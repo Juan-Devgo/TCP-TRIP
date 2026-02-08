@@ -1,0 +1,404 @@
+---
+import CopyButton from '../ui/copy-button.astro';
+---
+
+<section class="flex justify-center items-center min-h-screen p-4">
+  <div
+    class="bg-linear-to-br from-zinc-800 to-zinc-900 rounded-3xl p-6 shadow-2xl max-w-md w-full border border-zinc-700/50"
+  >
+    <div class="text-center mb-6">
+      <h2 class="text-white text-xl font-semibold mb-1">
+        Number Base Converter
+      </h2>
+      <p class="text-zinc-500 text-xs">
+        Convert between binary, octal, decimal, and hexadecimal
+      </p>
+    </div>
+
+    <form class="flex flex-col gap-4">
+      <div class="flex flex-col gap-2">
+        <div class="flex flex-col gap-0 items-start">
+          <label for="base-from" class="text-zinc-500 text-xs w-10">From:</label
+          >
+          <div class="flex items-center gap-2 w-full">
+            <select
+              id="base-from"
+              name="base-from"
+              class="bg-zinc-700 text-white border-none rounded-lg px-4 py-3 text-sm font-semibold cursor-pointer outline-none focus:ring-2 focus:ring-green-400"
+            >
+              <option value="2">BIN</option>
+              <option value="8">OCT</option>
+              <option value="10" selected>DEC</option>
+              <option value="16">HEX</option>
+            </select>
+            <input
+              type="text"
+              id="number"
+              name="number"
+              class="flex-1 bg-zinc-900 text-green-400 border-2 border-zinc-700 rounded-lg px-4 py-3 text-xl font-mono text-right outline-none focus:border-green-400 transition-colors"
+              placeholder="0"
+              readonly
+            />
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-0 items-start">
+          <label for="base-to" class="text-zinc-500 text-xs w-10">To:</label>
+          <div class="flex items-center gap-2 w-full">
+            <select
+              id="base-to"
+              name="base-to"
+              class="bg-zinc-700 text-white border-none rounded-lg px-4 py-3 text-sm font-semibold cursor-pointer outline-none focus:ring-2 focus:ring-green-400"
+            >
+              <option value="2" selected>BIN</option>
+              <option value="8">OCT</option>
+              <option value="10">DEC</option>
+              <option value="16">HEX</option>
+            </select>
+            <div
+              class="flex-1 flex items-center bg-zinc-900 border-2 border-zinc-700 rounded-lg pl-2 pr-4 py-1 min-w-0"
+            >
+              <CopyButton targetId="result" />
+              <input
+                type="text"
+                id="result"
+                name="result"
+                class="flex-1 bg-transparent text-blue-400 py-2 text-xl font-mono text-right outline-none min-w-0"
+                placeholder="0"
+                readonly
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p
+        id="length-error"
+        class="text-red-400 text-xs w-full text-center hidden"
+      >
+      </p>
+
+      <div class="flex flex-col gap-2">
+        <div class="flex gap-2">
+          <button
+            type="button"
+            class="key flex-1 aspect-square bg-linear-to-br from-red-900 to-red-950 text-white border-none rounded-xl text-sm font-semibold cursor-pointer transition-all duration-100 shadow-lg hover:from-red-800 hover:to-red-900 active:translate-y-0.5 active:shadow-sm active:text-red-400 disabled:opacity-30 disabled:cursor-not-allowed select-none"
+            data-key="Clear">CLR</button
+          >
+          <button
+            type="button"
+            class="key flex-1 aspect-square bg-linear-to-br from-zinc-600 to-zinc-700 text-white border-none rounded-xl text-xl font-semibold cursor-pointer transition-all duration-100 shadow-lg hover:from-zinc-500 hover:to-zinc-600 active:translate-y-0.5 active:shadow-sm active:text-green-400 disabled:opacity-30 disabled:cursor-not-allowed select-none"
+            data-key="Backspace">⌫</button
+          >
+          <button
+            type="button"
+            class="key flex-1 aspect-square bg-linear-to-br from-zinc-600 to-zinc-700 text-white border-none rounded-xl text-xs font-semibold cursor-pointer transition-all duration-100 shadow-lg hover:from-zinc-500 hover:to-zinc-600 active:translate-y-0.5 active:shadow-sm active:text-green-400 disabled:opacity-30 disabled:cursor-not-allowed select-none"
+            data-key="length">LEN</button
+          >
+          <input
+            type="number"
+            id="length"
+            name="length"
+            class="aspect-square flex-1 bg-zinc-900 border-2 border-zinc-700 text-white font-mono rounded-lg text-base text-center outline-none focus:ring-2 focus:ring-green-400 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            value="1"
+            min="1"
+            max="64"
+            placeholder="0"
+          />
+        </div>
+        <div class="flex gap-2">
+          <button
+            type="button"
+            class="key flex-1 aspect-square bg-linear-to-br from-zinc-600 to-zinc-700 text-white border-none rounded-xl text-xl font-semibold cursor-pointer transition-all duration-100 shadow-lg hover:from-zinc-500 hover:to-zinc-600 active:translate-y-0.5 active:shadow-sm active:text-green-400 disabled:opacity-30 disabled:cursor-not-allowed select-none"
+            data-key="7">7</button
+          >
+          <button
+            type="button"
+            class="key flex-1 aspect-square bg-linear-to-br from-zinc-600 to-zinc-700 text-white border-none rounded-xl text-xl font-semibold cursor-pointer transition-all duration-100 shadow-lg hover:from-zinc-500 hover:to-zinc-600 active:translate-y-0.5 active:shadow-sm active:text-green-400 disabled:opacity-30 disabled:cursor-not-allowed select-none"
+            data-key="8">8</button
+          >
+          <button
+            type="button"
+            class="key flex-1 aspect-square bg-linear-to-br from-zinc-600 to-zinc-700 text-white border-none rounded-xl text-xl font-semibold cursor-pointer transition-all duration-100 shadow-lg hover:from-zinc-500 hover:to-zinc-600 active:translate-y-0.5 active:shadow-sm active:text-green-400 disabled:opacity-30 disabled:cursor-not-allowed select-none"
+            data-key="9">9</button
+          >
+          <button
+            type="button"
+            class="key key-hex flex-1 aspect-square bg-linear-to-br from-amber-900 to-amber-950 text-white border-none rounded-xl text-xl font-semibold cursor-pointer transition-all duration-100 shadow-lg hover:from-amber-800 hover:to-amber-900 active:translate-y-0.5 active:shadow-sm active:text-amber-400 disabled:opacity-30 disabled:cursor-not-allowed select-none"
+            data-key="A">A</button
+          >
+        </div>
+        <div class="flex gap-2">
+          <button
+            type="button"
+            class="key flex-1 aspect-square bg-linear-to-br from-zinc-600 to-zinc-700 text-white border-none rounded-xl text-xl font-semibold cursor-pointer transition-all duration-100 shadow-lg hover:from-zinc-500 hover:to-zinc-600 active:translate-y-0.5 active:shadow-sm active:text-green-400 disabled:opacity-30 disabled:cursor-not-allowed select-none"
+            data-key="4">4</button
+          >
+          <button
+            type="button"
+            class="key flex-1 aspect-square bg-linear-to-br from-zinc-600 to-zinc-700 text-white border-none rounded-xl text-xl font-semibold cursor-pointer transition-all duration-100 shadow-lg hover:from-zinc-500 hover:to-zinc-600 active:translate-y-0.5 active:shadow-sm active:text-green-400 disabled:opacity-30 disabled:cursor-not-allowed select-none"
+            data-key="5">5</button
+          >
+          <button
+            type="button"
+            class="key flex-1 aspect-square bg-linear-to-br from-zinc-600 to-zinc-700 text-white border-none rounded-xl text-xl font-semibold cursor-pointer transition-all duration-100 shadow-lg hover:from-zinc-500 hover:to-zinc-600 active:translate-y-0.5 active:shadow-sm active:text-green-400 disabled:opacity-30 disabled:cursor-not-allowed select-none"
+            data-key="6">6</button
+          >
+          <button
+            type="button"
+            class="key key-hex flex-1 aspect-square bg-linear-to-br from-amber-900 to-amber-950 text-white border-none rounded-xl text-xl font-semibold cursor-pointer transition-all duration-100 shadow-lg hover:from-amber-800 hover:to-amber-900 active:translate-y-0.5 active:shadow-sm active:text-amber-400 disabled:opacity-30 disabled:cursor-not-allowed select-none"
+            data-key="B">B</button
+          >
+        </div>
+        <div class="flex gap-2">
+          <button
+            type="button"
+            class="key flex-1 aspect-square bg-linear-to-br from-zinc-600 to-zinc-700 text-white border-none rounded-xl text-xl font-semibold cursor-pointer transition-all duration-100 shadow-lg hover:from-zinc-500 hover:to-zinc-600 active:translate-y-0.5 active:shadow-sm active:text-green-400 disabled:opacity-30 disabled:cursor-not-allowed select-none"
+            data-key="1">1</button
+          >
+          <button
+            type="button"
+            class="key flex-1 aspect-square bg-linear-to-br from-zinc-600 to-zinc-700 text-white border-none rounded-xl text-xl font-semibold cursor-pointer transition-all duration-100 shadow-lg hover:from-zinc-500 hover:to-zinc-600 active:translate-y-0.5 active:shadow-sm active:text-green-400 disabled:opacity-30 disabled:cursor-not-allowed select-none"
+            data-key="2">2</button
+          >
+          <button
+            type="button"
+            class="key flex-1 aspect-square bg-linear-to-br from-zinc-600 to-zinc-700 text-white border-none rounded-xl text-xl font-semibold cursor-pointer transition-all duration-100 shadow-lg hover:from-zinc-500 hover:to-zinc-600 active:translate-y-0.5 active:shadow-sm active:text-green-400 disabled:opacity-30 disabled:cursor-not-allowed select-none"
+            data-key="3">3</button
+          >
+          <button
+            type="button"
+            class="key key-hex flex-1 aspect-square bg-linear-to-br from-amber-900 to-amber-950 text-white border-none rounded-xl text-xl font-semibold cursor-pointer transition-all duration-100 shadow-lg hover:from-amber-800 hover:to-amber-900 active:translate-y-0.5 active:shadow-sm active:text-amber-400 disabled:opacity-30 disabled:cursor-not-allowed select-none"
+            data-key="HexC">C</button
+          >
+        </div>
+        <div class="flex gap-2">
+          <button
+            type="button"
+            class="key flex-1 aspect-square bg-linear-to-br from-zinc-600 to-zinc-700 text-white border-none rounded-xl text-xl font-semibold cursor-pointer transition-all duration-100 shadow-lg hover:from-zinc-500 hover:to-zinc-600 active:translate-y-0.5 active:shadow-sm active:text-green-400 disabled:opacity-30 disabled:cursor-not-allowed select-none"
+            data-key="0">0</button
+          >
+          <button
+            type="button"
+            class="key key-hex flex-1 aspect-square bg-linear-to-br from-amber-900 to-amber-950 text-white border-none rounded-xl text-xl font-semibold cursor-pointer transition-all duration-100 shadow-lg hover:from-amber-800 hover:to-amber-900 active:translate-y-0.5 active:shadow-sm active:text-amber-400 disabled:opacity-30 disabled:cursor-not-allowed select-none"
+            data-key="F">F</button
+          >
+          <button
+            type="button"
+            class="key key-hex flex-1 aspect-square bg-linear-to-br from-amber-900 to-amber-950 text-white border-none rounded-xl text-xl font-semibold cursor-pointer transition-all duration-100 shadow-lg hover:from-amber-800 hover:to-amber-900 active:translate-y-0.5 active:shadow-sm active:text-amber-400 disabled:opacity-30 disabled:cursor-not-allowed select-none"
+            data-key="E">E</button
+          >
+          <button
+            type="button"
+            class="key key-hex flex-1 aspect-square bg-linear-to-br from-amber-900 to-amber-950 text-white border-none rounded-xl text-xl font-semibold cursor-pointer transition-all duration-100 shadow-lg hover:from-amber-800 hover:to-amber-900 active:translate-y-0.5 active:shadow-sm active:text-amber-400 disabled:opacity-30 disabled:cursor-not-allowed select-none"
+            data-key="D">D</button
+          >
+        </div>
+      </div>
+    </form>
+  </div>
+</section>
+
+<script>
+  import { convertBase } from '../lib/number-base-converter';
+
+  // Constante para el tamaño máximo del resultado
+  const MAX_LENGTH = 64;
+
+  // Elementos del DOM
+  const form = document.querySelector('form') as HTMLFormElement;
+  const baseFromSelect = document.getElementById(
+    'base-from',
+  ) as HTMLSelectElement;
+  const baseToSelect = document.getElementById('base-to') as HTMLSelectElement;
+  const numberInput = document.getElementById('number') as HTMLInputElement;
+  const resultInput = document.getElementById('result') as HTMLInputElement;
+  const lengthInput = document.getElementById('length') as HTMLInputElement;
+  const lengthError = document.getElementById(
+    'length-error',
+  ) as HTMLParagraphElement;
+  const keys = document.querySelectorAll(
+    '.key[data-key]',
+  ) as NodeListOf<HTMLButtonElement>;
+
+  // Teclas permitidas por base
+  const ALLOWED_KEYS: Record<number, string[]> = {
+    2: ['0', '1'],
+    8: ['0', '1', '2', '3', '4', '5', '6', '7'],
+    10: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
+    16: [
+      '0',
+      '1',
+      '2',
+      '3',
+      '4',
+      '5',
+      '6',
+      '7',
+      '8',
+      '9',
+      'A',
+      'B',
+      'C',
+      'D',
+      'E',
+      'F',
+    ],
+  };
+
+  // Actualizar teclas habilitadas según la base
+  function updateKeyboard() {
+    const fromBase = parseInt(baseFromSelect.value);
+    const allowedKeys = ALLOWED_KEYS[fromBase] || [];
+
+    keys.forEach((key) => {
+      const keyValue = key.dataset.key?.toUpperCase();
+      if (!keyValue) return;
+
+      // Teclas especiales siempre habilitadas
+      if (['CLEAR', 'BACKSPACE', 'LENGTH'].includes(keyValue)) {
+        key.disabled = false;
+        return;
+      }
+
+      // Mapear HexC a C para validación
+      const actualKey = keyValue === 'HEXC' ? 'C' : keyValue;
+
+      // Habilitar/deshabilitar según la base
+      key.disabled = !allowedKeys.includes(actualKey);
+    });
+  }
+
+  // Validar y mostrar error de length
+  function validateLength(): boolean {
+    const length = parseInt(lengthInput.value) || 1;
+
+    if (length > MAX_LENGTH) {
+      lengthError.textContent = `Length cannot be greater than ${MAX_LENGTH}`;
+      lengthError.classList.remove('hidden');
+      return false;
+    }
+
+    lengthError.classList.add('hidden');
+    return true;
+  }
+
+  // Realizar conversión
+  function doConvert() {
+    const isLengthValid = validateLength();
+
+    try {
+      const fromBase = parseInt(baseFromSelect.value);
+      const toBase = parseInt(baseToSelect.value);
+      const numberStr = numberInput.value.trim();
+      const length = isLengthValid
+        ? parseInt(lengthInput.value) || 1
+        : MAX_LENGTH;
+
+      if (!numberStr) {
+        resultInput.value = '0';
+        return;
+      }
+
+      const result = convertBase(numberStr, fromBase, toBase, length);
+      resultInput.value = result.toUpperCase();
+    } catch (error) {
+      resultInput.value = 'Error';
+    }
+  }
+
+  // Manejar clic en tecla virtual
+  function handleKeyClick(keyValue: string) {
+    const fromBase = parseInt(baseFromSelect.value);
+    const allowedKeys = ALLOWED_KEYS[fromBase] || [];
+
+    if (keyValue === 'Clear') {
+      numberInput.value = '';
+    } else if (keyValue === 'HexC') {
+      if (allowedKeys.includes('C')) {
+        numberInput.value += 'C';
+      }
+    } else if (keyValue === 'Backspace') {
+      numberInput.value = numberInput.value.slice(0, -1);
+    } else if (keyValue === 'length') {
+      lengthInput.focus();
+    } else if (allowedKeys.includes(keyValue.toUpperCase())) {
+      numberInput.value += keyValue.toUpperCase();
+    }
+
+    doConvert();
+  }
+
+  // Efecto visual de tecla presionada
+  function activateKey(keyValue: string) {
+    const key = document.querySelector(
+      `.key[data-key="${keyValue}"]`,
+    ) as HTMLButtonElement;
+    if (key && !key.disabled) {
+      key.classList.add('active');
+      setTimeout(() => key.classList.remove('active'), 100);
+    }
+  }
+
+  // Event listeners para teclas virtuales
+  keys.forEach((key) => {
+    key.addEventListener('click', () => {
+      const keyValue = key.dataset.key;
+      if (keyValue) {
+        activateKey(keyValue);
+        handleKeyClick(keyValue);
+      }
+    });
+  });
+
+  // Event listener para teclado físico
+  document.addEventListener('keydown', (e) => {
+    // Si el focus está en el input de length, dejar que escriba normalmente
+    if (document.activeElement === lengthInput) {
+      return;
+    }
+
+    const key = e.key.toUpperCase();
+    const fromBase = parseInt(baseFromSelect.value);
+    const allowedKeys = ALLOWED_KEYS[fromBase] || [];
+
+    // Mapear teclas especiales
+    if (e.key === 'Backspace') {
+      activateKey('Backspace');
+      handleKeyClick('Backspace');
+      e.preventDefault();
+    } else if (e.key === 'Escape') {
+      activateKey('Clear');
+      handleKeyClick('Clear');
+      e.preventDefault();
+    } else if (key === 'C' && allowedKeys.includes('C')) {
+      activateKey('HexC');
+      handleKeyClick('HexC');
+      e.preventDefault();
+    } else if (allowedKeys.includes(key)) {
+      activateKey(key);
+      handleKeyClick(key);
+      e.preventDefault();
+    }
+  });
+
+  // Event listeners para cambios en selectores
+  baseFromSelect.addEventListener('change', () => {
+    updateKeyboard();
+    numberInput.value = ''; // Limpiar al cambiar base
+    doConvert();
+  });
+
+  baseToSelect.addEventListener('change', doConvert);
+  lengthInput.addEventListener('input', doConvert);
+
+  // Prevenir submit del formulario
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    doConvert();
+  });
+
+  // Inicializar teclado
+  updateKeyboard();
+  doConvert();
+</script>

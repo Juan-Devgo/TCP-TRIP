@@ -1,0 +1,102 @@
+---
+import Menu from '../icons/menu.astro';
+
+interface Props {
+  currentPath?: string;
+}
+
+const { currentPath = '/' } = Astro.props;
+
+const navLinks = [
+  { href: '/', label: 'Base Converter' },
+  { href: '/subnet', label: 'Subnet Calculator' },
+  { href: '/ip', label: 'IP Tools' },
+];
+---
+
+<nav
+  class="fixed top-0 left-0 right-0 z-50 bg-linear-to-r from-zinc-900 via-zinc-800 to-zinc-900 border-b border-zinc-700/50 shadow-lg"
+>
+  <div class="max-w-4xl mx-auto px-4">
+    <div class="flex items-center justify-between h-14">
+      <!-- Logo -->
+      <a
+        href="/"
+        class="flex items-center gap-0"
+      >
+        <span class="font-bold text-2xl text-amber-700 mx-1">TCP</span>
+        <span class="font-bold text-2xl text-amber-800">TR</span>
+        <span class="font-bold text-2xl text-amber-700">IP</span>
+      </a>
+
+      <!-- Navigation Links -->
+      <ul class="flex items-center gap-1">
+        {
+          navLinks.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                class:list={[
+                  'px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150',
+                  currentPath === link.href
+                    ? 'bg-zinc-700 text-amber-400 shadow-inner'
+                    : 'text-zinc-400 hover:text-white hover:bg-zinc-700/50',
+                ]}
+              >
+                {link.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+
+      <!-- Mobile Menu Button (hidden on desktop) -->
+      <button
+        type="button"
+        id="mobile-menu-btn"
+        class="md:hidden flex items-center justify-center w-10 h-10 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-700/50 transition-colors"
+        aria-label="Toggle menu"
+      >
+        <Menu />
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div
+    id="mobile-menu"
+    class="hidden md:hidden border-t border-zinc-700/50 bg-zinc-900"
+  >
+    <ul class="flex flex-col p-4 gap-2">
+      {
+        navLinks.map((link) => (
+          <li>
+            <a
+              href={link.href}
+              class:list={[
+                'block px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150',
+                currentPath === link.href
+                  ? 'bg-zinc-700 text-amber-400'
+                  : 'text-zinc-400 hover:text-white hover:bg-zinc-700/50',
+              ]}
+            >
+              {link.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</nav>
+
+<!-- Spacer to prevent content from going under fixed navbar -->
+<div class="h-14"></div>
+
+<script>
+  const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+  const mobileMenu = document.getElementById('mobile-menu');
+
+  mobileMenuBtn?.addEventListener('click', () => {
+    mobileMenu?.classList.toggle('hidden');
+  });
+</script>

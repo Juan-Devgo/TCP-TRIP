@@ -1,0 +1,23 @@
+---
+import '../styles/global.css';
+import Footer from '../ui/footer.astro';
+import Navbar from '../ui/navbar.astro';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TCPtrIP</title>
+  </head>
+  <body>
+    <header>
+      <Navbar currentPath={Astro.url.pathname} />
+    </header>
+    <main>
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

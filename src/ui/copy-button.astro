@@ -1,0 +1,67 @@
+---
+import Check from '../icons/check.astro';
+import Copy from '../icons/copy.astro';
+
+interface Props {
+  targetId: string;
+  class?: string;
+}
+
+const { targetId, class: className = '' } = Astro.props;
+---
+
+<button
+  type="button"
+  class:list={[
+    'copy-btn',
+    'flex items-center justify-center',
+    'text-zinc-400 hover:text-white hover:bg-zinc-700/50',
+    'transition-all duration-150 cursor-pointer',
+    'active:scale-95',
+    className,
+  ]}
+  data-target={targetId}
+  title="Copy to clipboard"
+>
+  <Copy />
+  <Check className='hidden' />
+</button>
+
+<script>
+  const copyButtons = document.querySelectorAll('.copy-btn');
+
+  copyButtons.forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const targetId = btn.getAttribute('data-target');
+      if (!targetId) return;
+
+      const targetElement = document.getElementById(
+        targetId,
+      ) as HTMLInputElement;
+      if (!targetElement) return;
+
+      const textToCopy = targetElement.value || targetElement.textContent || '';
+
+      try {
+        await navigator.clipboard.writeText(textToCopy);
+
+        // Mostrar icono de check
+        const copyIcon = btn.querySelector('.copy-icon') as SVGElement;
+        const checkIcon = btn.querySelector('.check-icon') as SVGElement;
+
+        copyIcon.classList.add('hidden');
+        checkIcon.classList.remove('hidden');
+        btn.classList.add('text-green-400');
+
+        // Volver al icono de copiar después de 1.5s
+        setTimeout(() => {
+          copyIcon.classList.remove('hidden');
+          checkIcon.classList.add('hidden');
+          btn.classList.remove('text-green-400');
+        }, 1500);
+      } catch (err) {
+        console.error('Failed to copy:', err);
+      }
+    });
+  });
+</script>
