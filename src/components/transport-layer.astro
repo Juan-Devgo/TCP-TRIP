@@ -1,0 +1,17 @@
+---
+import { translations, defaultLang, type Language } from '../i18n/translations';
+
+interface Props {
+  lang?: Language;
+}
+
+const t = translations[Astro.props.lang || defaultLang];
+---
+
+<main>
+  <h1>TRANSPORT LAYER</h1>
+  <ul>
+    <li>TCP</li>
+    <li>UDP</li>
+  </ul>
+</main>

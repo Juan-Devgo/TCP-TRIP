@@ -1,0 +1,49 @@
+---
+import { type Language, translations, defaultLang } from '../i18n/translations';
+
+interface Props {
+  lang?: Language;
+}
+
+const t = translations[Astro.props.lang || defaultLang];
+---
+
+<h1 class="text-3xl font-bold text-center mt-8">{t.subnet.title}</h1>
+<p class="text-center text-gray-600 mt-4">
+  {t.subnet.subtitle}
+</p>
+
+<!-- Subnet Calculator Form -->
+<div class="max-w-md mx-auto mt-8 p-6 bg-white rounded-lg shadow-md">
+  <form id="subnet-form" class="space-y-4">
+    <div>
+      <label for="ip-address" class="block text-sm font-medium text-gray-700"
+        >{t.subnet.ipAddress}</label
+      >
+      <input
+        type="text"
+        id="ip-address"
+        name="ip-address"
+        placeholder={t.subnet.ipPlaceholder}
+        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+    </div>
+    <div>
+      <label for="subnet-mask" class="block text-sm font-medium text-gray-700"
+        >{t.subnet.subnetMask}</label
+      >
+      <input
+        type="text"
+        id="subnet-mask"
+        name="subnet-mask"
+        placeholder={t.subnet.maskPlaceholder}
+        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+    </div>
+    <button
+      type="submit"
+      class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+      >{t.subnet.calculate}</button
+    >
+  </form>
+</div>

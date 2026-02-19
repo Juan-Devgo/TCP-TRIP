@@ -1,0 +1,11 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import TransportLayerComponent from '../../components/transport-layer.astro';
+import { defaultLang } from '../../i18n/translations';
+
+const lang = defaultLang;
+---
+
+<Layout lang={lang}>
+  <TransportLayerComponent lang={lang} />
+</Layout>

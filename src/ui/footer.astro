@@ -1,22 +1,34 @@
 ---
 import Github from '../icons/github.astro';
+import { translations, defaultLang, type Language } from '../i18n/translations';
+
+interface Props {
+  lang?: Language;
+}
+
+const { lang = defaultLang } = Astro.props;
+const t = translations[lang || defaultLang];
 
 const currentYear = new Date().getFullYear();
 
 const quickLinks = [
-  { href: '/', label: 'Base Converter' },
-  { href: '/subnet', label: 'Subnet Calculator' },
-  { href: '/ip', label: 'IP Tools' },
+  { href: '/', label: t.nav.baseConverter },
+  { href: '/subnet', label: t.nav.subnetCalculator },
+  { href: '/ip', label: t.nav.tcpIpTools },
 ];
 
 const resources = [
-  { href: '/docs', label: 'Documentation' },
-  { href: '/api', label: 'API Reference' },
-  { href: '/examples', label: 'Examples' },
+  { href: '/docs', label: t.footer.documentation },
+  { href: '/api', label: t.footer.apiReference },
+  { href: '/examples', label: t.footer.examples },
 ];
 
 const socialLinks = [
-  { href: 'https://github.com/Juan-Devgo/TCP-TRIP', label: 'GitHub', icon: 'github' },
+  {
+    href: 'https://github.com/Juan-Devgo/TCP-TRIP',
+    label: 'GitHub',
+    icon: 'github',
+  },
   { href: 'https://twitter.com/tcptrip', label: 'Twitter', icon: 'twitter' },
   { href: 'https://discord.gg/tcptrip', label: 'Discord', icon: 'discord' },
 ];
@@ -36,14 +48,13 @@ const socialLinks = [
           <span class="font-bold text-2xl text-amber-700">IP</span>
         </a>
         <p class="text-zinc-500 text-sm leading-relaxed">
-          Network tools for developers and IT professionals. Fast, reliable, and
-          easy to use.
+          {t.footer.description}
         </p>
       </div>
 
       <!-- Quick Links -->
       <div>
-        <h3 class="text-white font-semibold text-sm mb-4">Tools</h3>
+        <h3 class="text-white font-semibold text-sm mb-4">{t.footer.tools}</h3>
         <ul class="flex flex-col gap-2">
           {
             quickLinks.map((link) => (
@@ -62,7 +73,9 @@ const socialLinks = [
 
       <!-- Resources -->
       <div>
-        <h3 class="text-white font-semibold text-sm mb-4">Resources</h3>
+        <h3 class="text-white font-semibold text-sm mb-4">
+          {t.footer.resources}
+        </h3>
         <ul class="flex flex-col gap-2">
           {
             resources.map((link) => (
@@ -81,7 +94,9 @@ const socialLinks = [
 
       <!-- Social -->
       <div>
-        <h3 class="text-white font-semibold text-sm mb-4">Connect</h3>
+        <h3 class="text-white font-semibold text-sm mb-4">
+          {t.footer.connect}
+        </h3>
         <ul class="flex items-center gap-3">
           {
             socialLinks.map((link) => (
@@ -125,20 +140,21 @@ const socialLinks = [
       class="mt-10 pt-6 border-t border-zinc-700/50 flex flex-col md:flex-row items-center justify-between gap-4"
     >
       <p class="text-zinc-500 text-sm">
-        🄯 {currentYear} TCP TRIP copyleft.
+        🄯 {currentYear}
+        {t.footer.copyleft}
       </p>
       <div class="flex items-center gap-6">
         <a
           href="/privacy"
           class="text-zinc-500 text-sm hover:text-zinc-300 transition-colors"
         >
-          Privacy Policy
+          {t.footer.privacy}
         </a>
         <a
           href="/terms"
           class="text-zinc-500 text-sm hover:text-zinc-300 transition-colors"
         >
-          Terms of Service
+          {t.footer.terms}
         </a>
       </div>
     </div>

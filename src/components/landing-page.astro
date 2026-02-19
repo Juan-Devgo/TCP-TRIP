@@ -1,0 +1,456 @@
+---
+import { defaultLang, translations, type Language } from '../i18n/translations';
+import Arrow1 from '../icons/arrow1.astro';
+import Arrow2 from '../icons/arrow2.astro';
+import Github from '../icons/github.astro';
+
+interface Props {
+  lang?: Language;
+}
+
+const t = translations[Astro.props.lang || defaultLang];
+---
+
+<main class="min-h-screen bg-zinc-950">
+  <!-- Hero Section -->
+  <section class="relative overflow-hidden py-20 px-4">
+    <!-- Background decoration -->
+    <div class="absolute inset-0 opacity-10">
+      <div
+        class="absolute top-20 left-10 w-72 h-72 bg-green-400 rounded-full blur-3xl"
+      >
+      </div>
+      <div
+        class="absolute bottom-20 right-10 w-96 h-96 bg-amber-400 rounded-full blur-3xl"
+      >
+      </div>
+      <div
+        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-blue-400 rounded-full blur-3xl"
+      >
+      </div>
+    </div>
+
+    <div class="relative max-w-4xl mx-auto text-center">
+      <!-- Logo -->
+      <div class="mb-8">
+        <h1 class="text-6xl md:text-8xl font-black tracking-tight">
+          <span class="text-amber-600">TCP</span>
+          <span class="text-amber-700">-</span>
+          <span class="text-amber-500">TRIP</span>
+        </h1>
+        <div class="mt-2 flex justify-center gap-2">
+          <span
+            class="inline-block w-3 h-3 bg-green-400 rounded-full animate-pulse"
+          ></span>
+          <span
+            class="inline-block w-3 h-3 bg-blue-400 rounded-full animate-pulse delay-100"
+          ></span>
+          <span
+            class="inline-block w-3 h-3 bg-amber-400 rounded-full animate-pulse delay-200"
+          ></span>
+        </div>
+      </div>
+
+      <!-- Tagline -->
+      <p
+        class="text-xl md:text-2xl text-zinc-400 max-w-2xl mx-auto mb-8 leading-relaxed"
+      >
+        {t.hero.tagline}
+        <span class="text-green-400 font-semibold"
+          >{t.hero.networkProtocols}</span
+        >.
+        {t.hero.learnTcpIp}
+        <span class="text-blue-400 font-semibold">TCP/IP</span>
+        {t.hero.visualPractical}
+      </p>
+
+      <!-- CTA Buttons -->
+      <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+        <a
+          href="/tcp-ip"
+          class="group px-8 py-4 bg-linear-to-br from-amber-600 to-amber-700 text-white font-bold rounded-xl shadow-lg hover:from-amber-500 hover:to-amber-600 transition-all duration-200 hover:shadow-amber-500/25 hover:shadow-xl"
+        >
+          <span class="flex items-center gap-2">
+            🚀 {t.hero.startJourney}
+            <Arrow2
+              className="w-5 h-5 text-white group-hover:translate-x-1 transition-transform"
+            />
+          </span>
+        </a>
+        <a
+          href="https://github.com/Juan-Devgo/tcp-trip"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="flex items-center gap-2 px-6 py-4 bg-zinc-800 text-zinc-300 font-medium rounded-xl border border-zinc-700 hover:bg-zinc-700 hover:text-white transition-all duration-200"
+        >
+          <Github />
+          {t.hero.viewOnGithub}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="py-20 px-4 bg-linear-to-b from-zinc-950 to-zinc-900">
+    <div class="max-w-5xl mx-auto">
+      <h2 class="text-3xl md:text-4xl font-bold text-center text-white mb-4">
+        {t.features.title}
+      </h2>
+      <p class="text-zinc-500 text-center mb-12 max-w-2xl mx-auto">
+        {t.features.subtitle}
+      </p>
+
+      <div class="grid md:grid-cols-3 gap-6">
+        <!-- Base Converter Card -->
+        <a href="/base-converter" class="group">
+          <div
+            class="bg-linear-to-br from-zinc-800 to-zinc-900 rounded-2xl p-6 border border-zinc-700/50 hover:border-green-400/50 transition-all duration-300 hover:shadow-lg hover:shadow-green-400/10 h-full"
+          >
+            <div
+              class="w-14 h-14 bg-linear-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"
+            >
+              <span class="text-2xl">🔢</span>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2">
+              {t.features.baseConverter.title}
+            </h3>
+            <p class="text-zinc-400 text-sm leading-relaxed">
+              {t.features.baseConverter.description}
+            </p>
+            <div class="mt-4 flex flex-wrap gap-2">
+              <span
+                class="px-2 py-1 bg-green-900/50 text-green-400 text-xs rounded-lg"
+                >BIN</span
+              >
+              <span
+                class="px-2 py-1 bg-blue-900/50 text-blue-400 text-xs rounded-lg"
+                >OCT</span
+              >
+              <span
+                class="px-2 py-1 bg-amber-900/50 text-amber-400 text-xs rounded-lg"
+                >DEC</span
+              >
+              <span
+                class="px-2 py-1 bg-red-900/50 text-red-400 text-xs rounded-lg"
+                >HEX</span
+              >
+            </div>
+          </div>
+        </a>
+
+        <!-- TCP/IP Card -->
+        <a href="/tcp-ip" class="group">
+          <div
+            class="bg-linear-to-br from-zinc-800 to-zinc-900 rounded-2xl p-6 border border-zinc-700/50 hover:border-blue-400/50 transition-all duration-300 hover:shadow-lg hover:shadow-blue-400/10 h-full"
+          >
+            <div
+              class="w-14 h-14 bg-linear-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"
+            >
+              <span class="text-2xl">🌐</span>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2">
+              {t.features.tcpIpModel.title}
+            </h3>
+            <p class="text-zinc-400 text-sm leading-relaxed">
+              {t.features.tcpIpModel.description}
+            </p>
+            <div class="mt-4 flex flex-wrap gap-2">
+              <span
+                class="px-2 py-1 bg-blue-900/50 text-blue-400 text-xs rounded-lg"
+                >{t.features.tags.application}</span
+              >
+              <span
+                class="px-2 py-1 bg-green-900/50 text-green-400 text-xs rounded-lg"
+                >{t.features.tags.transport}</span
+              >
+              <span
+                class="px-2 py-1 bg-amber-900/50 text-amber-400 text-xs rounded-lg"
+                >{t.features.tags.network}</span
+              >
+            </div>
+          </div>
+        </a>
+
+        <!-- Subnet Calculator Card -->
+        <a href="/subnet-calculator" class="group">
+          <div
+            class="bg-linear-to-br from-zinc-800 to-zinc-900 rounded-2xl p-6 border border-zinc-700/50 hover:border-amber-400/50 transition-all duration-300 hover:shadow-lg hover:shadow-amber-400/10 h-full"
+          >
+            <div
+              class="w-14 h-14 bg-linear-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"
+            >
+              <span class="text-2xl">📊</span>
+            </div>
+            <h3 class="text-xl font-bold text-white mb-2">
+              {t.features.subnetCalculator.title}
+            </h3>
+            <p class="text-zinc-400 text-sm leading-relaxed">
+              {t.features.subnetCalculator.description}
+            </p>
+            <div class="mt-4 flex flex-wrap gap-2">
+              <span
+                class="px-2 py-1 bg-amber-900/50 text-amber-400 text-xs rounded-lg"
+                >IPv4</span
+              >
+              <span
+                class="px-2 py-1 bg-zinc-700 text-zinc-300 text-xs rounded-lg"
+                >CIDR</span
+              >
+              <span
+                class="px-2 py-1 bg-zinc-700 text-zinc-300 text-xs rounded-lg"
+                >{t.features.tags.subnets}</span
+              >
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- TCP/IP Layers Preview -->
+  <section class="py-20 px-4 bg-zinc-900">
+    <div class="max-w-4xl mx-auto">
+      <h2 class="text-3xl md:text-4xl font-bold text-center text-white mb-4">
+        {t.layers.title}
+      </h2>
+      <p class="text-zinc-500 text-center mb-12 max-w-2xl mx-auto">
+        {t.layers.subtitle}
+      </p>
+
+      <div class="flex flex-col gap-3">
+        <!-- Application Layer -->
+        <a href="/tcp-ip/app-layer" class="group">
+          <div
+            class="bg-linear-to-r from-purple-600/20 to-purple-500/10 border border-purple-500/30 rounded-xl p-5 hover:from-purple-600/30 hover:to-purple-500/20 hover:border-purple-400/50 transition-all duration-300"
+          >
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-4">
+                <div
+                  class="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center font-bold text-white"
+                >
+                  5
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold text-purple-400">
+                    {t.layers.application.name}
+                  </h3>
+                  <p class="text-zinc-500 text-sm">
+                    {t.layers.application.protocols}
+                  </p>
+                </div>
+              </div>
+              <Arrow1
+                className="w-6 h-6 text-purple-400 group-hover:translate-x-1 transition-transform"
+              />
+            </div>
+          </div>
+        </a>
+
+        <!-- Transport Layer -->
+        <a href="/tcp-ip/transport-layer" class="group">
+          <div
+            class="bg-linear-to-r from-blue-600/20 to-blue-500/10 border border-blue-500/30 rounded-xl p-5 hover:from-blue-600/30 hover:to-blue-500/20 hover:border-blue-400/50 transition-all duration-300"
+          >
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-4">
+                <div
+                  class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center font-bold text-white"
+                >
+                  4
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold text-blue-400">
+                    {t.layers.transport.name}
+                  </h3>
+                  <p class="text-zinc-500 text-sm">
+                    {t.layers.transport.protocols}
+                  </p>
+                </div>
+              </div>
+              <Arrow1
+                className="w-6 h-6 text-blue-400 group-hover:translate-x-1 transition-transform"
+              />
+            </div>
+          </div>
+
+          <!-- Network Layer -->
+          <a href="/tcp-ip/network-layer" class="group">
+            <div
+              class="bg-linear-to-r from-green-600/20 to-green-500/10 border border-green-500/30 rounded-xl p-5 hover:from-green-600/30 hover:to-green-500/20 hover:border-green-400/50 transition-all duration-300"
+            >
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                  <div
+                    class="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center font-bold text-white"
+                  >
+                    3
+                  </div>
+                  <div>
+                    <h3 class="text-lg font-bold text-green-400">
+                      {t.layers.network.name}
+                    </h3>
+                    <p class="text-zinc-500 text-sm">
+                      {t.layers.network.protocols}
+                    </p>
+                  </div>
+                </div>
+                <Arrow1
+                  className="w-6 h-6 text-green-400 group-hover:translate-x-1 transition-transform"
+                />
+              </div>
+            </div>
+          </a>
+        </a>
+
+        <!-- Data Link -->
+        <a href="/tcp-ip/data-link-layer" class="group">
+          <div
+            class="bg-linear-to-r from-amber-600/20 to-amber-500/10 border border-amber-500/30 rounded-xl p-5 hover:from-amber-600/30 hover:to-amber-500/20 hover:border-amber-400/50 transition-all duration-300"
+          >
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-4">
+                <div
+                  class="w-12 h-12 bg-amber-500 rounded-lg flex items-center justify-center font-bold text-white"
+                >
+                  2
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold text-amber-400">
+                    {t.layers.dataLink.name}
+                  </h3>
+                  <p class="text-zinc-500 text-sm">
+                    {t.layers.dataLink.protocols}
+                  </p>
+                </div>
+              </div>
+              <Arrow1
+                className="w-6 h-6 text-amber-400 group-hover:translate-x-1 transition-transform"
+              />
+            </div>
+          </div>
+        </a>
+
+        <!-- Physical Layer -->
+        <a href="/tcp-ip/physical-layer" class="group">
+          <div
+            class="bg-linear-to-r from-red-600/20 to-red-500/10 border border-red-500/30 rounded-xl p-5 hover:from-red-600/30 hover:to-red-500/20 hover:border-red-400/50 transition-all duration-300"
+          >
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-4">
+                <div
+                  class="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center font-bold text-white"
+                >
+                  1
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold text-red-400">
+                    {t.layers.physical.name}
+                  </h3>
+                  <p class="text-zinc-500 text-sm">
+                    {t.layers.physical.protocols}
+                  </p>
+                </div>
+              </div>
+              <Arrow1
+                className="w-6 h-6 text-red-400 group-hover:translate-x-1 transition-transform"
+              />
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why TCP-TRIP Section -->
+  <section class="py-20 px-4 bg-linear-to-b from-zinc-900 to-zinc-950">
+    <div class="max-w-5xl mx-auto">
+      <h2 class="text-3xl md:text-4xl font-bold text-center text-white mb-12">
+        {t.whyTcpTrip.title}
+        <span class="text-amber-500">TCP-TRIP</span>?
+      </h2>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="text-center">
+          <div
+            class="w-16 h-16 bg-zinc-800 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-zinc-700"
+          >
+            <span class="text-3xl">📚</span>
+          </div>
+          <h3 class="text-white font-semibold mb-2">
+            {t.whyTcpTrip.visualLearning}
+          </h3>
+          <p class="text-zinc-500 text-sm">
+            {t.whyTcpTrip.visualLearningDesc}
+          </p>
+        </div>
+
+        <div class="text-center">
+          <div
+            class="w-16 h-16 bg-zinc-800 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-zinc-700"
+          >
+            <span class="text-3xl">🛠️</span>
+          </div>
+          <h3 class="text-white font-semibold mb-2">
+            {t.whyTcpTrip.practicalTools}
+          </h3>
+          <p class="text-zinc-500 text-sm">
+            {t.whyTcpTrip.practicalToolsDesc}
+          </p>
+        </div>
+
+        <div class="text-center">
+          <div
+            class="w-16 h-16 bg-zinc-800 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-zinc-700"
+          >
+            <span class="text-3xl">🎓</span>
+          </div>
+          <h3 class="text-white font-semibold mb-2">
+            {t.whyTcpTrip.forStudents}
+          </h3>
+          <p class="text-zinc-500 text-sm">
+            {t.whyTcpTrip.forStudentsDesc}
+          </p>
+        </div>
+
+        <div class="text-center">
+          <div
+            class="w-16 h-16 bg-zinc-800 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-zinc-700"
+          >
+            <span class="text-3xl">💡</span>
+          </div>
+          <h3 class="text-white font-semibold mb-2">
+            {t.whyTcpTrip.openSource}
+          </h3>
+          <p class="text-zinc-500 text-sm">
+            {t.whyTcpTrip.openSourceDesc}
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer CTA -->
+  <section class="py-16 px-4 bg-zinc-950">
+    <div class="max-w-3xl mx-auto text-center">
+      <div
+        class="bg-linear-to-br from-zinc-800 to-zinc-900 rounded-3xl p-8 md:p-12 border border-zinc-700/50"
+      >
+        <h2 class="text-2xl md:text-3xl font-bold text-white mb-4">
+          {t.cta.title}
+        </h2>
+        <p class="text-zinc-400 mb-8">
+          {t.cta.subtitle}
+        </p>
+        <a
+          href="/tcp-ip"
+          class="inline-flex items-center gap-2 px-8 py-4 bg-linear-to-br from-green-500 to-green-600 text-white font-bold rounded-xl shadow-lg hover:from-green-400 hover:to-green-500 transition-all duration-200 hover:shadow-green-500/25 hover:shadow-xl"
+        >
+          {t.cta.button}
+          <Arrow2
+            className="w-5 h-5 text-white group-hover:translate-x-1 transition-transform"
+          />
+        </a>
+      </div>
+    </div>
+  </section>
+</main>

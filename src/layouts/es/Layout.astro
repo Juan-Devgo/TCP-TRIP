@@ -1,14 +1,14 @@
 ---
 import '../styles/global.css';
-import Footer from '../ui/footer.astro';
-import Navbar from '../ui/navbar.astro';
-import { defaultLang, type Language } from '../i18n/translations';
+import Footer from '../../ui/footer.astro';
+import Navbar from '../../ui/navbar.astro';
+import { type Language } from '../../i18n/translations';
 
 interface Props {
   lang?: Language;
 }
 
-const { lang = defaultLang } = Astro.props;
+const { lang = 'es' } = Astro.props;
 ---
 
 <!doctype html>

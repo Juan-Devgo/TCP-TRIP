@@ -1,5 +1,12 @@
 ---
+import { type Language, translations, defaultLang } from '../i18n/translations';
 import CopyButton from '../ui/copy-button.astro';
+
+interface Props {
+  lang?: Language;
+}
+
+const t = translations[Astro.props.lang || defaultLang];
 ---
 
 <section class="flex justify-center items-center min-h-screen p-4">
@@ -8,17 +15,18 @@ import CopyButton from '../ui/copy-button.astro';
   >
     <div class="text-center mb-6">
       <h2 class="text-white text-xl font-semibold mb-1">
-        Number Base Converter
+        {t.converter.title}
       </h2>
       <p class="text-zinc-500 text-xs">
-        Convert between binary, octal, decimal, and hexadecimal
+        {t.converter.subtitle}
       </p>
     </div>
 
     <form class="flex flex-col gap-4">
       <div class="flex flex-col gap-2">
         <div class="flex flex-col gap-0 items-start">
-          <label for="base-from" class="text-zinc-500 text-xs w-10">From:</label
+          <label for="base-from" class="text-zinc-500 text-xs w-10"
+            >{t.converter.from}</label
           >
           <div class="flex items-center gap-2 w-full">
             <select
@@ -31,19 +39,26 @@ import CopyButton from '../ui/copy-button.astro';
               <option value="10" selected>DEC</option>
               <option value="16">HEX</option>
             </select>
-            <input
-              type="text"
-              id="number"
-              name="number"
-              class="flex-1 bg-zinc-900 text-green-400 border-2 border-zinc-700 rounded-lg px-4 py-3 text-xl font-mono text-right outline-none focus:border-green-400 transition-colors"
-              placeholder="0"
-              readonly
-            />
+            <div
+              class="flex-1 flex items-center bg-zinc-900 border-2 border-zinc-700 rounded-lg pl-2 pr-4 py-1 min-w-0"
+            >
+              <CopyButton targetId="number" />
+              <input
+                type="text"
+                id="number"
+                name="number"
+                class="flex-1 bg-transparent text-green-400 py-2 text-xl font-mono text-right outline-none min-w-0"
+                placeholder="0"
+                readonly
+              />
+            </div>
           </div>
         </div>
 
         <div class="flex flex-col gap-0 items-start">
-          <label for="base-to" class="text-zinc-500 text-xs w-10">To:</label>
+          <label for="base-to" class="text-zinc-500 text-xs w-10"
+            >{t.converter.to}</label
+          >
           <div class="flex items-center gap-2 w-full">
             <select
               id="base-to"

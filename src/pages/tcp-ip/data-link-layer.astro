@@ -1,0 +1,11 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import DataLinkLayerComponent from '../../components/data-link-layer.astro';
+import { defaultLang } from '../../i18n/translations';
+
+const lang = defaultLang;
+---
+
+<Layout lang={lang}>
+  <DataLinkLayerComponent lang={lang} />
+</Layout>

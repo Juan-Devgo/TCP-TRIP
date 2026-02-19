@@ -1,0 +1,11 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import NetworkLayerComponent from '../../components/network-layer.astro';
+import { defaultLang } from '../../i18n/translations';
+
+const lang = defaultLang;
+---
+
+<Layout lang={lang}>
+  <NetworkLayerComponent lang={lang} />
+</Layout>

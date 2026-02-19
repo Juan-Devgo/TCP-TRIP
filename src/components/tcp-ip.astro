@@ -1,0 +1,19 @@
+---
+import { translations, defaultLang, type Language } from '../i18n/translations';
+
+interface Props {
+  lang?: Language;
+}
+
+const t = translations[Astro.props.lang || defaultLang];
+---
+
+<main>
+  <h1>TCP/IP MODEL</h1>
+  <ul>
+    <li>Application Layer</li>
+    <li>Transport Layer</li>
+    <li>Internet Layer</li>
+    <li>Network Access Layer</li>
+  </ul>
+</main>

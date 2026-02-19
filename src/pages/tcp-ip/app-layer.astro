@@ -1,0 +1,11 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import AppLayerComponent from '../../components/app-layer.astro';
+import { defaultLang } from '../../i18n/translations';
+
+const lang = defaultLang;
+---
+
+<Layout lang={lang}>
+  <AppLayerComponent lang={lang} />
+</Layout>

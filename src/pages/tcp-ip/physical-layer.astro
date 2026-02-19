@@ -1,0 +1,11 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import PhysicalLayerComponent from '../../components/physical-layer.astro';
+import { defaultLang } from '../../i18n/translations';
+
+const lang = defaultLang;
+---
+
+<Layout lang={lang}>
+  <PhysicalLayerComponent lang={lang} />
+</Layout>

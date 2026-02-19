@@ -1,16 +1,19 @@
 ---
 import Menu from '../icons/menu.astro';
+import { defaultLang, translations, type Language } from '../i18n/translations';
 
 interface Props {
   currentPath?: string;
+  lang?: Language;
 }
 
-const { currentPath = '/' } = Astro.props;
+const { currentPath = '/', lang = defaultLang } = Astro.props;
+const t = translations[lang || defaultLang];
 
 const navLinks = [
-  { href: '/', label: 'Base Converter' },
-  { href: '/subnet', label: 'Subnet Calculator' },
-  { href: '/ip', label: 'IP Tools' },
+  { href: '/base-converter', label: t.nav.baseConverter },
+  { href: '/tcp-ip', label: t.nav.tcpIpTools },
+  { href: '/subnet-calculator', label: t.nav.subnetCalculator },
 ];
 ---
 
@@ -20,10 +23,7 @@ const navLinks = [
   <div class="max-w-4xl mx-auto px-4">
     <div class="flex items-center justify-between h-14">
       <!-- Logo -->
-      <a
-        href="/"
-        class="flex items-center gap-0"
-      >
+      <a href="/" class="flex items-center gap-0">
         <span class="font-bold text-2xl text-amber-700 mx-1">TCP</span>
         <span class="font-bold text-2xl text-amber-800">TR</span>
         <span class="font-bold text-2xl text-amber-700">IP</span>
