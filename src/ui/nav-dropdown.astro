@@ -1,0 +1,73 @@
+---
+import type { NavLinkGroup } from '../lib/links/nav-links';
+
+interface Props {
+  group: NavLinkGroup;
+  currentPath?: string;
+}
+
+const { group, currentPath = '/' } = Astro.props;
+const hasDropdown = group.links.length > 0;
+const isCategoryActive =
+  currentPath === group.href ||
+  currentPath.startsWith(`${group.href}/`) ||
+  group.links.some(
+    (link) =>
+      currentPath === link.href ||
+      currentPath.startsWith(`${link.href}/`) ||
+      (link.href !== '/' && currentPath.startsWith(link.href)),
+  );
+---
+
+{
+  !hasDropdown ? (
+    <li>
+      <a
+        href={group.href}
+        class:list={[
+          'block px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-zinc-700/50',
+          isCategoryActive
+            ? 'text-amber-600'
+            : 'text-zinc-400 hover:text-white',
+        ]}
+      >
+        {group.category}
+      </a>
+    </li>
+  ) : (
+    <li class="relative group">
+      <a
+        href={group.href}
+        class:list={[
+          'px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-zinc-700/50',
+          isCategoryActive
+            ? 'text-amber-600'
+            : 'text-zinc-400 hover:text-white',
+        ]}
+        aria-haspopup={hasDropdown ? 'true' : undefined}
+      >
+        {group.category}
+      </a>
+
+      <div class="invisible opacity-0 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 transition-all duration-150 absolute top-full left-0 mt-2 min-w-72 bg-zinc-900/95 backdrop-blur-xs border border-zinc-700/60 rounded-lg shadow-xl p-2 z-50">
+        <ul class="flex flex-col gap-1">
+          {group.links.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                class:list={[
+                  'block px-3 py-2 rounded-md text-sm font-medium transition-all duration-150',
+                  currentPath === link.href
+                    ? 'bg-zinc-700 text-amber-600'
+                    : 'text-zinc-300 hover:text-amber-400 hover:bg-zinc-700/50',
+                ]}
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </li>
+  )
+}

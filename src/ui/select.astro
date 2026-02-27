@@ -1,0 +1,176 @@
+---
+interface SelectOption {
+  value: string;
+  label: string;
+}
+
+interface Props {
+  id: string;
+  name?: string;
+  options: SelectOption[];
+  value?: string;
+  wrapperClass?: string;
+  triggerClass?: string;
+  menuClass?: string;
+}
+
+const {
+  id,
+  name,
+  options,
+  value,
+  wrapperClass = '',
+  triggerClass = '',
+  menuClass = '',
+} = Astro.props;
+
+const selectedOption =
+  options.find((option) => option.value === value) ?? options[0] ?? null;
+---
+
+<div class={`relative ${wrapperClass}`} id={`${id}-wrapper`} data-custom-select>
+  <input
+    type="hidden"
+    id={id}
+    name={name || id}
+    value={selectedOption?.value || ''}
+    data-select-input
+  />
+
+  <button
+    type="button"
+    id={`${id}-trigger`}
+    class={`w-full min-w-20 bg-zinc-800/90 text-zinc-100 border border-zinc-600 rounded-lg pl-4 pr-10 py-2 text-sm font-semibold cursor-pointer outline-none shadow-inner transition-all duration-100 hover:border-zinc-500 focus:ring-2 focus:ring-green-400 focus:border-green-400 text-left ${triggerClass}`}
+    aria-haspopup="listbox"
+    aria-expanded="false"
+    aria-controls={`${id}-menu`}
+    data-select-trigger
+  >
+    <span data-select-label>{selectedOption?.label || ''}</span>
+    <svg
+      fill="currentColor"
+      aria-hidden="true"
+      class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-300"
+      viewBox="0 0 20 20"
+      ><path
+        fill-rule="evenodd"
+        d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.938a.75.75 0 0 1 1.08 1.04l-4.25 4.51a.75.75 0 0 1-1.08 0L5.21 8.27a.75.75 0 0 1 .02-1.06"
+        clip-rule="evenodd"></path></svg
+    >
+  </button>
+
+  <div
+    id={`${id}-menu`}
+    class={`hidden absolute z-30 mt-2 w-full overflow-hidden rounded-xl border border-zinc-600 bg-zinc-800/95 shadow-2xl backdrop-blur-xs ${menuClass}`}
+    role="listbox"
+    tabindex="-1"
+    data-select-menu
+  >
+    {
+      options.map((option) => (
+        <button
+          type="button"
+          role="option"
+          data-select-option
+          data-value={option.value}
+          data-label={option.label}
+          class="w-full px-4 py-2.5 text-left text-sm font-semibold text-zinc-100 hover:bg-zinc-700/80 transition-colors"
+          aria-selected={
+            option.value === selectedOption?.value ? 'true' : 'false'
+          }
+        >
+          {option.label}
+        </button>
+      ))
+    }
+  </div>
+</div>
+
+<script is:inline>
+  (() => {
+    const roots = document.querySelectorAll('[data-custom-select]');
+
+    roots.forEach((root) => {
+      if (root.dataset.initialized === 'true') return;
+      root.dataset.initialized = 'true';
+
+      const input = root.querySelector('[data-select-input]');
+      const trigger = root.querySelector('[data-select-trigger]');
+      const menu = root.querySelector('[data-select-menu]');
+      const label = root.querySelector('[data-select-label]');
+
+      if (!input || !trigger || !menu || !label) return;
+
+      const options = Array.from(menu.querySelectorAll('[data-select-option]'));
+
+      const closeMenu = () => {
+        menu.classList.add('hidden');
+        trigger.setAttribute('aria-expanded', 'false');
+      };
+
+      const openMenu = () => {
+        menu.classList.remove('hidden');
+        trigger.setAttribute('aria-expanded', 'true');
+      };
+
+      const setValue = (value, text, emitChange = true) => {
+        input.value = value;
+        label.textContent = text;
+
+        options.forEach((option) => {
+          const isSelected = option.dataset.value === value;
+          option.setAttribute('aria-selected', String(isSelected));
+          option.classList.toggle('bg-zinc-700/80', isSelected);
+        });
+
+        if (emitChange) {
+          input.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      };
+
+      trigger.addEventListener('click', () => {
+        const isHidden = menu.classList.contains('hidden');
+        if (isHidden) {
+          openMenu();
+        } else {
+          closeMenu();
+        }
+      });
+
+      options.forEach((option) => {
+        option.addEventListener('click', () => {
+          const value = option.dataset.value || '';
+          const text = option.dataset.label || option.textContent?.trim() || '';
+          setValue(value, text, true);
+          closeMenu();
+          trigger.focus();
+        });
+      });
+
+      document.addEventListener('click', (event) => {
+        const target = event.target;
+        if (!root.contains(target)) {
+          closeMenu();
+        }
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+          closeMenu();
+        }
+      });
+
+      const initialOption = options.find(
+        (option) => option.dataset.value === input.value,
+      );
+
+      if (initialOption) {
+        const text =
+          initialOption.dataset.label ||
+          initialOption.textContent?.trim() ||
+          '';
+        setValue(input.value, text, false);
+      }
+    });
+  })();
+</script>

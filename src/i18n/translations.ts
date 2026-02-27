@@ -107,16 +107,71 @@ export const translations = {
       to: 'A:',
       lengthError: 'La longitud no puede ser mayor a',
     },
+    // ASCII Converter
+    ascii: {
+      title: 'Conversor Texto ↔ ASCII',
+      subtitle:
+        'Convierte texto a ASCII y ASCII a texto con cambio rápido de base',
+      baseLabel: 'Base ASCII:',
+      swap: 'Intercambiar',
+      clear: 'Limpiar',
+      example: 'Ejemplo',
+      textLabel: 'Texto',
+      asciiLabel: 'Valores ASCII',
+      characters: 'Caracteres',
+      upload: 'Subir .txt',
+      download: 'Descargar .txt',
+      textPlaceholder: 'Escribe texto aquí...',
+      asciiPlaceholder: 'Ejemplo: 97 110 105 116 97',
+    },
     // Subnet Calculator
     subnet: {
-      title: 'Calculadora de Subredes',
+      title: 'Calculadora IPv4',
       subtitle:
         'Calcula información de subred basada en dirección IP y máscara de subred.',
       ipAddress: 'Dirección IP',
-      ipPlaceholder: 'ej., 192.168.1.1',
-      subnetMask: 'Máscara de Subred',
-      maskPlaceholder: 'ej., 255.255.255.0',
-      calculate: 'Calcular Subred',
+      ipPlaceholder: 'ej., 192.168.1.0',
+      mask: 'Máscara',
+      maskPlaceholder: 'ej., 24',
+      submask: 'Subred',
+      submaskPlaceholder: 'ej., 2',
+      enableSubnets: 'Subredes',
+      // Results table
+      results: 'Resultados',
+      ipAddressLabel: 'Dirección IP',
+      networkAddressLabel: 'Dirección de Red',
+      classLabel: 'Clase',
+      subnetMaskLabel: 'Máscara de Subred',
+      wildcardMaskLabel: 'Máscara Wildcard',
+      broadcastAddressLabel: 'Dirección de Broadcast',
+      firstHostLabel: 'Primer Host',
+      lastHostLabel: 'Último Host',
+      totalHostsLabel: 'Hosts Totales',
+      inAddrArpaLabel: 'in-addr.arpa',
+      ipv6MappedLabel: 'IPv6 Mapeado',
+      ipRangeLabel: 'Rango de IPs disponibles',
+      // Subnets
+      subnetsTitle: 'Subredes',
+      subnetLabel: 'Subred',
+      usable: 'Utilizable',
+      unusable: 'Inutilizable',
+      noData: 'Ingresa datos válidos para ver los resultados',
+      // Subnet unusable reasons
+      firstSubnetReason:
+        'La dirección de subred se confunde con la dirección de red',
+      lastSubnetReason:
+        'El broadcast de subred se confunde con el broadcast de red',
+      // Host validation
+      invalidHostRange:
+        'El primer host no puede ser mayor o igual al último host. La máscara es demasiado grande para esta red.',
+      // Error messages
+      errInvalidIp:
+        'Dirección IP inválida (formato: X.X.X.X, cada octeto entre 0-255)',
+      errInvalidMask: 'Máscara inválida (debe ser un número entre 0 y 32)',
+      errInvalidSubmask:
+        'Submáscara inválida (debe ser un número entre 1 y {max})',
+      examplesBtn: 'Ejemplos',
+      clearBtn: 'Limpiar',
     },
     // Footer
     footer: {
@@ -239,16 +294,68 @@ export const translations = {
       to: 'To:',
       lengthError: 'Length cannot be greater than',
     },
+    // ASCII Converter
+    ascii: {
+      title: 'Text ↔ ASCII Converter',
+      subtitle: 'Convert text to ASCII and ASCII to text with fast base switch',
+      baseLabel: 'ASCII base:',
+      swap: 'Swap',
+      clear: 'Clear',
+      example: 'Example',
+      textLabel: 'Text',
+      asciiLabel: 'ASCII values',
+      characters: 'Characters',
+      upload: 'Upload .txt',
+      download: 'Download .txt',
+      textPlaceholder: 'Write text here...',
+      asciiPlaceholder: 'Example: 97 110 105 116 97',
+    },
     // Subnet Calculator
     subnet: {
-      title: 'Subnet Calculator',
+      title: 'IPv4 Calculator',
       subtitle:
         'Calculate subnet information based on IP address and subnet mask.',
       ipAddress: 'IP Address',
-      ipPlaceholder: 'e.g., 192.168.1.1',
-      subnetMask: 'Subnet Mask',
-      maskPlaceholder: 'e.g., 255.255.255.0',
-      calculate: 'Calculate Subnet',
+      ipPlaceholder: 'e.g., 192.168.1.0',
+      mask: 'Mask',
+      maskPlaceholder: 'e.g., 24',
+      submask: 'Subnet',
+      submaskPlaceholder: 'e.g., 2',
+      enableSubnets: 'Subnets',
+      // Results table
+      results: 'Results',
+      ipAddressLabel: 'IP Address',
+      networkAddressLabel: 'Network Address',
+      classLabel: 'Class',
+      subnetMaskLabel: 'Subnet Mask',
+      wildcardMaskLabel: 'Wildcard Mask',
+      broadcastAddressLabel: 'Broadcast Address',
+      firstHostLabel: 'First Host',
+      lastHostLabel: 'Last Host',
+      totalHostsLabel: 'Total Hosts',
+      inAddrArpaLabel: 'in-addr.arpa',
+      ipv6MappedLabel: 'IPv6 Mapped',
+      ipRangeLabel: 'Available IP Range',
+      // Subnets
+      subnetsTitle: 'Subnets',
+      subnetLabel: 'Subnet',
+      usable: 'Usable',
+      unusable: 'Unusable',
+      noData: 'Enter valid data to see the results',
+      // Subnet unusable reasons
+      firstSubnetReason: 'Subnet address conflicts with the network address',
+      lastSubnetReason: 'Subnet broadcast conflicts with the network broadcast',
+      // Host validation
+      invalidHostRange:
+        'First host cannot be greater than or equal to last host. The mask is too large for this network.',
+      // Error messages
+      errInvalidIp:
+        'Invalid IP address (format: X.X.X.X, each octet between 0-255)',
+      errInvalidMask: 'Invalid mask (must be a number between 0 and 32)',
+      errInvalidSubmask:
+        'Invalid submask (must be a number between 1 and {max})',
+      examplesBtn: 'Examples',
+      clearBtn: 'Clear',
     },
     // Footer
     footer: {

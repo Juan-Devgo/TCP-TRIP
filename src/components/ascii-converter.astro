@@ -1,0 +1,404 @@
+---
+import { defaultLang, translations, type Language } from '../i18n/translations';
+import Download from '../icons/download.astro';
+import Upload from '../icons/upload.astro';
+import CopyButton from '../ui/copy-button.astro';
+import Select from '../ui/select.astro';
+
+interface Props {
+  lang?: Language;
+}
+
+const t = translations[Astro.props.lang || defaultLang];
+---
+
+<section class="flex justify-center items-center min-h-screen p-4">
+  <div
+    class="bg-linear-to-br from-zinc-800 to-zinc-900 rounded-3xl p-6 shadow-2xl w-full max-w-5xl border border-zinc-700/50"
+  >
+    <div class="text-center mb-2">
+      <h2 class="text-white text-xl font-semibold mb-1">{t.ascii.title}</h2>
+      <p class="text-zinc-500 text-sm">{t.ascii.subtitle}</p>
+    </div>
+
+    <div class="flex flex-col gap-4">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            id="clear-all"
+            class="bg-linear-to-br from-red-900 to-red-950 text-white rounded-lg px-3 py-2 text-sm font-semibold transition-all duration-100 shadow-lg cursor-pointer hover:from-red-800 hover:to-red-900"
+          >
+            {t.ascii.clear}
+          </button>
+          <button
+            type="button"
+            id="load-example"
+            class="bg-linear-to-br from-emerald-800 to-emerald-900 text-white rounded-lg px-3 py-2 text-sm font-semibold transition-all duration-100 shadow-lg cursor-pointer hover:from-emerald-700 hover:to-emerald-800"
+          >
+            {t.ascii.example}
+          </button>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <label for="ascii-base-trigger" class="text-zinc-400 text-sm"
+            >{t.ascii.baseLabel}</label
+          >
+          <Select
+            id="ascii-base"
+            name="ascii-base"
+            value="10"
+            options={[
+              { value: '2', label: 'BIN' },
+              { value: '8', label: 'OCT' },
+              { value: '10', label: 'DEC' },
+              { value: '16', label: 'HEX' },
+            ]}
+          />
+        </div>
+        
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="converter-grid">
+        <div class="flex flex-col gap-2" id="text-area-block">
+          <div class="flex items-center justify-between px-1">
+            <label for="plain-text" class="text-zinc-300 text-md font-medium"
+              >{t.ascii.textLabel}</label
+            >
+            <small class="text-zinc-500 text-xs"
+              >{t.ascii.characters}: <span id="text-char-count">0</span></small
+            >
+          </div>
+          <div
+            class="relative bg-zinc-900 border-2 border-zinc-700 rounded-xl p-3"
+          >
+            <div class="absolute top-2 right-2 flex items-center gap-1 z-10">
+              <CopyButton targetId="plain-text" class="w-8 h-8 rounded-md" />
+              <button
+                type="button"
+                id="download-text"
+                class="w-8 h-8 rounded-md flex items-center justify-center text-zinc-400 cursor-pointer hover:text-white hover:bg-zinc-700/50 transition-colors"
+                title={t.ascii.download}
+              >
+                <Download className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                id="upload-text"
+                class="w-8 h-8 rounded-md flex items-center justify-center text-zinc-400 cursor-pointer hover:text-white hover:bg-zinc-700/50 transition-colors"
+                title={t.ascii.upload}
+              >
+                <Upload className="w-4 h-4" />
+              </button>
+              <input
+                type="file"
+                id="upload-text-input"
+                class="hidden"
+                accept=".txt,text/plain"
+              />
+            </div>
+
+            <textarea
+              id="plain-text"
+              rows="10"
+              class="w-full bg-transparent text-green-400 font-mono text-sm outline-none resize-none pr-28"
+              placeholder={t.ascii.textPlaceholder}></textarea>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-2" id="ascii-area-block">
+          <div class="flex items-center justify-between px-1">
+            <label for="ascii-values" class="text-zinc-300 text-md font-medium"
+              >{t.ascii.asciiLabel}</label
+            >
+            <small class="text-zinc-500 text-xs"
+              >{t.ascii.characters}: <span id="ascii-char-count">0</span></small
+            >
+          </div>
+          <div
+            class="relative bg-zinc-900 border-2 border-zinc-700 rounded-xl p-3"
+          >
+            <div class="absolute top-2 right-2 flex items-center gap-1 z-10">
+              <CopyButton targetId="ascii-values" class="w-8 h-8 rounded-md" />
+              <button
+                type="button"
+                id="download-ascii"
+                class="w-8 h-8 rounded-md flex items-center justify-center text-zinc-400 cursor-pointer hover:text-white hover:bg-zinc-700/50 transition-colors"
+                title={t.ascii.download}
+              >
+                <Download className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                id="upload-ascii"
+                class="w-8 h-8 rounded-md flex items-center justify-center text-zinc-400 cursor-pointer hover:text-white hover:bg-zinc-700/50 transition-colors"
+                title={t.ascii.upload}
+              >
+                <Upload className="w-4 h-4" />
+              </button>
+              <input
+                type="file"
+                id="upload-ascii-input"
+                class="hidden"
+                accept=".txt,text/plain"
+              />
+            </div>
+
+            <textarea
+              id="ascii-values"
+              rows="10"
+              class="w-full bg-transparent text-blue-400 font-mono text-sm outline-none resize-none pr-28"
+              placeholder={t.ascii.asciiPlaceholder}></textarea>
+          </div>
+        </div>
+      </div>
+
+      <p id="ascii-error" class="text-red-400 text-xs text-center hidden"></p>
+    </div>
+  </div>
+</section>
+
+<script>
+  import asciiConverter from '../lib/functions/ascii-converter';
+  import { convertBase } from '../lib/functions/number-base-converter';
+  import { countTextareaChars } from '../lib/functions/count-textarea-chars';
+
+  const ASCII_PAD: Record<number, number> = {
+    2: 8,
+    8: 3,
+    10: 1,
+    16: 2,
+  };
+
+  const EXAMPLES = [
+    'anita lava la tina',
+    'tres trsites tigres tragaban trigo en un trigal',
+    'hola mundo',
+    'ascii converter',
+  ];
+
+  const baseSelect = document.getElementById('ascii-base') as HTMLInputElement;
+  const textArea = document.getElementById('plain-text') as HTMLTextAreaElement;
+  const asciiArea = document.getElementById(
+    'ascii-values',
+  ) as HTMLTextAreaElement;
+  const textCount = document.getElementById(
+    'text-char-count',
+  ) as HTMLSpanElement;
+  const asciiCount = document.getElementById(
+    'ascii-char-count',
+  ) as HTMLSpanElement;
+  const errorElement = document.getElementById(
+    'ascii-error',
+  ) as HTMLParagraphElement;
+
+  const clearButton = document.getElementById('clear-all') as HTMLButtonElement;
+  const exampleButton = document.getElementById(
+    'load-example',
+  ) as HTMLButtonElement;
+
+  const downloadTextButton = document.getElementById(
+    'download-text',
+  ) as HTMLButtonElement;
+  const downloadAsciiButton = document.getElementById(
+    'download-ascii',
+  ) as HTMLButtonElement;
+  const uploadTextButton = document.getElementById(
+    'upload-text',
+  ) as HTMLButtonElement;
+  const uploadAsciiButton = document.getElementById(
+    'upload-ascii',
+  ) as HTMLButtonElement;
+  const uploadTextInput = document.getElementById(
+    'upload-text-input',
+  ) as HTMLInputElement;
+  const uploadAsciiInput = document.getElementById(
+    'upload-ascii-input',
+  ) as HTMLInputElement;
+
+  let previousBase = parseInt(baseSelect.value);
+  let lastEdited: 'text' | 'ascii' = 'text';
+  let exampleIndex = 0;
+
+  function showError(message: string) {
+    errorElement.textContent = message;
+    errorElement.classList.remove('hidden');
+  }
+
+  function hideError() {
+    errorElement.classList.add('hidden');
+    errorElement.textContent = '';
+  }
+
+  function updateCounters() {
+    textCount.textContent = String(countTextareaChars(textArea));
+    asciiCount.textContent = String(countTextareaChars(asciiArea));
+  }
+
+  function tokenizeAscii(value: string): string[] {
+    return value
+      .trim()
+      .split(/[\s,;]+/)
+      .filter(Boolean);
+  }
+
+  function textToAscii(text: string, base: number): string {
+    if (!text) return '';
+
+    const decimalValues = asciiConverter(text).split(' ').filter(Boolean);
+    const length = ASCII_PAD[base] ?? 1;
+
+    return decimalValues
+      .map((value) => convertBase(value, 10, base, length).toUpperCase())
+      .join(' ');
+  }
+
+  function asciiToText(ascii: string, base: number): string {
+    if (!ascii.trim()) return '';
+
+    const tokens = tokenizeAscii(ascii);
+    if (!tokens.length) return '';
+
+    return tokens
+      .map((token) => {
+        const decimalValue = convertBase(token, base, 10, 1);
+        const parsed = Number.parseInt(decimalValue, 10);
+
+        if (!Number.isFinite(parsed) || parsed < 0 || parsed > 65535) {
+          throw new Error('ASCII_INVALID_RANGE');
+        }
+
+        return String.fromCharCode(parsed);
+      })
+      .join('');
+  }
+
+  function convertAsciiBetweenBases(
+    value: string,
+    fromBase: number,
+    toBase: number,
+  ): string {
+    const tokens = tokenizeAscii(value);
+    if (!tokens.length) return '';
+
+    const length = ASCII_PAD[toBase] ?? 1;
+    return tokens
+      .map((token) =>
+        convertBase(token, fromBase, toBase, length).toUpperCase(),
+      )
+      .join(' ');
+  }
+
+  function syncFromText() {
+    lastEdited = 'text';
+    hideError();
+
+    try {
+      const base = parseInt(baseSelect.value);
+      asciiArea.value = textToAscii(textArea.value, base);
+    } catch {
+      showError('Error al convertir texto a ASCII');
+    }
+
+    updateCounters();
+  }
+
+  function syncFromAscii() {
+    lastEdited = 'ascii';
+    hideError();
+
+    try {
+      const base = parseInt(baseSelect.value);
+      textArea.value = asciiToText(asciiArea.value, base);
+    } catch {
+      showError('Valores ASCII inválidos para la base seleccionada');
+    }
+
+    updateCounters();
+  }
+
+  function handleBaseChange() {
+    hideError();
+    const newBase = parseInt(baseSelect.value);
+
+    try {
+      if (lastEdited === 'ascii') {
+        asciiArea.value = convertAsciiBetweenBases(
+          asciiArea.value,
+          previousBase,
+          newBase,
+        );
+        textArea.value = asciiToText(asciiArea.value, newBase);
+      } else {
+        asciiArea.value = textToAscii(textArea.value, newBase);
+      }
+    } catch {
+      showError('No fue posible cambiar de base con el contenido actual');
+    }
+
+    previousBase = newBase;
+    updateCounters();
+  }
+
+  function downloadTextFile(content: string, filename: string) {
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function loadTxtFile(file: File): Promise<string> {
+    return file.text();
+  }
+
+  textArea.addEventListener('input', syncFromText);
+  asciiArea.addEventListener('input', syncFromAscii);
+  baseSelect.addEventListener('change', handleBaseChange);
+
+  clearButton.addEventListener('click', () => {
+    textArea.value = '';
+    asciiArea.value = '';
+    hideError();
+    updateCounters();
+  });
+
+  exampleButton.addEventListener('click', () => {
+    const selectedExample = EXAMPLES[exampleIndex % EXAMPLES.length] || '';
+    exampleIndex += 1;
+    textArea.value = selectedExample;
+    syncFromText();
+  });
+
+  downloadTextButton.addEventListener('click', () => {
+    downloadTextFile(textArea.value, 'texto.txt');
+  });
+
+  downloadAsciiButton.addEventListener('click', () => {
+    downloadTextFile(asciiArea.value, 'ascii.txt');
+  });
+
+  uploadTextButton.addEventListener('click', () => uploadTextInput.click());
+  uploadAsciiButton.addEventListener('click', () => uploadAsciiInput.click());
+
+  uploadTextInput.addEventListener('change', async () => {
+    const file = uploadTextInput.files?.[0];
+    if (!file) return;
+    textArea.value = await loadTxtFile(file);
+    syncFromText();
+    uploadTextInput.value = '';
+  });
+
+  uploadAsciiInput.addEventListener('change', async () => {
+    const file = uploadAsciiInput.files?.[0];
+    if (!file) return;
+    asciiArea.value = await loadTxtFile(file);
+    syncFromAscii();
+    uploadAsciiInput.value = '';
+  });
+
+  updateCounters();
+</script>

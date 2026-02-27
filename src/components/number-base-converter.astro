@@ -1,6 +1,7 @@
 ---
 import { type Language, translations, defaultLang } from '../i18n/translations';
 import CopyButton from '../ui/copy-button.astro';
+import Select from '../ui/select.astro';
 
 interface Props {
   lang?: Language;
@@ -25,20 +26,22 @@ const t = translations[Astro.props.lang || defaultLang];
     <form class="flex flex-col gap-4">
       <div class="flex flex-col gap-2">
         <div class="flex flex-col gap-0 items-start">
-          <label for="base-from" class="text-zinc-500 text-xs w-10"
+          <label for="base-from-trigger" class="text-zinc-500 text-xs w-10"
             >{t.converter.from}</label
           >
           <div class="flex items-center gap-2 w-full">
-            <select
+            <Select
               id="base-from"
               name="base-from"
-              class="bg-zinc-700 text-white border-none rounded-lg px-4 py-3 text-sm font-semibold cursor-pointer outline-none focus:ring-2 focus:ring-green-400"
-            >
-              <option value="2">BIN</option>
-              <option value="8">OCT</option>
-              <option value="10" selected>DEC</option>
-              <option value="16">HEX</option>
-            </select>
+              value="10"
+              triggerClass="py-3"
+              options={[
+                { value: '2', label: 'BIN' },
+                { value: '8', label: 'OCT' },
+                { value: '10', label: 'DEC' },
+                { value: '16', label: 'HEX' },
+              ]}
+            />
             <div
               class="flex-1 flex items-center bg-zinc-900 border-2 border-zinc-700 rounded-lg pl-2 pr-4 py-1 min-w-0"
             >
@@ -56,20 +59,22 @@ const t = translations[Astro.props.lang || defaultLang];
         </div>
 
         <div class="flex flex-col gap-0 items-start">
-          <label for="base-to" class="text-zinc-500 text-xs w-10"
+          <label for="base-to-trigger" class="text-zinc-500 text-xs w-10"
             >{t.converter.to}</label
           >
           <div class="flex items-center gap-2 w-full">
-            <select
+            <Select
               id="base-to"
               name="base-to"
-              class="bg-zinc-700 text-white border-none rounded-lg px-4 py-3 text-sm font-semibold cursor-pointer outline-none focus:ring-2 focus:ring-green-400"
-            >
-              <option value="2" selected>BIN</option>
-              <option value="8">OCT</option>
-              <option value="10">DEC</option>
-              <option value="16">HEX</option>
-            </select>
+              value="2"
+              triggerClass="py-3"
+              options={[
+                { value: '2', label: 'BIN' },
+                { value: '8', label: 'OCT' },
+                { value: '10', label: 'DEC' },
+                { value: '16', label: 'HEX' },
+              ]}
+            />
             <div
               class="flex-1 flex items-center bg-zinc-900 border-2 border-zinc-700 rounded-lg pl-2 pr-4 py-1 min-w-0"
             >
@@ -215,7 +220,7 @@ const t = translations[Astro.props.lang || defaultLang];
 </section>
 
 <script>
-  import { convertBase } from '../lib/number-base-converter';
+  import { convertBase } from '../lib/functions/number-base-converter';
 
   // Constante para el tamaño máximo del resultado
   const MAX_LENGTH = 64;
@@ -224,8 +229,8 @@ const t = translations[Astro.props.lang || defaultLang];
   const form = document.querySelector('form') as HTMLFormElement;
   const baseFromSelect = document.getElementById(
     'base-from',
-  ) as HTMLSelectElement;
-  const baseToSelect = document.getElementById('base-to') as HTMLSelectElement;
+  ) as HTMLInputElement;
+  const baseToSelect = document.getElementById('base-to') as HTMLInputElement;
   const numberInput = document.getElementById('number') as HTMLInputElement;
   const resultInput = document.getElementById('result') as HTMLInputElement;
   const lengthInput = document.getElementById('length') as HTMLInputElement;
