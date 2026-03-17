@@ -1,5 +1,5 @@
 ---
-import Social from './social.astro';
+import Social from './Social.astro';
 import { translations, defaultLang, type Language } from '../i18n/translations';
 
 interface Props {
@@ -12,9 +12,9 @@ const t = translations[lang || defaultLang];
 const currentYear = new Date().getFullYear();
 
 const quickLinks = [
-  { href: '/', label: t.nav.baseConverter },
-  { href: '/subnet', label: t.nav.subnetCalculator },
-  { href: '/ip', label: t.nav.tcpIpTools },
+  { href: '/converters/base-converter', label: t.nav.baseConverter },
+  { href: '/calculators/Ipv4Calculator', label: t.nav.subnetCalculator },
+  { href: '/tcp-ip', label: t.nav.tcpIpTools },
 ];
 
 const resources = [

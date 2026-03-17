@@ -33,7 +33,7 @@ const navLinksByLanguage: Record<Language, NavLinkGroup[]> = {
           label: 'Calculadora de bases numéricas',
         },
         {
-          href: '/calculators/ipv4-calculator',
+          href: '/calculators/Ipv4Calculator',
           label: 'Calculadora de IPv4',
         },
         { href: '/calculators/ipv6-calculator', label: 'Calculadora de IPv6' },
@@ -51,11 +51,11 @@ const navLinksByLanguage: Record<Language, NavLinkGroup[]> = {
       category: 'TCP/IP',
       href: '/tcp-ip',
       links: [
-        { href: '/tcp-ip/app-layer', label: 'Capa de aplicación' },
-        { href: '/tcp-ip/transport-layer', label: 'Capa de transporte' },
-        { href: '/tcp-ip/network-layer', label: 'Capa de red' },
-        { href: '/tcp-ip/data-link-layer', label: 'Capa de enlace de datos' },
-        { href: '/tcp-ip/physical-layer', label: 'Capa física' },
+        { href: '/tcp-ip/AppLayer', label: 'Capa de aplicación' },
+        { href: '/tcp-ip/TransportLayer', label: 'Capa de transporte' },
+        { href: '/tcp-ip/NetworkLayer', label: 'Capa de red' },
+        { href: '/tcp-ip/DataLinkLayer', label: 'Capa de enlace de datos' },
+        { href: '/tcp-ip/PhysicalLayer', label: 'Capa física' },
       ],
     },
     {
@@ -81,7 +81,7 @@ const navLinksByLanguage: Record<Language, NavLinkGroup[]> = {
           href: '/calculators/base-calculator',
           label: 'Number base calculator',
         },
-        { href: '/calculators/ipv4-calculator', label: 'IPv4 calculator' },
+        { href: '/calculators/Ipv4Calculator', label: 'IPv4 calculator' },
         { href: '/calculators/ipv6-calculator', label: 'IPv6 calculator' },
         { href: '/calculators/tcp-checksum', label: 'TCP checksum' },
         {
@@ -94,11 +94,11 @@ const navLinksByLanguage: Record<Language, NavLinkGroup[]> = {
       category: 'TCP/IP',
       href: '/tcp-ip',
       links: [
-        { href: '/tcp-ip/app-layer', label: 'Application layer' },
-        { href: '/tcp-ip/transport-layer', label: 'Transport layer' },
-        { href: '/tcp-ip/network-layer', label: 'Network layer' },
-        { href: '/tcp-ip/data-link-layer', label: 'Data link layer' },
-        { href: '/tcp-ip/physical-layer', label: 'Physical layer' },
+        { href: '/tcp-ip/AppLayer', label: 'Application layer' },
+        { href: '/tcp-ip/TransportLayer', label: 'Transport layer' },
+        { href: '/tcp-ip/NetworkLayer', label: 'Network layer' },
+        { href: '/tcp-ip/DataLinkLayer', label: 'Data link layer' },
+        { href: '/tcp-ip/PhysicalLayer', label: 'Physical layer' },
       ],
     },
     {

@@ -1,7 +1,7 @@
 ---
 import { type Language, translations, defaultLang } from '../i18n/translations';
-import CopyButton from '../ui/copy-button.astro';
-import Select from '../ui/select.astro';
+import CopyButton from '../ui/CopyButton.astro';
+import Select from '../ui/Select.astro';
 
 interface Props {
   lang?: Language;
@@ -220,7 +220,7 @@ const t = translations[Astro.props.lang || defaultLang];
 </section>
 
 <script>
-  import { convertBase } from '../lib/functions/number-base-converter';
+  import { convertBase } from '../lib/functions/numberBaseConverter';
 
   // Constante para el tamaño máximo del resultado
   const MAX_LENGTH = 64;

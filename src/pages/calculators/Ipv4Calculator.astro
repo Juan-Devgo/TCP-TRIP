@@ -1,0 +1,11 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Ipv4CalculatorComponent from "../../components/Ipv4Calculator";
+import { defaultLang } from "../../i18n/translations";
+
+const lang = defaultLang;
+---
+
+<Layout lang={lang}>
+  <Ipv4CalculatorComponent client:load lang={lang} />
+</Layout>

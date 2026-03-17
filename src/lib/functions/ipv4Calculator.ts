@@ -40,11 +40,16 @@ export default function calculateIpv4(
     }
   }
 
-  const netMask = (0xffffffff << (32 - mask - (submask || 0))) >>> 0;
-  const wildcardMask = ~netMask >>> 0;
+  const combinedMask = (0xffffffff << (32 - mask - (submask || 0))) >>> 0;
+  const wildcardMask = ~combinedMask >>> 0;
   const networkAddress =
-    ((octet1 << 24) | (octet2 << 16) | (octet3 << 8) | octet4) & netMask;
+    ((octet1 << 24) | (octet2 << 16) | (octet3 << 8) | octet4) & combinedMask;
   const broadcastAddress = networkAddress | wildcardMask;
+
+  const baseMask = (0xffffffff << (32 - mask)) >>> 0;
+  const subMaskInt = submask
+    ? (((1 << submask) - 1) << (32 - mask - submask)) >>> 0
+    : null;
 
   const totalSubnets = submask ? 2 ** submask : null;
 
@@ -59,8 +64,28 @@ export default function calculateIpv4(
       : null;
 
   const firstHost =
-    submask && subnets ? subnets[1].networkAddress + 1 : networkAddress + 1;
-  const lastHost = broadcastAddress - 1;
+    submask && subnets && subnets.length >= 2
+      ? parseIp(subnets[1]!.networkAddress) + 1
+      : networkAddress + 1;
+  const lastHost =
+    submask && subnets && subnets.length >= 2
+      ? parseIp(subnets[subnets.length - 2]!.broadcastAddress) - 1
+      : broadcastAddress - 1;
+
+  const networkOctets = [octet1, octet2, octet3, octet4];
+
+  // in-addr.arpa for network zones omits trailing zero octets.
+  while (
+    networkOctets.length > 0 &&
+    networkOctets[networkOctets.length - 1] === 0
+  ) {
+    networkOctets.pop();
+  }
+
+  const inAddrArpa =
+    (networkOctets.length > 0
+      ? [...networkOctets].reverse().join('.') + '.'
+      : '') + 'in-addr.arpa';
 
   return {
     ipAddress: ip,
@@ -80,12 +105,28 @@ export default function calculateIpv4(
             : octet1 < 240
               ? 'D'
               : 'E',
-    subnetMask: [
-      (netMask >> 24) & 0xff,
-      (netMask >> 16) & 0xff,
-      (netMask >> 8) & 0xff,
-      netMask & 0xff,
+    netMask: [
+      (baseMask >> 24) & 0xff,
+      (baseMask >> 16) & 0xff,
+      (baseMask >> 8) & 0xff,
+      baseMask & 0xff,
     ].join('.'),
+    subMask: subMaskInt !== null
+      ? [
+          (subMaskInt >> 24) & 0xff,
+          (subMaskInt >> 16) & 0xff,
+          (subMaskInt >> 8) & 0xff,
+          subMaskInt & 0xff,
+        ].join('.')
+      : null,
+    fullMask: submask
+      ? [
+          (combinedMask >> 24) & 0xff,
+          (combinedMask >> 16) & 0xff,
+          (combinedMask >> 8) & 0xff,
+          combinedMask & 0xff,
+        ].join('.')
+      : null,
     wildcardMask: [
       (wildcardMask >> 24) & 0xff,
       (wildcardMask >> 16) & 0xff,
@@ -111,10 +152,15 @@ export default function calculateIpv4(
       lastHost & 0xff,
     ].join('.'),
     totalHosts: totalHosts,
-    inAddrArpa: [octet4, octet3, octet2, octet1].join('.') + '.in-addr.arpa',
-    ipv6Mapped: `::ffff:${octet1.toString(16)}${octet2.toString(16)}:${octet3.toString(16)}${octet4.toString(16)}`,
+    inAddrArpa: inAddrArpa,
+    ipv6Mapped: `::ffff:${octet1.toString(16).padStart(2, '0')}${octet2.toString(16).padStart(2, '0')}:${octet3.toString(16).padStart(2, '0')}${octet4.toString(16).padStart(2, '0')}`,
     subnets: subnets,
   };
+}
+
+function parseIp(ip: string): number {
+  const p = ip.split('.').map(Number);
+  return ((p[0]! << 24) | (p[1]! << 16) | (p[2]! << 8) | p[3]!) >>> 0;
 }
 
 function generateSubnets(

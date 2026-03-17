@@ -1,9 +1,9 @@
 ---
 import { defaultLang, translations, type Language } from '../i18n/translations';
-import Download from '../icons/download.astro';
-import Upload from '../icons/upload.astro';
-import CopyButton from '../ui/copy-button.astro';
-import Select from '../ui/select.astro';
+import Download from '../icons/Download.astro';
+import Upload from '../icons/Upload.astro';
+import CopyButton from '../ui/CopyButton.astro';
+import Select from '../ui/Select.astro';
 
 interface Props {
   lang?: Language;
@@ -23,21 +23,45 @@ const t = translations[Astro.props.lang || defaultLang];
 
     <div class="flex flex-col gap-4">
       <div class="flex flex-wrap items-center justify-between gap-3">
-
         <div class="flex items-center gap-2">
           <button
             type="button"
             id="clear-all"
-            class="bg-linear-to-br from-red-900 to-red-950 text-white rounded-lg px-3 py-2 text-sm font-semibold transition-all duration-100 shadow-lg cursor-pointer hover:from-red-800 hover:to-red-900"
+            class="flex items-center gap-1.5 bg-red-700/70 hover:bg-red-700 border border-red-600/50 hover:border-red-500 text-red-300 hover:text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-all duration-200 cursor-pointer select-none"
           >
+            <svg
+              class="w-3.5 h-3.5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
             {t.ascii.clear}
           </button>
+
           <button
             type="button"
             id="load-example"
-            class="bg-linear-to-br from-emerald-800 to-emerald-900 text-white rounded-lg px-3 py-2 text-sm font-semibold transition-all duration-100 shadow-lg cursor-pointer hover:from-emerald-700 hover:to-emerald-800"
+            class="flex items-center gap-1.5 bg-emerald-700/70 hover:bg-emerald-700 border border-emerald-600/50 hover:border-emerald-500 text-emerald-300 hover:text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-all duration-200 cursor-pointer select-none"
           >
-            {t.ascii.example}
+            <svg
+              class="w-3.5 h-3.5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+            {t.ascii.examples}
           </button>
         </div>
 
@@ -57,7 +81,6 @@ const t = translations[Astro.props.lang || defaultLang];
             ]}
           />
         </div>
-        
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="converter-grid">
@@ -73,7 +96,7 @@ const t = translations[Astro.props.lang || defaultLang];
           <div
             class="relative bg-zinc-900 border-2 border-zinc-700 rounded-xl p-3"
           >
-            <div class="absolute top-2 right-2 flex items-center gap-1 z-10">
+            <div class="absolute top-2 right-6 flex items-center gap-1 z-10">
               <CopyButton targetId="plain-text" class="w-8 h-8 rounded-md" />
               <button
                 type="button"
@@ -102,7 +125,7 @@ const t = translations[Astro.props.lang || defaultLang];
             <textarea
               id="plain-text"
               rows="10"
-              class="w-full bg-transparent text-green-400 font-mono text-sm outline-none resize-none pr-28"
+              class="minimal-scrollbar w-full bg-transparent text-green-400 font-mono text-sm outline-none resize-none pr-28"
               placeholder={t.ascii.textPlaceholder}></textarea>
           </div>
         </div>
@@ -119,7 +142,7 @@ const t = translations[Astro.props.lang || defaultLang];
           <div
             class="relative bg-zinc-900 border-2 border-zinc-700 rounded-xl p-3"
           >
-            <div class="absolute top-2 right-2 flex items-center gap-1 z-10">
+            <div class="absolute top-2 right-6 flex items-center gap-1 z-10">
               <CopyButton targetId="ascii-values" class="w-8 h-8 rounded-md" />
               <button
                 type="button"
@@ -148,7 +171,7 @@ const t = translations[Astro.props.lang || defaultLang];
             <textarea
               id="ascii-values"
               rows="10"
-              class="w-full bg-transparent text-blue-400 font-mono text-sm outline-none resize-none pr-28"
+              class="minimal-scrollbar w-full bg-transparent text-blue-400 font-mono text-sm outline-none resize-none pr-28"
               placeholder={t.ascii.asciiPlaceholder}></textarea>
           </div>
         </div>
@@ -160,9 +183,9 @@ const t = translations[Astro.props.lang || defaultLang];
 </section>
 
 <script>
-  import asciiConverter from '../lib/functions/ascii-converter';
-  import { convertBase } from '../lib/functions/number-base-converter';
-  import { countTextareaChars } from '../lib/functions/count-textarea-chars';
+  import asciiConverter from '../lib/functions/asciiConverter';
+  import { convertBase } from '../lib/functions/numberBaseConverter';
+  import { countTextareaChars } from '../lib/functions/countTextareaChars';
 
   const ASCII_PAD: Record<number, number> = {
     2: 8,
@@ -402,3 +425,35 @@ const t = translations[Astro.props.lang || defaultLang];
 
   updateCounters();
 </script>
+
+<style>
+  .minimal-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(161, 161, 170, 0.5) transparent;
+    scrollbar-gutter: stable;
+  }
+
+  .minimal-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .minimal-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .minimal-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(161, 161, 170, 0.5);
+    border-radius: 9999px;
+  }
+
+  .minimal-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(161, 161, 170, 0.75);
+  }
+
+  .minimal-scrollbar::-webkit-scrollbar-button {
+    width: 0;
+    height: 0;
+    display: none;
+  }
+</style>

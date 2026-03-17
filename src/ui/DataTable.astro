@@ -1,0 +1,128 @@
+---
+export interface DataTableHeader {
+  label: string;
+  /** Extra Tailwind classes for the <th> (e.g. 'text-center') */
+  class?: string;
+}
+
+export interface DataTableCell {
+  /** Text or HTML string. Rendered via set:html, so HTML is allowed. */
+  content?: string;
+  /** Tailwind color class, e.g. 'text-green-400' */
+  color?: string;
+  /** Extra Tailwind classes appended to the <td> */
+  class?: string;
+  /** DOM id for the <td> (useful for JS updates) */
+  id?: string;
+}
+
+export interface DataTableRow {
+  /** DOM id for the <tr> */
+  id?: string;
+  /** Hide the row by default */
+  hidden?: boolean;
+  /**
+   * Override the row background.
+   * When omitted, rows alternate between 'bg-zinc-900' (even) and 'bg-zinc-800/50' (odd).
+   */
+  bg?: string;
+  cells: DataTableCell[];
+}
+
+interface Props {
+  /** DOM id for the outer wrapper <div> */
+  id?: string;
+  /** Extra Tailwind classes for the outer wrapper */
+  class?: string;
+  /** Renders a <thead> when provided */
+  headers?: DataTableHeader[];
+  /** Static rows. Use together with <slot /> for mixed static+dynamic rows. */
+  rows?: DataTableRow[];
+  /** DOM id for the <tbody> — useful when JS populates rows via innerHTML */
+  tbodyId?: string;
+  /**
+   * When true, renders only the <table> without the styled container <div>.
+   * Use this when the table is nested inside an element that already provides
+   * the border/background (e.g. inside a <details> panel).
+   */
+  bare?: boolean;
+}
+
+const { id, class: className = '', headers, rows = [], tbodyId, bare = false } = Astro.props;
+---
+
+{bare ? (
+  <table class="w-full text-sm">
+    {headers && headers.length > 0 && (
+      <thead>
+        <tr class="bg-zinc-800 border-b border-zinc-700">
+          {headers.map((h) => (
+            <th class={`px-4 py-2 text-zinc-400 font-medium text-left ${h.class ?? ''}`}>
+              {h.label}
+            </th>
+          ))}
+        </tr>
+      </thead>
+    )}
+    <tbody id={tbodyId}>
+      {rows.map((row, i) => {
+        const rowBg = row.bg ?? (i % 2 === 0 ? 'bg-zinc-900' : 'bg-zinc-800/50');
+        return (
+          <tr id={row.id} class:list={[rowBg, { hidden: row.hidden ?? false }]}>
+            {row.cells.map((cell, j) => (
+              <td
+                id={cell.id}
+                class:list={[
+                  'px-4 py-2',
+                  j === 0 ? 'text-zinc-400 font-medium w-1/3' : 'font-mono',
+                  cell.color,
+                  cell.class,
+                ]}
+                set:html={cell.content ?? ''}
+              />
+            ))}
+          </tr>
+        );
+      })}
+      <slot />
+    </tbody>
+  </table>
+) : (
+  <div id={id} class={`bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden ${className}`}>
+    <table class="w-full text-sm">
+      {headers && headers.length > 0 && (
+        <thead>
+          <tr class="bg-zinc-800 border-b border-zinc-700">
+            {headers.map((h) => (
+              <th class={`px-4 py-2 text-zinc-400 font-medium text-left ${h.class ?? ''}`}>
+                {h.label}
+              </th>
+            ))}
+          </tr>
+        </thead>
+      )}
+      <tbody id={tbodyId}>
+        {rows.map((row, i) => {
+          const rowBg = row.bg ?? (i % 2 === 0 ? 'bg-zinc-900' : 'bg-zinc-800/50');
+          return (
+            <tr id={row.id} class:list={[rowBg, { hidden: row.hidden ?? false }]}>
+              {row.cells.map((cell, j) => (
+                <td
+                  id={cell.id}
+                  class:list={[
+                    'px-4 py-2',
+                    j === 0 ? 'text-zinc-400 font-medium w-1/3' : 'font-mono',
+                    cell.color,
+                    cell.class,
+                  ]}
+                  set:html={cell.content ?? ''}
+                />
+              ))}
+            </tr>
+          );
+        })}
+        <slot />
+      </tbody>
+    </table>
+  </div>
+)}
