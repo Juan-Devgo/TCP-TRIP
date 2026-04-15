@@ -18,13 +18,11 @@ TCP-TRIP acompaña a estudiantes universitarios de redes y comunicaciones en su 
 
 ## Funcionalidades actuales (V1.0)
 
-- **Explorador TCP/IP por capas** — recorre las cinco capas del modelo TCP/IP con descripciones de protocolos por capa (HTTP, DNS, TCP, UDP, IP, Ethernet, etc.)
-- **Constructor de Protocolos (Protocol Builder)** — diseña visualmente encabezados de protocolo con campos tipados (uint, flags, ASCII, IPv4, hex, enum, padding, composite), previsualización estilo RFC en tiempo real y diagramas de 32 bits por fila
+- **Constructor de Protocolos (Protocol Builder)** — diseña visualmente encabezados de protocolo con campos tipados (uint, flags, ASCII, IPv4, hex, enum, padding, composite), previsualización del encabezado en tiempo real y diagramas de 32 bits por fila
 - **Calculadora de Subredes IPv4** — calcula direcciones de red, broadcast, máscara wildcard, rangos de hosts y subredes con soporte CIDR
 - **Conversor de Bases Numéricas** — convierte entre binario, octal, decimal y hexadecimal
 - **Conversor ASCII** — traduce texto a valores ASCII y viceversa, con soporte de múltiples bases y carga/descarga de archivos .txt
 - **Mis Protocolos** — gestión de protocolos guardados con compartición mediante código único
-- **Mensajes estructurados** — envía encabezados de protocolo completos a otros estudiantes
 - **Autenticación** — registro e inicio de sesión con Clerk; soporte bilingüe ES/EN
 
 ---
