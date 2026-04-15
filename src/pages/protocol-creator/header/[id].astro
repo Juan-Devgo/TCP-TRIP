@@ -1,0 +1,41 @@
+---
+import Layout from '../../../shared/layouts/Layout.astro';
+import HeaderCreator from '../../../domains/protocols/components/HeaderCreator/HeaderCreator';
+import { defaultLang } from '../../../shared/i18n/translations';
+import { sql } from '../../../shared/lib/sql';
+
+const { isAuthenticated, userId } = (Astro.locals as any).auth();
+if (!isAuthenticated) {
+  return Astro.redirect(`/sign-in?redirect_url=/protocol-creator/header/${Astro.params.id}`);
+}
+
+const { id } = Astro.params;
+const [row] = await sql`
+  SELECT id, name, description, fields, created_at
+  FROM protocols WHERE id = ${id!} AND user_id = ${userId}
+`;
+
+if (!row) {
+  return Astro.redirect('/my-protocols');
+}
+
+const protocol = {
+  id: row.id,
+  name: row.name,
+  description: row.description,
+  fields: row.fields,
+  createdAt: new Date(row.created_at),
+};
+
+const lang = defaultLang;
+---
+
+<Layout lang={lang}>
+  <section class="flex justify-center min-h-screen p-4 pt-8">
+    <div class="w-full max-w-3xl">
+      <div class="bg-linear-to-br from-zinc-800 to-zinc-900 rounded-2xl p-6 border border-zinc-700/50 shadow-xl">
+        <HeaderCreator protocol={protocol} client:load />
+      </div>
+    </div>
+  </section>
+</Layout>
