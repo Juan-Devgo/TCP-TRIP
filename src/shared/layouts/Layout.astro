@@ -1,0 +1,37 @@
+---
+import "../../styles/global.css";
+import Footer from "../ui/Footer.astro";
+import Navbar from "../ui/Navbar.astro";
+import { defaultLang, type Language } from "../i18n/translations";
+
+interface Props {
+  lang?: Language;
+}
+
+const { lang = defaultLang } = Astro.props;
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TCP TRIP</title>
+  </head>
+  <body>
+    <header>
+      <Navbar currentPath={Astro.url.pathname} lang={lang} />
+    </header>
+    <main>
+      <slot />
+    </main>
+    <Footer lang={lang} />
+  </body>
+</html>
+
+<script>
+  import { updateClerkOptions } from "@clerk/astro/client";
+  import { enUS } from "@clerk/localizations";
+
+  updateClerkOptions({ localization: enUS });
+</script>

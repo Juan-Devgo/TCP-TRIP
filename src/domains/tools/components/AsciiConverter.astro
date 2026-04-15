@@ -1,0 +1,672 @@
+---
+import { defaultLang, translations, type Language } from '../../../shared/i18n/translations';
+import Download from '../../../shared/icons/Download.astro';
+import Upload from '../../../shared/icons/Upload.astro';
+import CopyButton from '../../../shared/ui/CopyButton.astro';
+import Select from '../../../shared/ui/Select.astro';
+
+interface Props {
+  lang?: Language;
+}
+
+const t = translations[Astro.props.lang || defaultLang];
+---
+
+<section class="flex justify-center items-center min-h-screen p-4">
+  <div
+    class="bg-linear-to-br from-zinc-800 to-zinc-900 rounded-3xl p-6 shadow-2xl w-full max-w-5xl border border-zinc-700/50"
+  >
+    <div class="text-center mb-2">
+      <h2 class="text-white text-xl font-semibold mb-1">{t.ascii.title}</h2>
+      <p class="text-zinc-500 text-sm">{t.ascii.subtitle}</p>
+    </div>
+
+    <div class="flex flex-col gap-4">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            id="clear-all"
+            class="flex items-center gap-1.5 bg-red-700/70 hover:bg-red-700 border border-red-600/50 hover:border-red-500 text-red-300 hover:text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-all duration-200 cursor-pointer select-none"
+          >
+            <svg
+              class="w-3.5 h-3.5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+            {t.ascii.clear}
+          </button>
+
+          <button
+            type="button"
+            id="load-example"
+            class="flex items-center gap-1.5 bg-emerald-700/70 hover:bg-emerald-700 border border-emerald-600/50 hover:border-emerald-500 text-emerald-300 hover:text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-all duration-200 cursor-pointer select-none"
+          >
+            <svg
+              class="w-3.5 h-3.5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+            {t.ascii.examples}
+          </button>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <label for="ascii-base-trigger" class="text-zinc-400 text-sm"
+            >{t.ascii.baseLabel}</label
+          >
+          <Select
+            id="ascii-base"
+            name="ascii-base"
+            value="10"
+            options={[
+              { value: '2', label: 'BIN' },
+              { value: '8', label: 'OCT' },
+              { value: '10', label: 'DEC' },
+              { value: '16', label: 'HEX' },
+            ]}
+          />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="converter-grid">
+        <div class="flex flex-col gap-2" id="text-area-block">
+          <div class="flex items-center justify-between px-1">
+            <label for="plain-text" class="text-zinc-300 text-md font-medium"
+              >{t.ascii.textLabel}</label
+            >
+            <small class="text-zinc-500 text-xs"
+              >{t.ascii.characters}: <span id="text-char-count">0</span></small
+            >
+          </div>
+          <div
+            class="relative bg-zinc-900 border-2 border-zinc-700 rounded-xl p-3"
+          >
+            <div class="absolute top-2 right-6 flex items-center gap-1 z-10">
+              <CopyButton targetId="plain-text" class="w-8 h-8 rounded-md" />
+              <button
+                type="button"
+                id="download-text"
+                class="w-8 h-8 rounded-md flex items-center justify-center text-zinc-400 cursor-pointer hover:text-white hover:bg-zinc-700/50 transition-colors"
+                title={t.ascii.download}
+              >
+                <Download className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                id="upload-text"
+                class="w-8 h-8 rounded-md flex items-center justify-center text-zinc-400 cursor-pointer hover:text-white hover:bg-zinc-700/50 transition-colors"
+                title={t.ascii.upload}
+              >
+                <Upload className="w-4 h-4" />
+              </button>
+              <input
+                type="file"
+                id="upload-text-input"
+                class="hidden"
+                accept=".txt,text/plain"
+              />
+            </div>
+
+            <textarea
+              id="plain-text"
+              rows="10"
+              class="minimal-scrollbar w-full bg-transparent text-green-400 font-mono text-sm outline-none resize-none pr-28"
+              placeholder={t.ascii.textPlaceholder}></textarea>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-2" id="ascii-area-block">
+          <div class="flex items-center justify-between px-1">
+            <label for="ascii-values" class="text-zinc-300 text-md font-medium"
+              >{t.ascii.asciiLabel}</label
+            >
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                id="auto-group-toggle"
+                data-auto="true"
+                data-manual-label={t.ascii.manualMode}
+                class="flex items-center gap-1 bg-blue-700/70 hover:bg-blue-700 border border-blue-600/50 hover:border-blue-500 text-blue-300 hover:text-white text-xs font-medium px-2.5 py-1 rounded-lg transition-all duration-200 cursor-pointer select-none"
+                title={t.ascii.autoGroup}
+              >
+                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <span id="auto-group-label">{t.ascii.autoGroup}</span>
+              </button>
+              <small class="text-zinc-500 text-xs"
+                >{t.ascii.characters}: <span id="ascii-char-count">0</span></small
+              >
+            </div>
+          </div>
+          <div
+            class="relative bg-zinc-900 border-2 border-zinc-700 rounded-xl p-3"
+          >
+            <div class="absolute top-2 right-6 flex items-center gap-1 z-10">
+              <CopyButton targetId="ascii-values" class="w-8 h-8 rounded-md" />
+              <button
+                type="button"
+                id="download-ascii"
+                class="w-8 h-8 rounded-md flex items-center justify-center text-zinc-400 cursor-pointer hover:text-white hover:bg-zinc-700/50 transition-colors"
+                title={t.ascii.download}
+              >
+                <Download className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                id="upload-ascii"
+                class="w-8 h-8 rounded-md flex items-center justify-center text-zinc-400 cursor-pointer hover:text-white hover:bg-zinc-700/50 transition-colors"
+                title={t.ascii.upload}
+              >
+                <Upload className="w-4 h-4" />
+              </button>
+              <input
+                type="file"
+                id="upload-ascii-input"
+                class="hidden"
+                accept=".txt,text/plain"
+              />
+            </div>
+
+            <textarea
+              id="ascii-values"
+              rows="10"
+              class="minimal-scrollbar w-full bg-transparent text-blue-400 font-mono text-sm outline-none resize-none pr-28"
+              placeholder={t.ascii.asciiPlaceholder}></textarea>
+          </div>
+          <p id="manual-mode-hint" class="text-amber-400/80 text-xs px-1 hidden">
+            {t.ascii.manualModeHint}
+          </p>
+        </div>
+      </div>
+
+      <p id="ascii-error" class="text-red-400 text-xs text-center hidden"></p>
+    </div>
+  </div>
+</section>
+
+<script>
+  import asciiConverter from '../../../shared/lib/functions/asciiConverter';
+  import { convertBase } from '../../../shared/lib/functions/numberBaseConverter';
+  import { countTextareaChars } from '../../../shared/lib/functions/countTextareaChars';
+
+  const ASCII_PAD: Record<number, number> = {
+    2: 8,
+    8: 3,
+    10: 1,
+    16: 2,
+  };
+
+  // Fixed chunk widths for non-decimal bases (BIN=8, OCT=3, HEX=2)
+  const FIXED_WIDTH: Record<number, number> = { 2: 8, 8: 3, 16: 2 };
+
+  const EXAMPLES = [
+    'anita lava la tina',
+    'tres trsites tigres tragaban trigo en un trigal',
+    'hola mundo',
+    'ascii converter',
+  ];
+
+  const baseSelect = document.getElementById('ascii-base') as HTMLInputElement;
+  const textArea = document.getElementById('plain-text') as HTMLTextAreaElement;
+  const asciiArea = document.getElementById(
+    'ascii-values',
+  ) as HTMLTextAreaElement;
+  const textCount = document.getElementById(
+    'text-char-count',
+  ) as HTMLSpanElement;
+  const asciiCount = document.getElementById(
+    'ascii-char-count',
+  ) as HTMLSpanElement;
+  const errorElement = document.getElementById(
+    'ascii-error',
+  ) as HTMLParagraphElement;
+  const autoGroupToggle = document.getElementById(
+    'auto-group-toggle',
+  ) as HTMLButtonElement;
+  const autoGroupLabel = document.getElementById(
+    'auto-group-label',
+  ) as HTMLSpanElement;
+  const manualModeHint = document.getElementById(
+    'manual-mode-hint',
+  ) as HTMLParagraphElement;
+
+  const clearButton = document.getElementById('clear-all') as HTMLButtonElement;
+  const exampleButton = document.getElementById(
+    'load-example',
+  ) as HTMLButtonElement;
+
+  const downloadTextButton = document.getElementById(
+    'download-text',
+  ) as HTMLButtonElement;
+  const downloadAsciiButton = document.getElementById(
+    'download-ascii',
+  ) as HTMLButtonElement;
+  const uploadTextButton = document.getElementById(
+    'upload-text',
+  ) as HTMLButtonElement;
+  const uploadAsciiButton = document.getElementById(
+    'upload-ascii',
+  ) as HTMLButtonElement;
+  const uploadTextInput = document.getElementById(
+    'upload-text-input',
+  ) as HTMLInputElement;
+  const uploadAsciiInput = document.getElementById(
+    'upload-ascii-input',
+  ) as HTMLInputElement;
+
+  let previousBase = parseInt(baseSelect.value);
+  let lastEdited: 'text' | 'ascii' = 'text';
+  let exampleIndex = 0;
+  let autoMode = true;
+
+  // ── Toggle ──────────────────────────────────────────────────────────────────
+
+  const AUTO_LABEL = autoGroupToggle.title;
+  const MANUAL_LABEL =
+    autoGroupToggle.dataset.manualLabel ?? AUTO_LABEL;
+
+  function setAutoMode(enabled: boolean) {
+    autoMode = enabled;
+    autoGroupToggle.dataset.auto = String(enabled);
+
+    if (enabled) {
+      autoGroupLabel.textContent = AUTO_LABEL;
+      autoGroupToggle.className =
+        'flex items-center gap-1 bg-blue-700/70 hover:bg-blue-700 border border-blue-600/50 hover:border-blue-500 text-blue-300 hover:text-white text-xs font-medium px-2.5 py-1 rounded-lg transition-all duration-200 cursor-pointer select-none';
+      manualModeHint.classList.add('hidden');
+    } else {
+      autoGroupLabel.textContent = MANUAL_LABEL;
+      autoGroupToggle.className =
+        'flex items-center gap-1 bg-amber-700/70 hover:bg-amber-700 border border-amber-600/50 hover:border-amber-500 text-amber-300 hover:text-white text-xs font-medium px-2.5 py-1 rounded-lg transition-all duration-200 cursor-pointer select-none';
+      manualModeHint.classList.remove('hidden');
+    }
+  }
+
+  // ── Error display ────────────────────────────────────────────────────────────
+
+  function showError(message: string) {
+    errorElement.textContent = message;
+    errorElement.classList.remove('hidden');
+  }
+
+  function hideError() {
+    errorElement.classList.add('hidden');
+    errorElement.textContent = '';
+  }
+
+  function updateCounters() {
+    textCount.textContent = String(countTextareaChars(textArea));
+    asciiCount.textContent = String(countTextareaChars(asciiArea));
+  }
+
+  // ── Smart tokenization ───────────────────────────────────────────────────────
+
+  /**
+   * Splits a raw decimal string (no separators) into tokens using a greedy
+   * priority strategy:
+   *   1. Shortest match that is printable ASCII (32–127)
+   *   2. Longest match that fits extended ASCII (0–255)
+   *   3. Longest match that fits Unicode BMP (256–65535)
+   */
+  function smartTokenizeDec(clean: string): string[] {
+    const tokens: string[] = [];
+    let i = 0;
+
+    while (i < clean.length) {
+      let token: string | null = null;
+
+      // 1. Printable ASCII (32–127): prefer shortest match
+      for (let len = 1; len <= Math.min(3, clean.length - i); len++) {
+        const sub = clean.substring(i, i + len);
+        const val = parseInt(sub, 10);
+        if (val >= 32 && val <= 127) {
+          token = sub;
+          break;
+        }
+      }
+
+      // 2. Extended ASCII (0–255): prefer longest match
+      if (!token) {
+        for (let len = Math.min(3, clean.length - i); len >= 1; len--) {
+          const sub = clean.substring(i, i + len);
+          const val = parseInt(sub, 10);
+          if (val >= 0 && val <= 255) {
+            token = sub;
+            break;
+          }
+        }
+      }
+
+      // 3. Unicode BMP (256–65535): prefer longest match
+      if (!token) {
+        for (let len = Math.min(5, clean.length - i); len >= 4; len--) {
+          const sub = clean.substring(i, i + len);
+          const val = parseInt(sub, 10);
+          if (val >= 256 && val <= 65535) {
+            token = sub;
+            break;
+          }
+        }
+      }
+
+      if (!token) throw new Error('ASCII_PARSE_FAILED');
+      tokens.push(token);
+      i += token.length;
+    }
+
+    return tokens;
+  }
+
+  /**
+   * Splits a string of digits/hex chars into equal-width chunks.
+   * Throws if the length is not a multiple of `width`.
+   */
+  function smartTokenizeFixed(clean: string, width: number): string[] {
+    if (clean.length % width !== 0) throw new Error('ASCII_PARSE_FAILED');
+    const tokens: string[] = [];
+    for (let i = 0; i < clean.length; i += width) {
+      tokens.push(clean.substring(i, i + width));
+    }
+    return tokens;
+  }
+
+  /**
+   * Main tokenizer. Behaviour:
+   * - If separators are present → always split by them (auto or manual).
+   * - If no separators and autoMode=false → return single token (manual, user
+   *   is warned to add spaces via the hint).
+   * - If no separators and autoMode=true:
+   *   - DEC: greedy heuristic (smartTokenizeDec)
+   *   - BIN/OCT/HEX: fixed-width chunks (smartTokenizeFixed)
+   */
+  function tokenizeAscii(value: string, base: number): string[] {
+    const hasSeparators = /[\s,;]/.test(value.trim());
+
+    if (hasSeparators || !autoMode) {
+      return value.trim().split(/[\s,;]+/).filter(Boolean);
+    }
+
+    // Auto mode, no separators
+    const clean = value.trim();
+    if (!clean) return [];
+
+    if (base === 10) {
+      if (!/^\d+$/.test(clean)) throw new Error('ASCII_PARSE_FAILED');
+      return smartTokenizeDec(clean);
+    }
+
+    const fixedWidth = FIXED_WIDTH[base];
+    if (fixedWidth) {
+      return smartTokenizeFixed(clean, fixedWidth);
+    }
+
+    return [clean];
+  }
+
+  // ── Conversion helpers ───────────────────────────────────────────────────────
+
+  function textToAscii(text: string, base: number): string {
+    if (!text) return '';
+
+    const decimalValues = asciiConverter(text).split(' ').filter(Boolean);
+    const length = ASCII_PAD[base] ?? 1;
+
+    return decimalValues
+      .map((value) => convertBase(value, 10, base, length).toUpperCase())
+      .join(' ');
+  }
+
+  function asciiToText(ascii: string, base: number): string {
+    if (!ascii.trim()) return '';
+
+    const tokens = tokenizeAscii(ascii, base);
+    if (!tokens.length) return '';
+
+    return tokens
+      .map((token) => {
+        const decimalValue = convertBase(token, base, 10, 1);
+        const parsed = Number.parseInt(decimalValue, 10);
+
+        if (!Number.isFinite(parsed) || parsed < 0 || parsed > 65535) {
+          throw new Error('ASCII_INVALID_RANGE');
+        }
+
+        return String.fromCharCode(parsed);
+      })
+      .join('');
+  }
+
+  function convertAsciiBetweenBases(
+    value: string,
+    fromBase: number,
+    toBase: number,
+  ): string {
+    const tokens = tokenizeAscii(value, fromBase);
+    if (!tokens.length) return '';
+
+    const length = ASCII_PAD[toBase] ?? 1;
+    return tokens
+      .map((token) =>
+        convertBase(token, fromBase, toBase, length).toUpperCase(),
+      )
+      .join(' ');
+  }
+
+  // ── Auto-format ASCII input ──────────────────────────────────────────────────
+
+  /**
+   * When auto-mode is ON and the user hasn't typed any separators yet,
+   * reformats the textarea by joining smart-parsed tokens with spaces.
+   * Restores the cursor to the equivalent position in the new string.
+   */
+  function reformatAsciiInput(base: number) {
+    if (!autoMode) return;
+
+    const value = asciiArea.value;
+
+    // Always work from the stripped value so the re-tokenization is not
+    // blocked by spaces that were inserted in a previous reformat pass.
+    const clean = value.replace(/[\s,;]+/g, '').trim();
+    if (!clean) return;
+
+    let tokens: string[];
+    try {
+      // Pass the clean (separator-free) string so tokenizeAscii always
+      // takes the smart-parse path, not the simple space-split path.
+      tokens = tokenizeAscii(clean, base);
+    } catch {
+      return;
+    }
+
+    // Only reformat once we have at least 2 tokens (something to separate)
+    if (tokens.length <= 1) return;
+
+    const formatted = tokens.join(' ');
+    if (formatted === value) return;
+
+    // Count non-separator chars before the cursor in the original string
+    const cursorPos = asciiArea.selectionStart ?? value.length;
+    const nonSpaceBefore = value
+      .substring(0, cursorPos)
+      .replace(/[\s,;]/g, '').length;
+
+    asciiArea.value = formatted;
+
+    // Restore cursor: advance past nonSpaceBefore non-space chars in the new string
+    let count = 0;
+    let newCursor = formatted.length;
+    for (let i = 0; i < formatted.length; i++) {
+      if (formatted[i] !== ' ') count++;
+      if (count === nonSpaceBefore) {
+        newCursor = i + 1;
+        break;
+      }
+    }
+    asciiArea.setSelectionRange(newCursor, newCursor);
+  }
+
+  // ── Sync functions ───────────────────────────────────────────────────────────
+
+  function syncFromText() {
+    lastEdited = 'text';
+    hideError();
+
+    try {
+      const base = parseInt(baseSelect.value);
+      asciiArea.value = textToAscii(textArea.value, base);
+    } catch {
+      showError('Error al convertir texto a ASCII');
+    }
+
+    updateCounters();
+  }
+
+  function syncFromAscii() {
+    lastEdited = 'ascii';
+    hideError();
+
+    try {
+      const base = parseInt(baseSelect.value);
+      reformatAsciiInput(base);
+
+      // In auto-mode, handle partial fixed-width input (e.g. a BIN value that
+      // isn't yet a full 8-char chunk): show text from already-complete tokens
+      // but don't error — the trailing partial token is still being typed.
+      if (autoMode) {
+        const fixedWidth = FIXED_WIDTH[base];
+        if (fixedWidth) {
+          const clean = asciiArea.value.replace(/[\s,;]+/g, '').trim();
+          if (clean.length % fixedWidth !== 0) {
+            const completeLength =
+              Math.floor(clean.length / fixedWidth) * fixedWidth;
+            textArea.value =
+              completeLength > 0
+                ? asciiToText(clean.substring(0, completeLength), base)
+                : '';
+            updateCounters();
+            return;
+          }
+        }
+      }
+
+      textArea.value = asciiToText(asciiArea.value, base);
+    } catch {
+      showError('Valores ASCII inválidos para la base seleccionada');
+    }
+
+    updateCounters();
+  }
+
+  function handleBaseChange() {
+    hideError();
+    const newBase = parseInt(baseSelect.value);
+
+    try {
+      if (lastEdited === 'ascii') {
+        asciiArea.value = convertAsciiBetweenBases(
+          asciiArea.value,
+          previousBase,
+          newBase,
+        );
+        textArea.value = asciiToText(asciiArea.value, newBase);
+      } else {
+        asciiArea.value = textToAscii(textArea.value, newBase);
+      }
+    } catch {
+      showError('No fue posible cambiar de base con el contenido actual');
+    }
+
+    previousBase = newBase;
+    updateCounters();
+  }
+
+  // ── File helpers ─────────────────────────────────────────────────────────────
+
+  function downloadTextFile(content: string, filename: string) {
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = filename;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function loadTxtFile(file: File): Promise<string> {
+    return file.text();
+  }
+
+  // ── Event listeners ──────────────────────────────────────────────────────────
+
+  textArea.addEventListener('input', syncFromText);
+  asciiArea.addEventListener('input', syncFromAscii);
+  baseSelect.addEventListener('change', handleBaseChange);
+
+  autoGroupToggle.addEventListener('click', () => {
+    setAutoMode(!autoMode);
+    if (lastEdited === 'ascii') {
+      syncFromAscii();
+    } else {
+      syncFromText();
+    }
+  });
+
+  clearButton.addEventListener('click', () => {
+    textArea.value = '';
+    asciiArea.value = '';
+    hideError();
+    updateCounters();
+  });
+
+  exampleButton.addEventListener('click', () => {
+    const selectedExample = EXAMPLES[exampleIndex % EXAMPLES.length] || '';
+    exampleIndex += 1;
+    textArea.value = selectedExample;
+    syncFromText();
+  });
+
+  downloadTextButton.addEventListener('click', () => {
+    downloadTextFile(textArea.value, 'texto.txt');
+  });
+
+  downloadAsciiButton.addEventListener('click', () => {
+    downloadTextFile(asciiArea.value, 'ascii.txt');
+  });
+
+  uploadTextButton.addEventListener('click', () => uploadTextInput.click());
+  uploadAsciiButton.addEventListener('click', () => uploadAsciiInput.click());
+
+  uploadTextInput.addEventListener('change', async () => {
+    const file = uploadTextInput.files?.[0];
+    if (!file) return;
+    textArea.value = await loadTxtFile(file);
+    syncFromText();
+    uploadTextInput.value = '';
+  });
+
+  uploadAsciiInput.addEventListener('change', async () => {
+    const file = uploadAsciiInput.files?.[0];
+    if (!file) return;
+    asciiArea.value = await loadTxtFile(file);
+    syncFromAscii();
+    uploadAsciiInput.value = '';
+  });
+
+  updateCounters();
+</script>

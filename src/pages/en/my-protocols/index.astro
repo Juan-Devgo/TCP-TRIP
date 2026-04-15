@@ -1,0 +1,39 @@
+---
+import Layout from '../../../shared/layouts/Layout.astro';
+import MyProtocolsList from '../../../domains/my-protocols/components/MyProtocols/MyProtocolsList';
+
+const { isAuthenticated } = (Astro.locals as any).auth();
+if (!isAuthenticated) {
+  return Astro.redirect('/es/sign-in?redirect_url=/es/my-protocols');
+}
+
+const lang = 'es' as const;
+---
+
+<Layout lang={lang}>
+  <section class="flex justify-center min-h-screen p-4 pt-8">
+    <div class="w-full max-w-4xl space-y-6">
+      <div class="bg-linear-to-br from-zinc-800 to-zinc-900 rounded-2xl p-6 border border-zinc-700/50 shadow-xl">
+        <div class="flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <h1 class="text-white text-2xl font-bold">Mis Protocolos</h1>
+            <p class="text-zinc-400 text-sm mt-1">
+              Tus protocolos guardados con visualización de encabezado estilo RFC.
+            </p>
+          </div>
+          <a
+            href="/es/protocol-creator"
+            class="flex items-center gap-2 bg-amber-700/70 hover:bg-amber-700 border border-amber-600/50 hover:border-amber-500 text-amber-200 hover:text-white text-sm font-medium px-4 py-2 rounded-xl transition-all"
+          >
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            Nuevo protocolo
+          </a>
+        </div>
+      </div>
+
+      <MyProtocolsList client:load />
+    </div>
+  </section>
+</Layout>

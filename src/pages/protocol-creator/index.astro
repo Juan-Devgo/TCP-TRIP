@@ -1,15 +1,11 @@
 ---
-import Layout from '../../layouts/Layout.astro';
-import { defaultLang } from '../../i18n/translations';
+import Layout from '../../shared/layouts/Layout.astro';
+import ProtocolBuilder from '../../domains/protocols/components/ProtocolBuilder/ProtocolBuilder';
+import { defaultLang } from '../../shared/i18n/translations';
 
 const lang = defaultLang;
 ---
 
 <Layout lang={lang}>
-  <section class="max-w-4xl mx-auto px-4 py-12 text-zinc-200">
-    <h1 class="text-3xl font-bold text-amber-600 mb-4">Crea un Protocolo</h1>
-    <p class="text-zinc-400">
-      Aquí podrás crear y explorar protocolos personalizados.
-    </p>
-  </section>
+  <ProtocolBuilder client:load />
 </Layout>

@@ -1,0 +1,10 @@
+---
+import Layout from '../../../shared/layouts/Layout.astro';
+import ProtocolBuilder from '../../../domains/protocols/components/ProtocolBuilder/ProtocolBuilder';
+
+const lang = 'es';
+---
+
+<Layout lang={lang}>
+  <ProtocolBuilder client:load />
+</Layout>

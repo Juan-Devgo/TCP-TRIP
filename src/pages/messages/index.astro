@@ -1,0 +1,52 @@
+---
+import Layout from "../../shared/layouts/Layout.astro";
+import MessagesView from "../../domains/messages/components/Messages/MessagesView";
+import { defaultLang } from "../../shared/i18n/translations";
+
+const { isAuthenticated } = (Astro.locals as any).auth();
+if (!isAuthenticated) {
+  return Astro.redirect("/sign-in?redirect_url=/messages");
+}
+
+const lang = defaultLang;
+---
+
+<Layout lang={lang}>
+  <section class="flex justify-center min-h-screen p-4 pt-8">
+    <div class="w-full max-w-3xl space-y-6">
+      <div
+        class="bg-linear-to-br from-zinc-800 to-zinc-900 rounded-2xl p-6 border border-zinc-700/50 shadow-xl"
+      >
+        <div class="flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <h1 class="text-white text-2xl font-bold">Mensajes</h1>
+            <p class="text-zinc-400 text-sm mt-1">
+              Encabezados de protocolo enviados y recibidos entre compañeros.
+            </p>
+          </div>
+          <a
+            href="/my-protocols"
+            class="flex items-center gap-2 bg-zinc-700/50 hover:bg-zinc-700 border border-zinc-600/50 hover:border-zinc-500 text-zinc-300 hover:text-white text-sm font-medium px-4 py-2 rounded-xl transition-all"
+          >
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              ></path>
+            </svg>
+            Mis protocolos
+          </a>
+        </div>
+      </div>
+
+      <MessagesView client:load />
+    </div>
+  </section>
+</Layout>
