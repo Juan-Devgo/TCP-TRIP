@@ -1,0 +1,68 @@
+{
+  "common": {
+    "copy": "Copy",
+    "copied": "Copied"
+  },
+  "tools": {
+    "numberBaseConverter": {
+      "title": "Number Base Converter",
+      "subtitle": "Binary · Octal · Decimal · Hexadecimal",
+      "intro": "Type a value with the keypad and read it back in another base. Only the digits that are legal in the source base stay enabled.",
+      "from": "From:",
+      "to": "To:",
+      "length": "Result length (digits)",
+      "lengthIncrement": "Increase length",
+      "lengthDecrement": "Decrease length",
+      "lengthError": "Length cannot be greater than {{max}}",
+      "clear": "Clear",
+      "clearTooltip": "Clear (Esc)",
+      "backspace": "Backspace",
+      "error": "Error"
+    }
+  },
+  "theme": {
+    "label": "Theme",
+    "toggle": "Toggle theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "language": {
+    "toggle": "Change language",
+    "en": "English",
+    "es": "Español"
+  },
+  "breadcrumb": {
+    "home": "Home"
+  },
+  "sidebar": {
+    "tagline": "Explore the TCP/IP model",
+    "empty": "No items yet",
+    "groups": {
+      "tools": "Tools",
+      "theory": "Theory",
+      "protocol": "Generic Protocol"
+    },
+    "tools": {
+      "converters": "Converters",
+      "calculators": "Calculators"
+    },
+    "converters": {
+      "numberBases": "Number Base Converter"
+    },
+    "theory": {
+      "tcpIpModel": "TCP/IP Model"
+    },
+    "protocol": {
+      "builder": "Build your Protocol",
+      "mine": "My Protocols",
+      "messages": "Messages"
+    },
+    "account": {
+      "hint": "Sign in to save your protocols and messages.",
+      "signIn": "Sign in",
+      "signUp": "Sign up",
+      "user": "User"
+    }
+  }
+}

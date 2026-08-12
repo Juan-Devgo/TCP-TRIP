@@ -1,0 +1,68 @@
+{
+  "common": {
+    "copy": "Copiar",
+    "copied": "Copiado"
+  },
+  "tools": {
+    "numberBaseConverter": {
+      "title": "Conversor de Bases Numéricas",
+      "subtitle": "Binario · Octal · Decimal · Hexadecimal",
+      "intro": "Escribe un valor con el teclado y léelo en otra base. Solo se habilitan los dígitos válidos en la base de origen.",
+      "from": "De:",
+      "to": "A:",
+      "length": "Longitud del resultado (dígitos)",
+      "lengthIncrement": "Aumentar longitud",
+      "lengthDecrement": "Disminuir longitud",
+      "lengthError": "La longitud no puede ser mayor que {{max}}",
+      "clear": "Limpiar",
+      "clearTooltip": "Limpiar (Esc)",
+      "backspace": "Borrar",
+      "error": "Error"
+    }
+  },
+  "theme": {
+    "label": "Tema",
+    "toggle": "Cambiar tema",
+    "light": "Claro",
+    "dark": "Oscuro",
+    "system": "Sistema"
+  },
+  "language": {
+    "toggle": "Cambiar idioma",
+    "en": "English",
+    "es": "Español"
+  },
+  "breadcrumb": {
+    "home": "Inicio"
+  },
+  "sidebar": {
+    "tagline": "Explora el modelo TCP/IP",
+    "empty": "Sin elementos todavía",
+    "groups": {
+      "tools": "Herramientas",
+      "theory": "Teoría",
+      "protocol": "Protocolo Genérico"
+    },
+    "tools": {
+      "converters": "Conversores",
+      "calculators": "Calculadoras"
+    },
+    "converters": {
+      "numberBases": "Conversor de Bases Numéricas"
+    },
+    "theory": {
+      "tcpIpModel": "Modelo TCP/IP"
+    },
+    "protocol": {
+      "builder": "Crea tu Protocolo",
+      "mine": "Mis Protocolos",
+      "messages": "Mensajes"
+    },
+    "account": {
+      "hint": "Inicia sesión para guardar tus protocolos y mensajes.",
+      "signIn": "Iniciar sesión",
+      "signUp": "Registrarse",
+      "user": "Usuario"
+    }
+  }
+}
