@@ -4,6 +4,7 @@ const result = await Bun.build({
   entrypoints: ["src/index.html"],
   outdir: "dist",
   target: "browser",
+  env: "PUBLIC_*",
   minify: true,
   sourcemap: "linked",
   plugins: [tailwind],

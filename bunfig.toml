@@ -1,2 +1,4 @@
 [serve.static]
 plugins = ["bun-plugin-tailwind"]
+# Inline PUBLIC_* env vars into the frontend bundle (literal `process.env.X` only).
+env = "PUBLIC_*"
