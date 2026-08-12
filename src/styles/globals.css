@@ -1,20 +1,57 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "./typeset.css";
 
 @custom-variant dark (&:is(.dark *));
 
+@import "@fontsource-variable/montserrat";
+@import "@fontsource-variable/jetbrains-mono";
+
+.typeset-docs {
+  --typeset-font-body: var(--font-montserrat);
+  --typeset-font-heading: var(--font-montserrat);
+  --typeset-font-mono: var(--font-jetbrains-mono);
+  --typeset-size: 16px;
+  --typeset-leading: 1.75;
+  --typeset-flow: 1.25em;
+}
+
 @theme inline {
+  --font-sans: var(--font-montserrat);
+  --font-mono: var(--font-jetbrains-mono);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
+  --color-primary: #FE9A00;
+  --color-primary-foreground: #000;
+  --color-primary-dark: #8A5300;
+  --color-primary-dark-foreground: #FFF;
+  --color-primary-darkest: #613A00;
+  --color-primary-darkest-foreground: #FFF;
+  --color-secondary: #7F00FF;
+  --color-secondary-foreground: #FFF;
+  --color-tertiary: #00FF54;
+  --color-tertiary-foreground: #000;
+  --color-quaternary: #604080;
+  --color-quaternary-foreground: #FFF;
+  /* "ink" = the brand hue as *text/icon on the page background*. The solid
+     brand hexes above are only safe as fills (paired with their -foreground);
+     used as text they fail WCAG AA in one theme or the other, so these shift
+     per theme. Rule: `bg-primary` for fills, `text-primary-ink` for type. */
+  --color-primary-ink: var(--primary-ink);
+  --color-secondary-ink: var(--secondary-ink);
+  --color-tertiary-ink: var(--tertiary-ink);
+  --color-quaternary-ink: var(--quaternary-ink);
+  /* Neutral keypad key: a gray that stays visible against the `sidebar`
+     surface the calculator sits on (which `muted`/`accent` do not, in light
+     mode). Light theme = light gray, dark theme = dark gray. */
+  --color-key: var(--key);
+  --color-key-foreground: var(--key-foreground);
+  --color-key-hover: var(--key-hover);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
@@ -47,6 +84,11 @@
 }
 
 :root {
+  --font-montserrat: 'Montserrat Variable', sans-serif;
+  --font-jetbrains-mono: 'JetBrains Mono Variable', monospace;
+}
+
+:root {
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -63,6 +105,7 @@
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
@@ -79,6 +122,16 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  /* Keypad keys: light gray on #FAFAFA, near-black type (11.8:1). */
+  --key: oklch(0.87 0 0);
+  --key-foreground: oklch(0.205 0 0);
+  --key-hover: oklch(0.78 0 0);
+  /* Brand ink on white: darkened where the raw brand hex is too light.
+     amber 6.3:1 · violet 6.3:1 · green 5.1:1 · purple 8.3:1 */
+  --primary-ink: #8A5300;
+  --secondary-ink: #7F00FF;
+  --tertiary-ink: #00803A;
+  --quaternary-ink: #604080;
 }
 
 .dark {
@@ -97,6 +150,7 @@
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
@@ -113,6 +167,16 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  /* Keypad keys: dark gray on #171717, near-white type (10.4:1). */
+  --key: oklch(0.32 0 0);
+  --key-foreground: oklch(0.985 0 0);
+  --key-hover: oklch(0.38 0 0);
+  /* Brand ink on the dark surface: lightened where the raw brand hex is too
+     dark. amber 7.2:1 · violet 5.8:1 · green 11.2:1 · purple 6.4:1 */
+  --primary-ink: #FE9A00;
+  --secondary-ink: #B388FF;
+  --tertiary-ink: #00FF54;
+  --quaternary-ink: #B39DDB;
 }
 
 @layer base {
@@ -121,5 +185,20 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/*Shadcn Components*/
+
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [role="button"][aria-disabled="true"],
+  [role="button"]:disabled {
+    cursor: not-allowed;
   }
 }
