@@ -17,7 +17,34 @@
       "clear": "Clear",
       "clearTooltip": "Clear (Esc)",
       "backspace": "Backspace",
-      "error": "Error"
+      "error": "Error",
+      "actions": {
+        "copyResult": "Copy result",
+        "clear": "Clear operand"
+      }
+    }
+  },
+  "tabs": {
+    "label": "Open tools",
+    "close": "Close {{title}}"
+  },
+  "nav": {
+    "back": "Back",
+    "forward": "Forward"
+  },
+  "actions": {
+    "label": "Actions"
+  },
+  "home": {
+    "title": "TCP-TRIP",
+    "subtitle": "Open a tool to start. Each one keeps its own tab, so you can carry a result from one to the next.",
+    "hint": "Closing a tab discards what you typed in it."
+  },
+  "page": {
+    "pending": "This page is not built yet.",
+    "notFound": {
+      "title": "Page not found",
+      "description": "There is nothing at {{path}}."
     }
   },
   "theme": {

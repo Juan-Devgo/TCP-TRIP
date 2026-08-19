@@ -199,6 +199,7 @@
   button:disabled,
   [role="button"][aria-disabled="true"],
   [role="button"]:disabled {
+    pointer-events: none;
     cursor: not-allowed;
   }
 }

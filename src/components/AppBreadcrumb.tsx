@@ -10,6 +10,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { isPagePath } from "@/config/pages";
 
 /** Path segment → i18n label key. Reuses the sidebar labels so a nav entry
  *  and its breadcrumb can never drift apart. Unknown segments fall back to
@@ -57,12 +58,15 @@ export function AppBreadcrumb() {
               <BreadcrumbItem>
                 {isLast ? (
                   <BreadcrumbPage>{label}</BreadcrumbPage>
-                ) : (
+                ) : isPagePath(to) ? (
                   <BreadcrumbLink
                     render={<Link to={to} className="no-underline" />}
                   >
                     {label}
                   </BreadcrumbLink>
+                ) : (
+                  // Grouping segment, not a page — nothing to navigate to.
+                  <span>{label}</span>
                 )}
               </BreadcrumbItem>
             </Fragment>

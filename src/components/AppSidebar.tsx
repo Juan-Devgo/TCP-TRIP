@@ -273,7 +273,7 @@ function AccountMenu() {
                 size="sm"
                 className={cn(
                   "flex-1 bg-primary text-primary-foreground",
-                  "hover:bg-primary-dark hover:text-primary-dark-foreground"
+                  "hover:bg-primary/80"
                 )}
               >
                 {t("sidebar.account.signUp")}

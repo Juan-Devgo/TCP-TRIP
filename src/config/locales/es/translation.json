@@ -17,7 +17,34 @@
       "clear": "Limpiar",
       "clearTooltip": "Limpiar (Esc)",
       "backspace": "Borrar",
-      "error": "Error"
+      "error": "Error",
+      "actions": {
+        "copyResult": "Copiar resultado",
+        "clear": "Limpiar operando"
+      }
+    }
+  },
+  "tabs": {
+    "label": "Herramientas abiertas",
+    "close": "Cerrar {{title}}"
+  },
+  "nav": {
+    "back": "Atrás",
+    "forward": "Adelante"
+  },
+  "actions": {
+    "label": "Acciones"
+  },
+  "home": {
+    "title": "TCP-TRIP",
+    "subtitle": "Abre una herramienta para empezar. Cada una vive en su propia pestaña, así puedes llevar un resultado de una a otra.",
+    "hint": "Cerrar una pestaña descarta lo que hayas escrito en ella."
+  },
+  "page": {
+    "pending": "Esta página aún no está construida.",
+    "notFound": {
+      "title": "Página no encontrada",
+      "description": "No hay nada en {{path}}."
     }
   },
   "theme": {

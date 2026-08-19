@@ -1,0 +1,18 @@
+import { cn } from "@/lib/utils";
+
+interface ArrowRightProps {
+  className?: string;
+}
+
+export function ArrowRight({ className }: ArrowRightProps) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 -960 960 960"
+      fill="currentColor"
+      className={cn('w-6 h-6', className)}
+    >
+      <path d="M647-440H160v-80h487L423-744l57-56 320 320-320 320-57-56 224-224Z" />
+    </svg>
+  );
+}

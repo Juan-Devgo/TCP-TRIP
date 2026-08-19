@@ -31,6 +31,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Information } from "@/components/icons/Information";
+import { useIsTabActive } from "@/components/TabsProvider";
+import { NumberBaseConverterActions } from "@/components/tools/NumberBaseConverterActions";
 import {
   convertBase,
   digitsForBase,
@@ -99,6 +101,7 @@ const KEYPAD_ROWS: KeypadKey[][] = [
 
 export function NumberBaseConverter() {
   const { t } = useTranslation();
+  const isTabActive = useIsTabActive();
   const fromId = useId();
   const toId = useId();
   const lengthId = useId();
@@ -162,8 +165,11 @@ export function NumberBaseConverter() {
   }, []);
 
   // Physical keyboard mirrors the on-screen keypad, except while the user is
-  // typing into the length field.
+  // typing into the length field. Inactive tabs stay mounted, so this listener
+  // must be gated — otherwise a hidden converter would also swallow the keys.
   useEffect(() => {
+    if (!isTabActive) return;
+
     function onKeyDown(event: KeyboardEvent) {
       if (event.metaKey || event.ctrlKey || event.altKey) return;
       if (document.activeElement === lengthRef.current) return;
@@ -191,7 +197,7 @@ export function NumberBaseConverter() {
 
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [allowedDigits, flashKey, pressKey]);
+  }, [allowedDigits, flashKey, pressKey, isTabActive]);
 
   function changeFromBase(value: string) {
     const next = Number(value);
@@ -246,6 +252,10 @@ export function NumberBaseConverter() {
     // `bg-sidebar` = #FAFAFA light / #171717 dark — in dark that is already
     // what `bg-card` resolves to, so only light mode changes.
     <Card className="mx-auto w-full max-w-md bg-sidebar">
+      <NumberBaseConverterActions
+        onCopyResult={() => void navigator.clipboard.writeText(result)}
+        onClear={() => pressKey("Clear")}
+      />
       <CardHeader className="text-center">
         <CardTitle>{t("tools.numberBaseConverter.title")}</CardTitle>
         <CardDescription>

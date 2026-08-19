@@ -1,10 +1,11 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Routes, Route, useNavigate } from "react-router";
+import { BrowserRouter, useNavigate } from "react-router";
 import { ClerkProvider } from "@clerk/clerk-react";
 import { App } from "@/app";
-import { NumberBaseConverterPage } from "@/pages/tools/NumberBaseConverterPage";
+import { TabsProvider } from "@/components/TabsProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { ToolActionsProvider } from "@/components/ToolActionsProvider";
 // Side-effect import: this is what initializes i18next. Keep it bare — a bound
 // import (`import i18n from ...`) gets dead-code-eliminated by Bun's bundler.
 import "@/config/i18n";
@@ -26,13 +27,13 @@ function RootLayout() {
       routerPush={(to) => navigate(to)}
       routerReplace={(to) => navigate(to, { replace: true })}
     >
-      <Routes>
-        <Route path="/" element={<App />} />
-        <Route
-          path="/tools/converters/number-bases"
-          element={<NumberBaseConverterPage />}
-        />
-      </Routes>
+      {/* There is no <Routes> map: the pathname drives the tab system, which
+          resolves it against the page registry in `src/config/pages.ts`. */}
+      <TabsProvider>
+        <ToolActionsProvider>
+          <App />
+        </ToolActionsProvider>
+      </TabsProvider>
     </ClerkProvider>
   );
 }
