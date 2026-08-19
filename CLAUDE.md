@@ -8,6 +8,8 @@ TCP-TRIP is a bilingual (es/en) educational web platform for university networki
 
 The problem it solves: RFCs are dense and hard to read without visual context, and existing tools (Wireshark, online subnet calculators) target professionals rather than guided learning. UI copy is user-facing educational content — it must exist in both Spanish and English.
 
+**Core purpose — teacher-time optimization:** every feature should let a student resolve their easy, mechanical doubts on their own (conversions, subnet math, field widths, layer lookups), so that the time spent with the teacher is reserved for the complex, conceptual doubts the app cannot answer. When designing a tool, screen, or copy, ask whether it makes a student self-sufficient on the routine question; if it does not, it is not pulling its weight. Documented user stories under `docs/` must state this value split explicitly (value for the student / value for the teacher).
+
 ## Commands
 
 ```sh
@@ -37,8 +39,12 @@ Single Bun process serves both the API and the SPA — there is no separate fron
 - `src/index.html` — imported directly by `index.ts`; Bun's bundler transpiles the `<script type="module" src="./main.tsx">` graph (TSX + CSS + Tailwind) with no separate build step in dev. `bunfig.toml` registers `bun-plugin-tailwind` for `serve.static`; `build.ts` registers the same plugin for production builds.
 - `src/api/routes.ts` — the single route map. **Add new API modules under `src/api/` and mount them in this map; `src/index.ts` should not change.**
 - `src/api/http.ts` — response contract for every route: `ok(data)`, `fail(status, message, details)` (shape `{ error: { message, details } }`), and `handler(fn)` which turns an uncaught throw into a logged 500. Wrap every route handler in `handler`.
-- `src/main.tsx` — React root: `StrictMode` → `BrowserRouter` → `ClerkProvider` → `Routes`. Routes are declared here.
-- `src/components/layouts/MainLayout.tsx` — page shell: `typeset typeset-docs` wrapper + `SidebarProvider` + `AppSidebar` + `AppHeader`, content constrained to `max-w-[42em]`. `AppHeader` holds the `SidebarTrigger`, `ModeToggle`, `LanguageToggle` (left) and the route-driven `AppBreadcrumb` (right); breadcrumb segment labels reuse the `sidebar.*` i18n keys.
+- `src/main.tsx` — React root: `StrictMode` → `BrowserRouter` → `ClerkProvider` → `TabsProvider` → `ToolActionsProvider` → `App`. **There is no `<Routes>` map**: the pathname drives the tab system, which resolves it against the page registry.
+- `src/config/pages.ts` — the page registry (path + i18n title key), metadata only so the tab state layer can import it. **A pathname listed here opens as a tab; anything else is navigation inside the active tab.** Add a page here and map it to its component in `TabHost`.
+- `src/components/layouts/MainLayout.tsx` — page shell: `SidebarProvider` + `AppSidebar` + `AppHeader` + `ContentToolbar`, content constrained to `max-w-[42em]` and scoped with `typeset typeset-docs`. `AppHeader` holds the `SidebarTrigger`, the `TabBar`, and `ModeToggle`/`LanguageToggle`; `ContentToolbar` holds the per-tab back/forward buttons, the `AppBreadcrumb` and the active tool's actions. Breadcrumb segment labels reuse the `sidebar.*` i18n keys.
+- **Tab system** (spec: `docs/ui/Tab.md`, state machine: `src/lib/tabs.ts` + `src/lib/tabHistory.ts`): every sidebar page opens as a browser-like tab that keeps its state in memory while open — one tab per page, focus the existing tab instead of duplicating, no persistence across reloads. New tools must work mounted inside this tab system, not as routes that unmount on navigation. **Inactive tabs stay mounted**, so anything global inside a tool (a `document` listener, a timer) must be gated on `useIsTabActive()`.
+  - The URL and the tab set are kept in step by two effects that run in the *same* commit, so the second one cannot see what the first just dispatched. `TabsState.syncedPath` records which pathname the state has been reconciled with, and `urlRealignTarget()` refuses to move the URL until it matches. Removing that guard makes every link ping-pong between the old and new page forever. Any new reducer case must carry `syncedPath` through (`...state`), never rebuild the state object from scratch.
+- **Tool actions**: each tool exposes its actions (e.g. Generate Exercises) through `useToolActions()`, rendered at the top-right of the content — a button for one action, a dropdown menu for several. Actions are defined in a small tool-owned component (e.g. `NumberBaseConverterActions`) that renders `null`, never inside the layout.
 
 Path alias `@/*` → `src/*` (declared in `tsconfig.json` `paths` — TS 7, no `baseUrl`). Use `@/...` imports, not relative ones, when crossing directories.
 
@@ -49,6 +55,8 @@ TypeScript is strict plus `noUncheckedIndexedAccess`, `exactOptionalPropertyType
 Reference docs checked into the repo. Read the relevant one before touching that area — they carry conventions this file only summarizes.
 
 - `.claude/skills/i18n/react-i18next.md` — the react-i18next setup this project follows: locale folder layout, `i18n.ts` init, `useTranslation()`/`t()`, `{{name}}` interpolation, a `LanguageSwitcher` via `i18n.changeLanguage`, and key-naming rules (descriptive keys like `"nav.home"`, never full sentences; no string concatenation — use placeholders; use i18next pluralization/date/number formatting). Its examples are Vite/JS — this project is Bun/TSX and imports i18n from `src/app.tsx`, not `main.jsx`.
+- `.claude/skills/user-story-from-component/SKILL.md` — writes the Spanish `US-###` doc for an **already implemented** component, deriving every GIVEN–WHEN–THEN acceptance criterion from code actually read; carries the fixed Prioridad/Estado vocabulary, the `docs/` path map, and the doc template.
+- `.claude/skills/user-story-interview/SKILL.md` — interviews the user about a **not-yet-built** component and writes the same doc with `Estado: Por hacer`; also watches for app-wide principles that surfaced in the interview and asks before promoting them into this file.
 - `.claude/settings.local.json` — local permission allowlist only, no project rules.
 - `.agents/skills/shadcn/` — vendored shadcn skill (pinned in `skills-lock.json`). `SKILL.md` is the index; `rules/base-vs-radix.md` (**most important here — this project is Base UI**), `rules/styling.md`, `rules/forms.md`, `rules/composition.md`, `rules/icons.md`, `rules/chat.md`, plus `cli.md`, `registry.md`, `customization.md`, `mcp.md`. Each rules file has Incorrect/Correct code pairs.
 
