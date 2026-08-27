@@ -1,6 +1,6 @@
 ---
 name: user-story-from-component
-description: "Write the Spanish user-story doc (US-###) for a component that already exists in the codebase, deriving the GIVEN-WHEN-THEN acceptance criteria from the real implementation. Use when the user points at a built component/feature and asks for its historia de usuario, US doc, or docs/ entry — e.g. '/user-story-from-component src/components/tools/IPv4Calculator.tsx'. For a component that does NOT exist yet, use user-story-interview instead."
+description: "Write the Spanish user-story doc (US-###) for a component that already exists in the codebase, deriving the GIVEN-WHEN-THEN acceptance criteria from the real implementation. Use when the user points at a built component/feature and asks for its historia de usuario, US doc, or docs/ entry — e.g. '/user-story-from-component src/features/ipv4-calculator/components/IPv4Calculator.tsx'. For a component that does NOT exist yet, use user-story-interview instead."
 ---
 
 # user-story-from-component
@@ -11,7 +11,7 @@ The rule that makes this skill different from `user-story-interview`: **every ac
 
 ## Input
 
-A component path (`src/components/tools/NumberBaseConverter.tsx`) or a feature name. If the user gives a name, locate the file before doing anything else.
+A component path (`src/features/number-base-converter/components/NumberBaseConverter.tsx`) or a feature name. If the user gives a name, locate the file before doing anything else.
 
 ## Steps
 

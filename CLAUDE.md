@@ -10,6 +10,8 @@ The problem it solves: RFCs are dense and hard to read without visual context, a
 
 **Core purpose — teacher-time optimization:** every feature should let a student resolve their easy, mechanical doubts on their own (conversions, subnet math, field widths, layer lookups), so that the time spent with the teacher is reserved for the complex, conceptual doubts the app cannot answer. When designing a tool, screen, or copy, ask whether it makes a student self-sufficient on the routine question; if it does not, it is not pulling its weight. Documented user stories under `docs/` must state this value split explicitly (value for the student / value for the teacher).
 
+**Exercise generation is a cross-tool capability:** any tool (current or future) where practice exercises make sense must offer a Generate Exercises action producing a downloadable PDF (difficulty, count, optional answer key at the end) built on the shared institutional template (app author, university, thesis advisor, page numbers). Each tool owns only its exercise-generation logic; dialog, template and PDF pipeline are shared infrastructure.
+
 ## Commands
 
 ```sh
@@ -44,11 +46,90 @@ Single Bun process serves both the API and the SPA — there is no separate fron
 - `src/components/layouts/MainLayout.tsx` — page shell: `SidebarProvider` + `AppSidebar` + `AppHeader` + `ContentToolbar`, content constrained to `max-w-[42em]` and scoped with `typeset typeset-docs`. `AppHeader` holds the `SidebarTrigger`, the `TabBar`, and `ModeToggle`/`LanguageToggle`; `ContentToolbar` holds the per-tab back/forward buttons, the `AppBreadcrumb` and the active tool's actions. Breadcrumb segment labels reuse the `sidebar.*` i18n keys.
 - **Tab system** (spec: `docs/ui/Tab.md`, state machine: `src/lib/tabs.ts` + `src/lib/tabHistory.ts`): every sidebar page opens as a browser-like tab that keeps its state in memory while open — one tab per page, focus the existing tab instead of duplicating, no persistence across reloads. New tools must work mounted inside this tab system, not as routes that unmount on navigation. **Inactive tabs stay mounted**, so anything global inside a tool (a `document` listener, a timer) must be gated on `useIsTabActive()`.
   - The URL and the tab set are kept in step by two effects that run in the *same* commit, so the second one cannot see what the first just dispatched. `TabsState.syncedPath` records which pathname the state has been reconciled with, and `urlRealignTarget()` refuses to move the URL until it matches. Removing that guard makes every link ping-pong between the old and new page forever. Any new reducer case must carry `syncedPath` through (`...state`), never rebuild the state object from scratch.
-- **Tool actions**: each tool exposes its actions (e.g. Generate Exercises) through `useToolActions()`, rendered at the top-right of the content — a button for one action, a dropdown menu for several. Actions are defined in a small tool-owned component (e.g. `NumberBaseConverterActions`) that renders `null`, never inside the layout.
+- **Tool actions**: each tool exposes its actions (e.g. Generate Exercises) through `useToolActions()`, rendered at the top-right of the content — a button for one action, a dropdown menu for several. Actions are defined in a small tool-owned component (e.g. `src/features/number-base-converter/components/NumberBaseConverterActions.tsx`) that renders `null`, never inside the layout.
+
+### Folder structure
+
+`src/` follows a feature-based layout. Where a file goes is decided by **who owns it**, not by what kind of file it is:
+
+```
+src/
+├── api/            Bun server: route map + response contract (not React)
+├── assets/         static assets (images, icons) — fonts come from npm
+├── components/
+│   ├── common/     app-wide components (AppSidebar, AppBreadcrumb,
+│   │               ExerciseGeneratorDialog, ModeToggle, LanguageToggle)
+│   ├── layouts/    the shell (MainLayout, AppHeader, ContentToolbar,
+│   │               TabBar, TabHost)
+│   └── ui/         shadcn primitives — generated, don't hand-write
+├── config/         i18n init, locales, the page registry
+├── context/        React providers (ThemeProvider, TabsProvider,
+│                   ToolActionsProvider)
+├── features/       one folder per tool — see below
+├── hooks/          shared hooks
+├── lib/            cross-cutting pure logic: tabs.ts, tabHistory.ts,
+│                   utils.ts (cn), pdf/, exercises/types.ts
+├── pages/          route-level views (HomePage, NotFoundPage, Placeholder)
+├── services/       API clients / query hooks (empty until persistence lands)
+├── styles/         globals.css + vendored typeset.css
+└── types/          ambient .d.ts declarations
+```
+
+**A tool is a feature, not a component.** Everything a tool owns lives under `src/features/<tool>/`:
+
+```
+src/features/number-base-converter/
+├── components/   NumberBaseConverter.tsx, NumberBaseConverterActions.tsx
+├── lib/          numberBase.ts + numberBase.test.ts   (domain logic)
+├── exercises/    numberBaseExercises.ts + .test.ts    (exercise generator)
+└── index.ts      the public surface — the only file others import
+```
+
+Rules:
+
+- **Import a feature through its barrel** (`@/features/ipv4-calculator`), never reach into its `components/`, `lib/` or `exercises/` from outside. `TabHost` maps a page path to the component it gets from the barrel.
+- **A feature never imports another feature.** Anything two tools need moves up to `lib/`, `components/common/` or `hooks/`.
+- Shared exercise infrastructure stays out of the features: the `Exercise`/`Difficulty` contract is `src/lib/exercises/types.ts`, the PDF pipeline is `src/lib/pdf/`, and the dialog is `src/components/common/ExerciseGeneratorDialog.tsx`. A feature only owns its generator.
+- Tests are colocated with the code they cover (`lib/ipv4.test.ts` next to `lib/ipv4.ts`) — there is no top-level `tests/`.
+- `@/lib/utils` (the `cn` helper) keeps its path because the shadcn CLI writes that import into every generated `ui/` component.
 
 Path alias `@/*` → `src/*` (declared in `tsconfig.json` `paths` — TS 7, no `baseUrl`). Use `@/...` imports, not relative ones, when crossing directories.
 
 TypeScript is strict plus `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, and `verbatimModuleSyntax` (use `import type` for type-only imports).
+
+## State management
+
+**No global store library, and Zustand is a deliberate "no".** The decision was reviewed and the rationale matters more than the verdict — re-read it before reaching for one.
+
+State is split four ways, and every new feature must land in one of them:
+
+| Kind | Where it lives | Examples |
+| --- | --- | --- |
+| Draft / local UI | `useState` (or `useReducer`) inside the tool | converter inputs, IPv4 fields, a protocol being edited |
+| Tab & navigation | `TabsProvider` over the pure reducer in `src/lib/tabs.ts` | open tabs, active tab, per-tab back/forward |
+| Cross-cutting UI | one narrow Context each | `ThemeProvider`, `ToolActionsProvider`, sidebar |
+| Server data | the API + a query cache (see below) | saved protocols, user role |
+
+Why no store library:
+
+- The hard part is already factored out. `src/lib/tabs.ts` and `src/lib/tabHistory.ts` are pure and unit-tested with no React import; a store would replace the ~30 lines of provider boilerplate around them and nothing else.
+- The usual reason to hoist state — it dies when a route unmounts — does not apply. **Inactive tabs stay mounted**, so plain `useState` inside a tool already survives tab switching.
+- There are three Contexts total and no prop drilling. Re-render pressure is a handful of components with roughly ten tabs at most.
+- Clerk owns auth/role, i18next owns language, `react-router` owns the URL. Mirroring any of them into a store duplicates a source of truth (and for the role, contradicts the Clerk rule below).
+- It is a thesis project: every dependency has to be defensible. "A pure, tested reducer with no dependencies" is a stronger answer than "less provider boilerplate".
+
+If per-Context re-renders ever become a real problem, split `TabsContext` into a frequently-changing state context and a stable actions context before adding any library.
+
+### Server data (planned: protocol persistence)
+
+The protocol builder will persist protocols so the message composer can consume them. That data is **server state, not client state** — a client store would mean hand-writing fetch dedupe, loading/error, invalidation and optimistic rollback.
+
+- Use a query cache (**TanStack Query**; `@tanstack/react-table` is already a dependency) — not a store, not bare `fetch` in `useEffect`.
+- Cross-tab sharing comes free: the builder tab invalidates `['protocols']` after a mutation and the composer tab, reading the same key, refetches. No store, no message passing between tabs.
+- **Draft is local, saved is server.** A protocol under construction stays in component state until it is POSTed.
+- Server side: `bun:sqlite` (never better-sqlite3), a new module under `src/api/` mounted in `src/api/routes.ts`, every handler wrapped in `handler` and answering through `ok`/`fail`. Ownership is scoped by the Clerk user id **verified server-side**, never taken from the client.
+
+Revisit a store library only for global client state that is not derivable from the URL, the server, or Clerk — presentation mode is the one plausible candidate, and a Context handles it today.
 
 ## Project skills & agent docs
 
@@ -77,7 +158,7 @@ Reference docs checked into the repo. Read the relevant one before touching that
   Other Base-vs-Radix API differences (Select, ToggleGroup, Slider, Accordion) are documented in `.agents/skills/shadcn/rules/base-vs-radix.md`.
 - Add components with `bun run ui <name>` (pinned CLI: `bunx shadcn@4.16.1 add <name> --yes` matches what's installed). Don't hand-write files into `src/components/ui/`.
 - Styling rules enforced by the bundled shadcn skill (`.agents/skills/shadcn/`): `className` for layout only — never override component colors/typography; semantic tokens (`bg-primary`, `text-muted-foreground`) never raw `bg-blue-500`; no `dark:` color overrides; `flex ... gap-*` instead of `space-x/y-*`; `size-*` when width equals height; `cn()` for conditional classes; no manual `z-index` on overlays. Forms use `FieldGroup`/`Field`.
-- Custom SVG icons live in `src/components/icons/` (Material-style, `viewBox="0 -960 960 960"`, `fill="currentColor"`, `cn('w-6 h-6', className)`). Lucide is fine for generic icons.
+- Icons come from `lucide-react` (the `lucide` library configured in `components.json`). Import them directly — there is no local icon component directory.
 
 ## Styling & colors (`src/styles/globals.css`)
 
