@@ -1,7 +1,9 @@
 {
   "common": {
     "copy": "Copy",
-    "copied": "Copied"
+    "copied": "Copied",
+    "increment": "Increase",
+    "decrement": "Decrease"
   },
   "tools": {
     "numberBaseConverter": {
@@ -19,8 +21,118 @@
       "backspace": "Backspace",
       "error": "Error",
       "actions": {
-        "copyResult": "Copy result",
-        "clear": "Clear operand"
+        "generateExercises": "Generate exercises"
+      },
+      "exercises": {
+        "prompt": "Convert {{value}} from {{from}} to {{to}}."
+      }
+    },
+    "asciiConverter": {
+      "title": "ASCII Converter",
+      "subtitle": "Text ⇄ ASCII - BIN · OCT · DEC · HEX",
+      "intro": "Type on either side: the other one follows. The ASCII tab gives one 8-bit code per character; the Unicode tab shows the UTF-8 bytes of each character, up to 32 bits. Separators are optional — codes are read back in fixed-width groups.",
+      "modes": {
+        "ascii": "ASCII (8 bits)",
+        "unicode": "Unicode (UTF-8)"
+      },
+      "modeHint": {
+        "ascii": "One byte per character, values 0–255. A character that needs more than 8 bits cannot be encoded here.",
+        "unicode": "UTF-8: 1 to 4 bytes per character (up to 32 bits). The bytes of one character are shown joined together."
+      },
+      "textLabel": "Text",
+      "textPlaceholder": "Write or paste text…",
+      "codesLabel": "Codes ({{base}})",
+      "codesPlaceholder": {
+        "2": "01001000 01101111 01101100 01100001",
+        "8": "110 157 154 141",
+        "10": "072 111 108 097",
+        "16": "48 6F 6C 61"
+      },
+      "characters_one": "{{count}} character",
+      "characters_other": "{{count}} characters",
+      "download": "Download as .txt",
+      "upload": "Load a .txt file",
+      "actions": {
+        "example": "Example",
+        "generateExercises": "Generate exercises",
+        "clear": "Clear"
+      },
+      "errors": {
+        "unrepresentable": "\"{{detail}}\" needs more than 8 bits — switch to the Unicode tab.",
+        "invalidDigit": "\"{{detail}}\" is not a valid group in the selected base.",
+        "outOfRange": "\"{{detail}}\" is above 255, so it is not a byte.",
+        "generic": "The value could not be converted."
+      },
+      "exercises": {
+        "textToCodes": "Write the ASCII codes of “{{text}}” in {{base}}.",
+        "codesToText": "Which ASCII text do the codes {{codes}} in {{base}} represent?",
+        "textToCodesUtf8": "Write the UTF-8 codes of “{{text}}” in {{base}}.",
+        "codesToTextUtf8": "Which text does the UTF-8 stream {{codes}} represent, written in {{base}} with no separators?"
+      }
+    },
+    "ipv4Calculator": {
+      "title": "IPv4 Calculator",
+      "subtitle": "Network · Broadcast · Mask · Subnets",
+      "intro": "Type an address and its mask to see the network it belongs to. Turn subnetting on to add bits to the host part and see how the network splits: the first and the last subnet are never assigned, and the table marks which ones are usable.",
+      "enableSubnets": "Split into subnets",
+      "ipAddress": "IP address",
+      "ipPlaceholder": "192.168.1.100",
+      "mask": "Mask",
+      "submask": "Added bits",
+      "results": "Results",
+      "noData": "Type an address and a mask to see the calculation.",
+      "showDetails": "Show details",
+      "subnetsTitle_one": "Subnet ({{count}})",
+      "subnetsTitle_other": "Subnets ({{count}})",
+      "subnetsTruncated": "Showing the first {{listed}} of {{total}} subnets.",
+      "subnetLabel": "Subnet {{index}}",
+      "usable": "Usable",
+      "usableYes": "Usable subnet",
+      "usableNo": "Unusable subnet",
+      "firstSubnetReason": "first subnet: it is the network address",
+      "lastSubnetReason": "last subnet: it is the broadcast address",
+      "invalidHostRange": "no assignable host range",
+      "fields": {
+        "ipAddress": "IP address",
+        "netMask": "Network mask",
+        "subMask": "Subnet mask",
+        "fullMask": "Full mask",
+        "networkAddress": "Network address",
+        "broadcastAddress": "Broadcast address",
+        "ipClass": "Class",
+        "ipRange": "Host range",
+        "firstHost": "First host",
+        "lastHost": "Last host",
+        "totalHosts": "Usable hosts",
+        "wildcardMask": "Wildcard mask",
+        "inAddrArpa": "in-addr.arpa",
+        "ipv6Mapped": "IPv6 mapped"
+      },
+      "actions": {
+        "example": "Example",
+        "generateExercises": "Generate exercises",
+        "clear": "Clear"
+      },
+      "errors": {
+        "invalidIp": "The address must have four octets between 0 and 255.",
+        "invalidMask": "The mask must be a whole number between 0 and 32.",
+        "invalidSubmask": "You can only add between 1 and {{max}} bits with this mask.",
+        "generic": "The network could not be calculated."
+      },
+      "exercises": {
+        "network": "What is the network address of {{ip}}/{{prefix}}?",
+        "broadcast": "What is the broadcast address of {{ip}}/{{prefix}}?",
+        "netMask": "Write the mask of {{ip}}/{{prefix}} in dotted-decimal notation.",
+        "wildcard": "What is the wildcard mask of {{ip}}/{{prefix}}?",
+        "firstHost": "What is the first assignable host of {{ip}}/{{prefix}}?",
+        "lastHost": "What is the last assignable host of {{ip}}/{{prefix}}?",
+        "hosts": "How many usable hosts does the network {{ip}}/{{prefix}} have?",
+        "ipClass": "Which class does the address {{ip}} belong to?",
+        "subnetCount": "Adding {{submask}} bits to the host part of the network {{ip}}/{{mask}}, how many subnets do you get?",
+        "subnetHosts": "Adding {{submask}} bits to the host part of the network {{ip}}/{{mask}}, how many usable hosts does each subnet have?",
+        "subnetNetwork": "Adding {{submask}} bits to the host part of the network {{ip}}/{{mask}}, what is the network address of subnet {{index}}?",
+        "fullMask": "Adding {{submask}} bits to the host part of the network {{ip}}/{{mask}}, what is the full mask in dotted-decimal notation?",
+        "noHosts": "None: the prefix leaves no assignable hosts."
       }
     }
   },
@@ -60,7 +172,8 @@
     "es": "Español"
   },
   "breadcrumb": {
-    "home": "Home"
+    "home": "Home",
+    "more": "Show hidden path"
   },
   "sidebar": {
     "tagline": "Explore the TCP/IP model",
@@ -75,7 +188,8 @@
       "calculators": "Calculators"
     },
     "converters": {
-      "numberBases": "Number Base Converter"
+      "numberBases": "Number Base Converter",
+      "ascii": "ASCII Converter"
     },
     "theory": {
       "tcpIpModel": "TCP/IP Model"
@@ -90,6 +204,52 @@
       "signIn": "Sign in",
       "signUp": "Sign up",
       "user": "User"
+    },
+    "calculators": {
+      "ipv4": "IPv4 Calculator"
     }
+  },
+  "exercises": {
+    "dialog": {
+      "title": "Generate exercises",
+      "description": "Download a {{tool}} practice sheet as a PDF.",
+      "difficulty": "Difficulty",
+      "count": "Number of exercises",
+      "countHint": "Between {{min}} and {{max}}.",
+      "countError": "Enter a whole number between {{min}} and {{max}}.",
+      "includeAnswers": "Include answers",
+      "includeAnswersHint": "Adds an answer sheet at the end of the document.",
+      "cancel": "Cancel",
+      "generate": "Generate PDF",
+      "generating": "Generating…",
+      "error": "The PDF could not be generated. Try again."
+    },
+    "difficulty": {
+      "easy": "Easy",
+      "medium": "Medium",
+      "hard": "Hard"
+    },
+    "pdf": {
+      "title": "Exercises — {{tool}}",
+      "subtitle": "Difficulty: {{difficulty}} · {{count}} exercises",
+      "answersTitle": "Answer sheet",
+      "author": "Author",
+      "university": "University",
+      "advisor": "Thesis advisor",
+      "studentName": "Name",
+      "date": "Date",
+      "page": "Page {{page}} of {{total}}"
+    }
+  },
+  "dataTable": {
+    "empty": "No results.",
+    "page": "Page {{page}} of {{total}}",
+    "first": "First page",
+    "previous": "Previous page",
+    "next": "Next page",
+    "last": "Last page",
+    "rowsPerPage": "Rows",
+    "expandRow": "Show details",
+    "collapseRow": "Hide details"
   }
 }

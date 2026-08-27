@@ -6,6 +6,9 @@ const result = await Bun.build({
   target: "browser",
   env: "PUBLIC_*",
   minify: true,
+  // PDFKit is imported on demand and weighs ~2.4 MB: without splitting it would
+  // be inlined into the main bundle and downloaded by every visitor.
+  splitting: true,
   sourcemap: "linked",
   plugins: [tailwind],
 });

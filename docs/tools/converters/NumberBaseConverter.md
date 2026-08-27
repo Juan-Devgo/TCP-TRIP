@@ -1,7 +1,7 @@
 # US-### — Conversor de Bases Numéricas
 
-**Componente:** `src/components/tools/NumberBaseConverter.tsx`
-**Lógica de dominio:** `src/lib/numberBase.ts`
+**Componente:** `src/features/number-base-converter/components/NumberBaseConverter.tsx`
+**Lógica de dominio:** `src/features/number-base-converter/lib/numberBase.ts`
 
 ---
 

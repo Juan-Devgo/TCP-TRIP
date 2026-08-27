@@ -1,8 +1,10 @@
 import type { ComponentType } from "react";
 
 import { tabButtonId, tabPanelId } from "@/components/layouts/TabBar";
-import { TabScopeProvider, useTabs } from "@/components/TabsProvider";
-import { NumberBaseConverter } from "@/components/tools/NumberBaseConverter";
+import { TabScopeProvider, useTabs } from "@/context/TabsProvider";
+import { AsciiConverter } from "@/features/ascii-converter";
+import { IPv4Calculator } from "@/features/ipv4-calculator";
+import { NumberBaseConverter } from "@/features/number-base-converter";
 import { findPage } from "@/config/pages";
 import { cn } from "@/lib/utils";
 import { HomePage } from "@/pages/HomePage";
@@ -16,6 +18,8 @@ import { PlaceholderPage } from "@/pages/PlaceholderPage";
  */
 const PAGE_COMPONENTS: Record<string, ComponentType> = {
   "/tools/converters/number-bases": NumberBaseConverter,
+  "/tools/converters/ascii": AsciiConverter,
+  "/tools/calculators/ipv4": IPv4Calculator,
 };
 
 export function TabHost() {

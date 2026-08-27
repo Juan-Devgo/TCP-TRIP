@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { X } from "lucide-react";
 
-import { Close } from "@/components/icons/Close";
-import { useTabs, type Tab } from "@/components/TabsProvider";
+import { Button } from "@/components/ui/button";
+import { ButtonGroup, ButtonGroupSeparator } from "@/components/ui/button-group";
+import { useTabs, type Tab } from "@/context/TabsProvider";
 import { findPage } from "@/config/pages";
 import { cn } from "@/lib/utils";
 
@@ -36,15 +38,19 @@ export function TabBar() {
     <div
       role="tablist"
       aria-label={t("tabs.label")}
-      className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto [scrollbar-width:thin]"
+      // `p-1 -m-1` gives rings (drop target, focus-visible) room inside the
+      // clipping box without changing where the strip sits or how tall it is.
+      className="-m-1 flex min-w-0 flex-1 items-center gap-3 overflow-y-hidden overflow-x-auto scrollbar-thin p-2.5"
     >
       {tabs.map((tab, index) => {
         const isActive = tab.id === activeTabId;
         const title = titleOf(tab);
 
         return (
-          <div
+          <ButtonGroup
             key={tab.id}
+            // The tablist owns the ARIA roles; this wrapper is only a visual group.
+            role="presentation"
             draggable
             onDragStart={(event) => {
               setDragIndex(index);
@@ -72,39 +78,44 @@ export function TabBar() {
               undefined
             }
             className={cn(
-              "group/tab flex h-9 w-44 min-w-24 shrink items-center gap-1 rounded-lg",
-              "border border-transparent pr-1 pl-2.5 transition-colors",
-              "text-sidebar-foreground/70 hover:bg-sidebar-accent",
-              "data-active:border-sidebar-border data-active:bg-background data-active:text-foreground",
+              "group/tab w-44 min-w-24 shrink rounded-lg",
               "data-dragging:opacity-50",
-              "data-over:border-primary",
+              "data-over:ring-2 data-over:ring-tertiary",
             )}
           >
-            <button
-              type="button"
+            <Button
+              variant="outline"
+              size="default"
               role="tab"
               id={tabButtonId(tab.id)}
               aria-selected={isActive}
               aria-controls={tabPanelId(tab.id)}
               title={title}
               onClick={() => activateTab(tab.id)}
-              className="min-w-0 flex-1 cursor-pointer truncate text-left text-sm outline-none"
+              className={cn(
+                "min-w-0 flex-1 justify-start overflow-hidden opacity-50 transition-opacity border-r-0!",
+                "group-hover/tab:opacity-100 group-focus-within/tab:opacity-100",
+                "group-data-active/tab:opacity-100",
+                "group-data-active/tab:border-primary! group-data-active/tab:bg-primary/10!",
+              )}
             >
-              {title}
-            </button>
-            <button
-              type="button"
+              <span className="truncate">{title}</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
               aria-label={t("tabs.close", { title })}
               onClick={() => closeTab(tab.id)}
               className={cn(
-                "grid size-6 shrink-0 place-items-center rounded-md opacity-0 transition-opacity",
-                "hover:bg-sidebar-accent focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring",
-                "group-hover/tab:opacity-100 group-data-active/tab:opacity-100",
+                "opacity-50 transition-opacity border-l-0!",
+                "group-hover/tab:opacity-100 group-focus-within/tab:opacity-100",
+                "group-data-active/tab:opacity-100",
+                "group-data-active/tab:border-primary! group-data-active/tab:bg-primary/10!",
               )}
             >
-              <Close className="size-3.5" />
-            </button>
-          </div>
+              <X className="size-3.5" />
+            </Button>
+          </ButtonGroup>
         );
       })}
     </div>

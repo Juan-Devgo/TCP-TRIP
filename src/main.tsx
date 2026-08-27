@@ -3,9 +3,9 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, useNavigate } from "react-router";
 import { ClerkProvider } from "@clerk/clerk-react";
 import { App } from "@/app";
-import { TabsProvider } from "@/components/TabsProvider";
-import { ThemeProvider } from "@/components/ThemeProvider";
-import { ToolActionsProvider } from "@/components/ToolActionsProvider";
+import { TabsProvider } from "@/context/TabsProvider";
+import { ThemeProvider } from "@/context/ThemeProvider";
+import { ToolActionsProvider } from "@/context/ToolActionsProvider";
 // Side-effect import: this is what initializes i18next. Keep it bare — a bound
 // import (`import i18n from ...`) gets dead-code-eliminated by Bun's bundler.
 import "@/config/i18n";

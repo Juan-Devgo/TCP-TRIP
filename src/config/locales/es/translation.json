@@ -1,7 +1,9 @@
 {
   "common": {
     "copy": "Copiar",
-    "copied": "Copiado"
+    "copied": "Copiado",
+    "increment": "Aumentar",
+    "decrement": "Disminuir"
   },
   "tools": {
     "numberBaseConverter": {
@@ -19,8 +21,118 @@
       "backspace": "Borrar",
       "error": "Error",
       "actions": {
-        "copyResult": "Copiar resultado",
-        "clear": "Limpiar operando"
+        "generateExercises": "Generar ejercicios"
+      },
+      "exercises": {
+        "prompt": "Convierte {{value}} de {{from}} a {{to}}."
+      }
+    },
+    "asciiConverter": {
+      "title": "Conversor ASCII",
+      "subtitle": "Texto ⇄ ASCII - BIN · OCT · DEC · HEX",
+      "intro": "Escribe en cualquiera de los dos lados: el otro se actualiza. La pestaña ASCII da un código de 8 bits por carácter; la pestaña Unicode muestra los bytes UTF-8 de cada carácter, hasta 32 bits. Los separadores son opcionales: los códigos se leen en grupos de ancho fijo.",
+      "modes": {
+        "ascii": "ASCII (8 bits)",
+        "unicode": "Unicode (UTF-8)"
+      },
+      "modeHint": {
+        "ascii": "Un byte por carácter, valores 0–255. Un carácter que necesite más de 8 bits no se puede codificar aquí.",
+        "unicode": "UTF-8: de 1 a 4 bytes por carácter (hasta 32 bits). Los bytes de un mismo carácter se muestran unidos."
+      },
+      "textLabel": "Texto",
+      "textPlaceholder": "Escribe o pega texto…",
+      "codesLabel": "Códigos ({{base}})",
+      "codesPlaceholder": {
+        "2": "01001000 01101111 01101100 01100001",
+        "8": "110 157 154 141",
+        "10": "072 111 108 097",
+        "16": "48 6F 6C 61"
+      },
+      "characters_one": "{{count}} carácter",
+      "characters_other": "{{count}} caracteres",
+      "download": "Descargar como .txt",
+      "upload": "Cargar un archivo .txt",
+      "actions": {
+        "example": "Ejemplo",
+        "generateExercises": "Generar ejercicios",
+        "clear": "Limpiar"
+      },
+      "errors": {
+        "unrepresentable": "\"{{detail}}\" necesita más de 8 bits: cambia a la pestaña Unicode.",
+        "invalidDigit": "\"{{detail}}\" no es un grupo válido en la base seleccionada.",
+        "outOfRange": "\"{{detail}}\" es mayor que 255, así que no es un byte.",
+        "generic": "No se pudo convertir el valor."
+      },
+      "exercises": {
+        "textToCodes": "Escribe los códigos ASCII de «{{text}}» en {{base}}.",
+        "codesToText": "¿Qué texto ASCII representan los códigos {{codes}} en {{base}}?",
+        "textToCodesUtf8": "Escribe los códigos UTF-8 de «{{text}}» en {{base}}.",
+        "codesToTextUtf8": "¿Qué texto representa el flujo UTF-8 {{codes}}, escrito en {{base}} y sin separadores?"
+      }
+    },
+    "ipv4Calculator": {
+      "title": "Calculadora IPv4",
+      "subtitle": "Red · Broadcast · Máscara · Subredes",
+      "intro": "Escribe una dirección y su máscara para ver la red a la que pertenece. Activa las subredes para añadir bits al host y ver en qué se parte la red: la primera subred y la última no se asignan, y la tabla marca cuáles quedan utilizables.",
+      "enableSubnets": "Dividir en subredes",
+      "ipAddress": "Dirección IP",
+      "ipPlaceholder": "192.168.1.100",
+      "mask": "Máscara",
+      "submask": "Bits añadidos",
+      "results": "Resultados",
+      "noData": "Escribe una dirección y una máscara para ver el cálculo.",
+      "showDetails": "Ver detalles",
+      "subnetsTitle_one": "Subred ({{count}})",
+      "subnetsTitle_other": "Subredes ({{count}})",
+      "subnetsTruncated": "Se muestran las primeras {{listed}} de {{total}} subredes.",
+      "subnetLabel": "Subred {{index}}",
+      "usable": "Utilizable",
+      "usableYes": "Subred utilizable",
+      "usableNo": "Subred no utilizable",
+      "firstSubnetReason": "primera subred: es la dirección de red",
+      "lastSubnetReason": "última subred: es la dirección de broadcast",
+      "invalidHostRange": "sin rango de hosts asignable",
+      "fields": {
+        "ipAddress": "Dirección IP",
+        "netMask": "Máscara de red",
+        "subMask": "Máscara de subred",
+        "fullMask": "Máscara completa",
+        "networkAddress": "Dirección de red",
+        "broadcastAddress": "Dirección de broadcast",
+        "ipClass": "Clase",
+        "ipRange": "Rango de hosts",
+        "firstHost": "Primer host",
+        "lastHost": "Último host",
+        "totalHosts": "Hosts utilizables",
+        "wildcardMask": "Máscara wildcard",
+        "inAddrArpa": "in-addr.arpa",
+        "ipv6Mapped": "IPv6 mapeada"
+      },
+      "actions": {
+        "example": "Ejemplo",
+        "generateExercises": "Generar ejercicios",
+        "clear": "Limpiar"
+      },
+      "errors": {
+        "invalidIp": "La dirección debe tener cuatro octetos entre 0 y 255.",
+        "invalidMask": "La máscara debe ser un número entero entre 0 y 32.",
+        "invalidSubmask": "Solo puedes añadir entre 1 y {{max}} bits con esta máscara.",
+        "generic": "No se pudo calcular la red."
+      },
+      "exercises": {
+        "network": "¿Cuál es la dirección de red de {{ip}}/{{prefix}}?",
+        "broadcast": "¿Cuál es la dirección de broadcast de {{ip}}/{{prefix}}?",
+        "netMask": "Escribe la máscara de {{ip}}/{{prefix}} en notación decimal punteada.",
+        "wildcard": "¿Cuál es la máscara wildcard de {{ip}}/{{prefix}}?",
+        "firstHost": "¿Cuál es el primer host asignable de {{ip}}/{{prefix}}?",
+        "lastHost": "¿Cuál es el último host asignable de {{ip}}/{{prefix}}?",
+        "hosts": "¿Cuántos hosts utilizables tiene la red {{ip}}/{{prefix}}?",
+        "ipClass": "¿A qué clase pertenece la dirección {{ip}}?",
+        "subnetCount": "Si a la red {{ip}}/{{mask}} le añades {{submask}} bits al host, ¿cuántas subredes obtienes?",
+        "subnetHosts": "Si a la red {{ip}}/{{mask}} le añades {{submask}} bits al host, ¿cuántos hosts utilizables tiene cada subred?",
+        "subnetNetwork": "Si a la red {{ip}}/{{mask}} le añades {{submask}} bits al host, ¿cuál es la dirección de red de la subred {{index}}?",
+        "fullMask": "Si a la red {{ip}}/{{mask}} le añades {{submask}} bits al host, ¿cuál es la máscara completa en notación decimal punteada?",
+        "noHosts": "Ninguno: el prefijo no deja hosts asignables."
       }
     }
   },
@@ -60,7 +172,8 @@
     "es": "Español"
   },
   "breadcrumb": {
-    "home": "Inicio"
+    "home": "Inicio",
+    "more": "Mostrar ruta oculta"
   },
   "sidebar": {
     "tagline": "Explora el modelo TCP/IP",
@@ -75,7 +188,8 @@
       "calculators": "Calculadoras"
     },
     "converters": {
-      "numberBases": "Conversor de Bases Numéricas"
+      "numberBases": "Conversor de Bases Numéricas",
+      "ascii": "Conversor ASCII"
     },
     "theory": {
       "tcpIpModel": "Modelo TCP/IP"
@@ -90,6 +204,52 @@
       "signIn": "Iniciar sesión",
       "signUp": "Registrarse",
       "user": "Usuario"
+    },
+    "calculators": {
+      "ipv4": "Calculadora IPv4"
     }
+  },
+  "exercises": {
+    "dialog": {
+      "title": "Generar ejercicios",
+      "description": "Descarga una hoja de práctica de {{tool}} en PDF.",
+      "difficulty": "Dificultad",
+      "count": "Número de ejercicios",
+      "countHint": "Entre {{min}} y {{max}}.",
+      "countError": "Escribe un número entero entre {{min}} y {{max}}.",
+      "includeAnswers": "Incluir respuestas",
+      "includeAnswersHint": "Agrega una hoja de respuestas al final del documento.",
+      "cancel": "Cancelar",
+      "generate": "Generar PDF",
+      "generating": "Generando…",
+      "error": "No se pudo generar el PDF. Inténtalo de nuevo."
+    },
+    "difficulty": {
+      "easy": "Fácil",
+      "medium": "Medio",
+      "hard": "Difícil"
+    },
+    "pdf": {
+      "title": "Ejercicios — {{tool}}",
+      "subtitle": "Dificultad: {{difficulty}} · {{count}} ejercicios",
+      "answersTitle": "Hoja de respuestas",
+      "author": "Autor",
+      "university": "Universidad",
+      "advisor": "Director de trabajo de grado",
+      "studentName": "Nombre",
+      "date": "Fecha",
+      "page": "Página {{page}} de {{total}}"
+    }
+  },
+  "dataTable": {
+    "empty": "Sin datos.",
+    "page": "Página {{page}} de {{total}}",
+    "first": "Primera página",
+    "previous": "Página anterior",
+    "next": "Página siguiente",
+    "last": "Última página",
+    "rowsPerPage": "Filas",
+    "expandRow": "Ver detalles",
+    "collapseRow": "Ocultar detalles"
   }
 }

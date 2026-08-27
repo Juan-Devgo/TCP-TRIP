@@ -21,6 +21,14 @@ export const PAGES: PageDefinition[] = [
     path: "/tools/converters/number-bases",
     titleKey: "sidebar.converters.numberBases",
   },
+  {
+    path: "/tools/converters/ascii",
+    titleKey: "sidebar.converters.ascii",
+  },
+  {
+    path: "/tools/calculators/ipv4",
+    titleKey: "sidebar.calculators.ipv4",
+  },
   { path: "/protocol/new", titleKey: "sidebar.protocol.builder" },
   { path: "/protocol/mine", titleKey: "sidebar.protocol.mine" },
   { path: "/messages", titleKey: "sidebar.protocol.messages" },
