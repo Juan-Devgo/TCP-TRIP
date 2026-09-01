@@ -5,21 +5,25 @@ import { TabScopeProvider, useTabs } from "@/context/TabsProvider";
 import { AsciiConverter } from "@/features/ascii-converter";
 import { IPv4Calculator } from "@/features/ipv4-calculator";
 import { NumberBaseConverter } from "@/features/number-base-converter";
-import { findPage } from "@/config/pages";
+import { ProtocolBuilder } from "@/features/protocol-builder";
+import { findPage, type PagePath } from "@/config/navigation";
 import { cn } from "@/lib/utils";
 import { HomePage } from "@/pages/HomePage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import { PlaceholderPage } from "@/pages/PlaceholderPage";
 
 /**
- * Registered pages that already have a component. A page listed in
- * `src/config/pages.ts` without an entry here renders the placeholder, so the
+ * The component behind each page of `src/config/navigation.ts`. Keys are typed
+ * as `PagePath`, the literal union derived from the nav tree: a misspelled or
+ * stale path is a compile error, not a tab that silently falls back to the
+ * placeholder. A page with no entry here renders the placeholder, so the
  * sidebar never opens a blank tab.
  */
-const PAGE_COMPONENTS: Record<string, ComponentType> = {
+const PAGE_COMPONENTS: Partial<Record<PagePath, ComponentType>> = {
   "/tools/converters/number-bases": NumberBaseConverter,
   "/tools/converters/ascii": AsciiConverter,
   "/tools/calculators/ipv4": IPv4Calculator,
+  "/generic-protocol/new": ProtocolBuilder,
 };
 
 export function TabHost() {
@@ -52,7 +56,7 @@ export function TabHost() {
 }
 
 function TabContent({ path }: { path: string }) {
-  const Page = PAGE_COMPONENTS[path];
+  const Page = PAGE_COMPONENTS[path as PagePath];
   if (Page) return <Page />;
 
   const page = findPage(path);

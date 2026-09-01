@@ -8,8 +8,8 @@ import {
 } from "@/lib/tabs";
 
 const CONVERTER = "/tools/converters/number-bases";
-const MESSAGES = "/messages";
-const BUILDER = "/protocol/new";
+const MESSAGES = "/generic-protocol/messages";
+const BUILDER = "/generic-protocol/new";
 
 type Session = { state: TabsState; pathname: string };
 
@@ -92,13 +92,13 @@ describe("opening pages", () => {
 
   test("focusing a tab restores the path it had navigated to", () => {
     let session = go(HOME, MESSAGES);
-    session = go(session, "/messages/42"); // in-tab navigation
+    session = go(session, "/generic-protocol/messages/42"); // in-tab navigation
     session = go(session, BUILDER);
 
     session = go(session, MESSAGES); // sidebar click on an open page
 
     expect(titles(session)).toEqual([MESSAGES, BUILDER]);
-    expect(session.pathname).toBe("/messages/42");
+    expect(session.pathname).toBe("/generic-protocol/messages/42");
   });
 
   test("home keeps the tabs open with none active", () => {
@@ -129,12 +129,12 @@ describe("links never bounce the URL", () => {
   });
 
   test("a breadcrumb link to a page that is already open", () => {
-    let session = go(go(HOME, MESSAGES), "/messages/42");
+    let session = go(go(HOME, MESSAGES), "/generic-protocol/messages/42");
     session = go(session, MESSAGES);
 
     // Focusing an open page keeps its place (CA-2), so the URL settles back on
     // where the tab was — the point here is only that it settles at all.
-    expect(session.pathname).toBe("/messages/42");
+    expect(session.pathname).toBe("/generic-protocol/messages/42");
     expect(session.state.tabs).toHaveLength(1);
   });
 
@@ -149,29 +149,29 @@ describe("links never bounce the URL", () => {
 
 describe("navigating inside a tab", () => {
   test("an unregistered path lands on the active tab's history", () => {
-    const session = go(go(HOME, MESSAGES), "/messages/42");
+    const session = go(go(HOME, MESSAGES), "/generic-protocol/messages/42");
     const tab = session.state.tabs[0];
 
     expect(session.state.tabs).toHaveLength(1);
     expect(tab?.history).toEqual({
       back: [MESSAGES],
-      current: "/messages/42",
+      current: "/generic-protocol/messages/42",
       forward: [],
     });
   });
 
   test("back and forward move the tab and the URL together", () => {
-    let session = go(go(HOME, MESSAGES), "/messages/42");
+    let session = go(go(HOME, MESSAGES), "/generic-protocol/messages/42");
 
     session = act(session, { type: "back" });
     expect(session.pathname).toBe(MESSAGES);
 
     session = act(session, { type: "forward" });
-    expect(session.pathname).toBe("/messages/42");
+    expect(session.pathname).toBe("/generic-protocol/messages/42");
   });
 
   test("each tab keeps its own history", () => {
-    let session = go(go(HOME, MESSAGES), "/messages/42");
+    let session = go(go(HOME, MESSAGES), "/generic-protocol/messages/42");
     session = go(session, BUILDER);
 
     // The builder tab has nowhere to go back to...
@@ -183,7 +183,7 @@ describe("navigating inside a tab", () => {
     session = act(session, { type: "back" });
     expect(session.pathname).toBe(MESSAGES);
     expect(findTab(session.state, session.state.activeTabId)?.history.forward).toEqual(
-      ["/messages/42"],
+      ["/generic-protocol/messages/42"],
     );
   });
 });
@@ -235,7 +235,7 @@ describe("closing tabs", () => {
   });
 
   test("a closed tab loses its history — reopening starts fresh", () => {
-    let session = go(go(HOME, MESSAGES), "/messages/42");
+    let session = go(go(HOME, MESSAGES), "/generic-protocol/messages/42");
     const tab = session.state.tabs[0];
 
     session = act(session, { type: "close", id: tab?.id ?? "" });

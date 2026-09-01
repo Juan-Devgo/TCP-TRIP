@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 
-import { HOME_PATH } from "@/config/pages";
+import { HOME_PATH } from "@/config/navigation";
 
 export function NotFoundPage({ path }: { path: string }) {
   const { t } = useTranslation();

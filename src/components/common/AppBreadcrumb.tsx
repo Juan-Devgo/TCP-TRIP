@@ -19,26 +19,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { isPagePath } from "@/config/pages";
+import { findNavItem } from "@/config/navigation";
 import { cn } from "@/lib/utils";
-
-/** Path segment → i18n label key. Reuses the sidebar labels so a nav entry
- *  and its breadcrumb can never drift apart. Unknown segments fall back to
- *  the raw segment text. */
-const SEGMENT_LABEL_KEYS: Record<string, string> = {
-  tools: "sidebar.groups.tools",
-  converters: "sidebar.tools.converters",
-  calculators: "sidebar.tools.calculators",
-  "number-bases": "sidebar.converters.numberBases",
-  ascii: "sidebar.converters.ascii",
-  ipv4: "sidebar.calculators.ipv4",
-  theory: "sidebar.groups.theory",
-  "tcp-ip-model": "sidebar.theory.tcpIpModel",
-  protocol: "sidebar.groups.protocol",
-  new: "sidebar.protocol.builder",
-  mine: "sidebar.protocol.mine",
-  messages: "sidebar.protocol.messages",
-};
 
 type Crumb = {
   /** Path this crumb stands for; also the React key. */
@@ -58,11 +40,14 @@ export function AppBreadcrumb({ className }: { className?: string }) {
     { path: "/", label: t("breadcrumb.home"), navigable: segments.length > 0 },
     ...segments.map((segment, index) => {
       const path = `/${segments.slice(0, index + 1).join("/")}`;
-      const labelKey = SEGMENT_LABEL_KEYS[segment];
+      // The nav tree labels every known segment, so a crumb and its sidebar
+      // entry can never drift. Unknown segments fall back to the raw text.
+      const item = findNavItem(path);
       return {
         path,
-        label: labelKey ? t(labelKey) : segment,
-        navigable: isPagePath(path),
+        label: item ? t(item.titleKey) : segment,
+        // Grouping nodes (`/tools`) are not pages — nothing to navigate to.
+        navigable: item?.page != null,
       };
     }),
   ];

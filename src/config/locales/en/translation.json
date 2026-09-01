@@ -134,6 +134,241 @@
         "fullMask": "Adding {{submask}} bits to the host part of the network {{ip}}/{{mask}}, what is the full mask in dotted-decimal notation?",
         "noHosts": "None: the prefix leaves no assignable hosts."
       }
+    },
+    "protocolBuilder": {
+      "title": "Build your Protocol",
+      "subtitle": "Generic protocol header diagram · editable schema",
+      "intro": "Add fields to the diagram with the green button, drag a type from the catalogue on the left onto a Free field, and set its length against the bit ruler. You are defining the header schema, not the values that travel in it.",
+      "untitled": "Untitled protocol",
+      "protocolName": "Protocol name",
+      "protocolNamePlaceholder": "My test protocol",
+      "rulerWidth": "Ruler width",
+      "rulerWidthOption_one": "{{count}} bit",
+      "rulerWidthOption_other": "{{count}} bits",
+      "empty": {
+        "title": "The diagram is empty",
+        "hint": "Use “Add field” to place the first Free field, then drag a type onto it from the catalogue."
+      },
+      "add": {
+        "button": "Add field",
+        "single": "Single field",
+        "singleHint": "One Free field at the end of the diagram.",
+        "composite": "Composite field",
+        "compositeHint": "A named group, divided into two Free fields.",
+        "child": "Add a field to the group"
+      },
+      "field": {
+        "free": "Free",
+        "bits_one": "{{count}} bit",
+        "bits_other": "{{count}} bits",
+        "assignLabel": "Define this field",
+        "resizeLabel": "Change the length of {{name}}",
+        "selectLabel": "Select {{name}} ({{count}} bits)",
+        "freeHint": "Undefined field. Drag a type from the catalogue onto it, or double-click to define it.",
+        "noMeaning": "No meaning written yet. Double-click the field to add it."
+      },
+      "group": {
+        "untitled": "Untitled group",
+        "editLabel": "Edit the {{name}} group",
+        "selectLabel": "Select the {{name}} group",
+        "renameLabel": "Name of the {{name}} group",
+        "noMeaning": "No meaning written yet. Use the pencil to add it."
+      },
+      "palette": {
+        "title": "Field types",
+        "hint": "Drag a type onto a Free field, or select it and then click the field.",
+        "armed": "{{type}} selected: click a Free field."
+      },
+      "categories": {
+        "primitives": "Primitives",
+        "layer2": "Layer 2 — Link",
+        "layer3": "Layer 3 — Network",
+        "layer4": "Layer 4 — Transport"
+      },
+      "types": {
+        "uint": {
+          "label": "Unsigned integer",
+          "description": "A plain binary number. You choose how many bits it takes: with n bits it covers 0 to 2ⁿ−1."
+        },
+        "flag": {
+          "label": "Flag",
+          "description": "A single bit that is 0 or 1, like IPv4's DF. Its length is fixed at 1 bit."
+        },
+        "enum": {
+          "label": "Enumeration",
+          "description": "A numeric code with one meaning per value, like IPv4's Protocol field (6 = TCP)."
+        },
+        "reserved": {
+          "label": "Reserved / padding",
+          "description": "Unused bits, set to zero, kept to align the header or to leave room for future versions."
+        },
+        "checksum": {
+          "label": "Checksum",
+          "description": "The result of a computation over the rest of the header, used to detect transmission errors."
+        },
+        "mac": {
+          "label": "MAC address",
+          "description": "The physical address of an interface. Its length is fixed at 48 bits."
+        },
+        "ipv4": {
+          "label": "IPv4 address",
+          "description": "A network address in IPv4 form. Its length is fixed at 32 bits."
+        },
+        "port": {
+          "label": "Port",
+          "description": "Identifies the sending or receiving process. Its length is fixed at 16 bits."
+        }
+      },
+      "options": {
+        "values": {
+          "label": "Possible values",
+          "placeholder": "6 = TCP\n17 = UDP",
+          "hint": "One value per line, with the meaning the protocol gives it."
+        },
+        "algorithm": {
+          "label": "Algorithm",
+          "placeholder": "Internet checksum (RFC 1071)",
+          "hint": "Optional: how the checksum is computed."
+        }
+      },
+      "form": {
+        "createTitle": "Define the field",
+        "editTitle": "Edit the field",
+        "description": "A field is defined by what it means and by the bits it takes.",
+        "groupTitle": "Edit the group",
+        "groupDescription": "The group names the band and says what it means; each field inside is defined on its own.",
+        "type": "Type",
+        "typePlaceholder": "Pick a type",
+        "name": "Name",
+        "namePlaceholder": "Field name",
+        "meaning": "Meaning",
+        "meaningPlaceholder": "What this field carries and what it is for.",
+        "length": "Length (bits)",
+        "lengthHint": "Between {{min}} and {{max}} bits.",
+        "lengthFixed_one": "The type imposes {{count}} bit.",
+        "lengthFixed_other": "The type imposes {{count}} bits.",
+        "documentation": "Documentation (optional)",
+        "documentationPlaceholder": "RFC 791, section 3.1",
+        "documentationHint": "Where this field is described, if it comes from a standard.",
+        "groupName": "Group name",
+        "groupNamePlaceholder": "Flags",
+        "groupMeaningPlaceholder": "What this band of bits groups together.",
+        "save": "Save field",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "errors": {
+          "required": "This is required.",
+          "range": "The length must be between {{min}} and {{max}} bits.",
+          "fixed_one": "This type always takes {{count}} bit.",
+          "fixed_other": "This type always takes {{count}} bits."
+        }
+      },
+      "summary": {
+        "fields_one": "{{count}} field",
+        "fields_other": "{{count}} fields",
+        "bits_one": "{{count}} bit in total",
+        "bits_other": "{{count}} bits in total",
+        "rows_one": "{{count}} row",
+        "rows_other": "{{count}} rows"
+      },
+      "validation": {
+        "noName": "the protocol has no name",
+        "noFields": "the diagram is empty",
+        "freeFields_one": "{{count}} Free field is still undefined",
+        "freeFields_other": "{{count}} Free fields are still undefined",
+        "unnamedGroups_one": "{{count}} group has no name",
+        "unnamedGroups_other": "{{count}} groups have no name"
+      },
+      "actions": {
+        "save": "Save",
+        "share": "Share",
+        "export": "Export",
+        "example": "Example",
+        "clear": "Clear",
+        "undo": "Undo",
+        "redo": "Redo"
+      },
+      "save": {
+        "saved": "Protocol saved. It is now listed under My Protocols.",
+        "savedSession": "Protocol saved for this session. Server persistence is not wired up yet, so it is lost when the page reloads.",
+        "blocked": "Cannot save yet: {{problems}}.",
+        "error": "The protocol could not be saved."
+      },
+      "share": {
+        "title": "Share the protocol",
+        "description": "A read-only link to the saved protocol.",
+        "pending": "The link is reserved: the public page goes live once server persistence is wired up.",
+        "needsSave": "Save the protocol before sharing it: unsaved, there is nothing behind the link.",
+        "error": "The link could not be generated."
+      },
+      "export": {
+        "title": "Export the protocol",
+        "description": "The schema to open it again, or the diagram as a picture.",
+        "json": "Schema (JSON)",
+        "jsonHint": "The whole protocol, ready to import back.",
+        "svg": "Diagram (SVG)",
+        "svgHint": "Vector, for documents and reports.",
+        "png": "Diagram (PNG)",
+        "pngHint": "An image ready for slides.",
+        "error": "The file could not be generated."
+      },
+      "clear": {
+        "title": "Clear the diagram?",
+        "description": "Every field and the protocol name are removed. If you have not saved it, it cannot be recovered.",
+        "confirm": "Clear",
+        "cancel": "Cancel"
+      },
+      "examples": {
+        "udp": {
+          "name": "UDP header (RFC 768)",
+          "fields": {
+            "sourcePort": "Port of the process sending the datagram.",
+            "destinationPort": "Port of the process meant to receive it.",
+            "length": "Total length in bytes of the header plus the data.",
+            "checksum": "Error check over the header and the data."
+          }
+        },
+        "ipv4": {
+          "name": "IPv4 header (RFC 791)",
+          "fields": {
+            "version": "IP protocol version; 4 in IPv4.",
+            "ihl": "Header length, in 32-bit words.",
+            "dscp": "Class of service requested for the packet.",
+            "ecn": "Explicit congestion notification.",
+            "totalLength": "Total packet length in bytes, header included.",
+            "identification": "Identifier grouping the fragments of one packet.",
+            "reservedFlag": "Reserved bit; always 0.",
+            "dontFragment": "Forbids fragmenting the packet.",
+            "moreFragments": "Says more fragments follow this one.",
+            "fragmentOffset": "Where this fragment sits inside the original packet.",
+            "ttl": "Hops the packet has left before it is dropped.",
+            "protocol": "Protocol carried in the payload.",
+            "headerChecksum": "Error check over the header only.",
+            "sourceAddress": "Source IPv4 address.",
+            "destinationAddress": "Destination IPv4 address."
+          },
+          "groups": {
+            "flags": "Control flags for fragmentation."
+          }
+        },
+        "ethernet": {
+          "name": "Ethernet II frame",
+          "fields": {
+            "destinationMac": "Physical address of the interface meant to receive the frame.",
+            "sourceMac": "Physical address of the interface sending it.",
+            "etherType": "Upper-layer protocol carried in the frame."
+          }
+        }
+      },
+      "select": {
+        "edit": "Edit",
+        "delete": "Delete",
+        "doubleClick": "Double click"
+      },
+      "keys": {
+        "delete": "Del",
+        "backspace": "Backspace"
+      }
     }
   },
   "tabs": {

@@ -125,7 +125,6 @@ function matchesShortcut(event: KeyboardEvent, shortcut: ActionShortcut): boolea
   );
 }
 
-// Parked with the guard above; kept so re-enabling is a one-line change.
 function isTypingTarget(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;
   return (
@@ -156,11 +155,15 @@ export function useToolActionShortcuts(tabId: string | null): void {
         const { shortcut } = action;
         if (!shortcut || action.disabled) continue;
         if (!matchesShortcut(event, shortcut)) continue;
-        // Disabled while testing: a shortcut that silently stops working once
-        // the caret is in a field reads as broken. Re-enable if a bare key ever
-        // needs to coexist with typing.
-        // const bare = !shortcut.ctrl && !shortcut.alt && !shortcut.meta;
-        // if (bare && isTypingTarget(event.target)) continue;
+        // An unmodified letter (the builder's `S`) is also just a character
+        // someone is typing, so it yields to the caret. Named keys don't:
+        // `ESC` has to keep clearing a tool from inside its own text panel.
+        const printableBare =
+          shortcut.key.length === 1 &&
+          !shortcut.ctrl &&
+          !shortcut.alt &&
+          !shortcut.meta;
+        if (printableBare && isTypingTarget(event.target)) continue;
 
         event.preventDefault();
         action.onSelect();

@@ -5,7 +5,7 @@ import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup, ButtonGroupSeparator } from "@/components/ui/button-group";
 import { useTabs, type Tab } from "@/context/TabsProvider";
-import { findPage } from "@/config/pages";
+import { findPage } from "@/config/navigation";
 import { cn } from "@/lib/utils";
 
 /** Id shared by the tab button and its panel, so screen readers pair them. */

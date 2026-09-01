@@ -1,4 +1,4 @@
-import { HOME_PATH, isPagePath } from "@/config/pages";
+import { HOME_PATH, isPagePath } from "@/config/navigation";
 import {
   createTabHistory,
   goBack,

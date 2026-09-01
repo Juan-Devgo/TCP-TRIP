@@ -8,16 +8,7 @@ import {
   UserButton,
   useUser,
 } from "@clerk/clerk-react"
-import {
-  ArrowLeftRight,
-  Calculator,
-  ChevronDown,
-  FolderOpen,
-  Layers,
-  MessagesSquare,
-  Network,
-  PenLine,
-} from "lucide-react"
+import { ChevronDown, Network } from "lucide-react"
 
 import {
   Sidebar,
@@ -43,57 +34,11 @@ import {
 } from "@/components/ui/collapsible"
 import { Button } from "@/components/ui/button"
 
+import { NAV_TREE, type NavItem } from "@/config/navigation"
 import { cn } from "@/lib/utils"
 
-type NavLink = {
-  /** i18n key resolved with `t()` */
-  labelKey: string
-  to: string
-}
-
-type NavSection = {
-  labelKey: string
-  icon: React.ComponentType<{ className?: string }>
-  /** Add links here, e.g. { labelKey: "sidebar.converters.binaryDecimal", to: "/tools/converters/binary-decimal" } */
-  links: NavLink[]
-}
-
-const TOOL_SECTIONS: NavSection[] = [
-  {
-    labelKey: "sidebar.tools.converters",
-    icon: ArrowLeftRight,
-    links: [
-      {
-        labelKey: "sidebar.converters.numberBases",
-        to: "/tools/converters/number-bases",
-      },
-      {
-        labelKey: "sidebar.converters.ascii",
-        to: "/tools/converters/ascii",
-      },
-    ],
-  },
-  {
-    labelKey: "sidebar.tools.calculators",
-    icon: Calculator,
-    links: [
-      {
-        labelKey: "sidebar.calculators.ipv4",
-        to: "/tools/calculators/ipv4",
-      },
-    ],
-  },
-]
-
-const THEORY_SECTIONS: NavSection[] = [
-  { labelKey: "sidebar.theory.tcpIpModel", icon: Layers, links: [] },
-]
-
-const PROTOCOL_LINKS: (NavLink & { icon: React.ComponentType<{ className?: string }> })[] = [
-  { labelKey: "sidebar.protocol.builder", to: "/protocol/new", icon: PenLine },
-  { labelKey: "sidebar.protocol.mine", to: "/protocol/mine", icon: FolderOpen },
-  { labelKey: "sidebar.protocol.messages", to: "/messages", icon: MessagesSquare },
-]
+/** Tailwind text color applied to every nav icon. */
+const ICON_ACCENT = "text-secondary-ink"
 
 export function AppSidebar() {
   const { t } = useTranslation()
@@ -126,40 +71,9 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="gap-1 py-2">
-        <NavGroup
-          labelKey="sidebar.groups.tools"
-          sections={TOOL_SECTIONS}
-          accent="text-secondary-ink"
-          pathname={pathname}
-        />
-        <NavGroup
-          labelKey="sidebar.groups.theory"
-          sections={THEORY_SECTIONS}
-          accent="text-secondary-ink"
-          pathname={pathname}
-        />
-
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-semibold tracking-wide uppercase">
-            {t("sidebar.groups.protocol")}
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu className="gap-0.5">
-              {PROTOCOL_LINKS.map(({ labelKey, to, icon: Icon }) => (
-                <SidebarMenuItem key={to}>
-                  <SidebarMenuButton
-                    isActive={pathname === to}
-                    tooltip={t(labelKey)}
-                    render={<Link to={to} className="no-underline" />}
-                  >
-                    <Icon className="text-secondary-ink" />
-                    <span>{t(labelKey)}</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {NAV_TREE.map((group) => (
+          <NavGroup key={group.path} group={group} pathname={pathname} />
+        ))}
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border">
@@ -170,15 +84,11 @@ export function AppSidebar() {
 }
 
 function NavGroup({
-  labelKey,
-  sections,
-  accent,
+  group,
   pathname,
 }: {
-  labelKey: string
-  sections: NavSection[]
-  /** Tailwind text color class applied to the section icons */
-  accent: string
+  /** A top-level node of `NAV_TREE`; its children are sections or links. */
+  group: NavItem
   pathname: string
 }) {
   const { t } = useTranslation()
@@ -186,51 +96,76 @@ function NavGroup({
   return (
     <SidebarGroup>
       <SidebarGroupLabel className="text-xs font-semibold tracking-wide uppercase">
-        {t(labelKey)}
+        {t(group.titleKey)}
       </SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu className="gap-0.5">
-          {sections.map(({ labelKey: sectionKey, icon: Icon, links }) => (
-            <Collapsible
-              key={sectionKey}
-              className="group/collapsible"
-              render={<SidebarMenuItem />}
-            >
-              <CollapsibleTrigger
-                render={
-                  <SidebarMenuButton tooltip={t(sectionKey)}>
-                    <Icon className={accent} />
-                    <span>{t(sectionKey)}</span>
-                    <ChevronDown className="ml-auto size-4 transition-transform duration-200 group-data-open/collapsible:rotate-180" />
-                  </SidebarMenuButton>
-                }
-              />
-              <CollapsibleContent>
-                <SidebarMenuSub className="border-sidebar-border">
-                  {links.map(({ labelKey: linkKey, to }) => (
-                    <SidebarMenuSubItem key={to}>
-                      <SidebarMenuSubButton
-                        isActive={pathname === to}
-                        render={<Link to={to} className="no-underline" />}
-                      >
-                        <span>{t(linkKey)}</span>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  ))}
-                  {links.length === 0 && (
-                    <SidebarMenuSubItem>
-                      <span className="block px-2 py-1 text-xs text-sidebar-foreground/50">
-                        {t("sidebar.empty")}
-                      </span>
-                    </SidebarMenuSubItem>
-                  )}
-                </SidebarMenuSub>
-              </CollapsibleContent>
-            </Collapsible>
-          ))}
+          {group.children.map((item) =>
+            item.branch ? (
+              <NavSection key={item.path} section={item} pathname={pathname} />
+            ) : (
+              <SidebarMenuItem key={item.path}>
+                <SidebarMenuButton
+                  isActive={pathname === item.path}
+                  tooltip={t(item.titleKey)}
+                  render={<Link to={item.path} className="no-underline" />}
+                >
+                  {item.icon && <item.icon className={ICON_ACCENT} />}
+                  <span>{t(item.titleKey)}</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ),
+          )}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
+  )
+}
+
+/** A collapsible section: a branch node whose children are page links. */
+function NavSection({
+  section,
+  pathname,
+}: {
+  section: NavItem
+  pathname: string
+}) {
+  const { t } = useTranslation()
+  const Icon = section.icon
+
+  return (
+    <Collapsible className="group/collapsible" render={<SidebarMenuItem />}>
+      <CollapsibleTrigger
+        render={
+          <SidebarMenuButton tooltip={t(section.titleKey)}>
+            {Icon && <Icon className={ICON_ACCENT} />}
+            <span>{t(section.titleKey)}</span>
+            <ChevronDown className="ml-auto size-4 transition-transform duration-200 group-data-open/collapsible:rotate-180" />
+          </SidebarMenuButton>
+        }
+      />
+      <CollapsibleContent>
+        <SidebarMenuSub className="border-sidebar-border">
+          {section.children.map((link) => (
+            <SidebarMenuSubItem key={link.path}>
+              <SidebarMenuSubButton
+                isActive={pathname === link.path}
+                render={<Link to={link.path} className="no-underline" />}
+              >
+                <span>{t(link.titleKey)}</span>
+              </SidebarMenuSubButton>
+            </SidebarMenuSubItem>
+          ))}
+          {section.children.length === 0 && (
+            <SidebarMenuSubItem>
+              <span className="block px-2 py-1 text-xs text-sidebar-foreground/50">
+                {t("sidebar.empty")}
+              </span>
+            </SidebarMenuSubItem>
+          )}
+        </SidebarMenuSub>
+      </CollapsibleContent>
+    </Collapsible>
   )
 }
 

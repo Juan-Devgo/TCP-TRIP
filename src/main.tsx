@@ -28,7 +28,7 @@ function RootLayout() {
       routerReplace={(to) => navigate(to, { replace: true })}
     >
       {/* There is no <Routes> map: the pathname drives the tab system, which
-          resolves it against the page registry in `src/config/pages.ts`. */}
+          resolves it against the page registry in `src/config/navigation.ts`. */}
       <TabsProvider>
         <ToolActionsProvider>
           <App />

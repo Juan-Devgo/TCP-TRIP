@@ -134,6 +134,241 @@
         "fullMask": "Si a la red {{ip}}/{{mask}} le añades {{submask}} bits al host, ¿cuál es la máscara completa en notación decimal punteada?",
         "noHosts": "Ninguno: el prefijo no deja hosts asignables."
       }
+    },
+    "protocolBuilder": {
+      "title": "Crea tu Protocolo",
+      "subtitle": "Diagrama de encabezado de protocolo genérico · esquema editable",
+      "intro": "Añade campos al diagrama con el botón verde, arrastra un tipo desde el catálogo de la izquierda sobre un campo Libre y ajusta su longitud contra la regla de bits. Se define el esquema del encabezado, no los valores que viajan en él.",
+      "untitled": "Protocolo sin nombre",
+      "protocolName": "Nombre del protocolo",
+      "protocolNamePlaceholder": "Mi protocolo de prueba",
+      "rulerWidth": "Ancho de la regla",
+      "rulerWidthOption_one": "{{count}} bit",
+      "rulerWidthOption_other": "{{count}} bits",
+      "empty": {
+        "title": "El diagrama está vacío",
+        "hint": "Usa «Añadir campo» para colocar el primer campo Libre y arrástrale un tipo desde el catálogo."
+      },
+      "add": {
+        "button": "Añadir campo",
+        "single": "Campo simple",
+        "singleHint": "Un solo campo Libre al final del diagrama.",
+        "composite": "Campo compuesto",
+        "compositeHint": "Un grupo con nombre propio, dividido en dos campos Libres.",
+        "child": "Añadir un campo al grupo"
+      },
+      "field": {
+        "free": "Libre",
+        "bits_one": "{{count}} bit",
+        "bits_other": "{{count}} bits",
+        "assignLabel": "Definir este campo",
+        "resizeLabel": "Cambiar la longitud de {{name}}",
+        "selectLabel": "Seleccionar {{name}} ({{count}} bits)",
+        "freeHint": "Campo sin definir. Arrastra un tipo del catálogo sobre él, o haz doble clic para definirlo.",
+        "noMeaning": "Todavía no tiene significado. Haz doble clic en el campo para escribirlo."
+      },
+      "group": {
+        "untitled": "Grupo sin nombre",
+        "editLabel": "Editar el grupo {{name}}",
+        "selectLabel": "Seleccionar el grupo {{name}}",
+        "renameLabel": "Nombre del grupo {{name}}",
+        "noMeaning": "Todavía no tiene significado. Usa el lápiz para escribirlo."
+      },
+      "palette": {
+        "title": "Tipos de campo",
+        "hint": "Arrastra un tipo sobre un campo Libre, o selecciónalo y luego haz clic en el campo.",
+        "armed": "{{type}} seleccionado: haz clic en un campo Libre."
+      },
+      "categories": {
+        "primitives": "Primitivos",
+        "layer2": "Capa 2 — Enlace",
+        "layer3": "Capa 3 — Red",
+        "layer4": "Capa 4 — Transporte"
+      },
+      "types": {
+        "uint": {
+          "label": "Entero sin signo",
+          "description": "Un número binario sin signo. Tú eliges cuántos bits ocupa: con n bits representa de 0 a 2ⁿ−1."
+        },
+        "flag": {
+          "label": "Bandera",
+          "description": "Un único bit que vale 0 o 1, como el DF de IPv4. Su longitud es fija: 1 bit."
+        },
+        "enum": {
+          "label": "Enumeración",
+          "description": "Un código numérico con un significado por valor, como el campo Protocol de IPv4 (6 = TCP)."
+        },
+        "reserved": {
+          "label": "Reservado / relleno",
+          "description": "Bits sin uso, puestos a cero, que existen para alinear el encabezado o dejar espacio a futuras versiones."
+        },
+        "checksum": {
+          "label": "Suma de verificación",
+          "description": "El resultado de un cálculo sobre el resto del encabezado que permite detectar errores de transmisión."
+        },
+        "mac": {
+          "label": "Dirección MAC",
+          "description": "Dirección física de una interfaz. Su longitud es fija: 48 bits."
+        },
+        "ipv4": {
+          "label": "Dirección IPv4",
+          "description": "Dirección de red en formato IPv4. Su longitud es fija: 32 bits."
+        },
+        "port": {
+          "label": "Puerto",
+          "description": "Identifica el proceso de origen o destino. Su longitud es fija: 16 bits."
+        }
+      },
+      "options": {
+        "values": {
+          "label": "Valores posibles",
+          "placeholder": "6 = TCP\n17 = UDP",
+          "hint": "Un valor por línea, con el significado que le da el protocolo."
+        },
+        "algorithm": {
+          "label": "Algoritmo",
+          "placeholder": "Internet checksum (RFC 1071)",
+          "hint": "Opcional: cómo se calcula la suma de verificación."
+        }
+      },
+      "form": {
+        "createTitle": "Definir el campo",
+        "editTitle": "Editar el campo",
+        "description": "Un campo se define por lo que significa y por los bits que ocupa.",
+        "groupTitle": "Editar el grupo",
+        "groupDescription": "El grupo da nombre y significado a la banda; cada campo de su interior se define aparte.",
+        "type": "Tipo",
+        "typePlaceholder": "Elige un tipo",
+        "name": "Nombre",
+        "namePlaceholder": "Nombre del campo",
+        "meaning": "Significado",
+        "meaningPlaceholder": "Qué transporta este campo y para qué sirve.",
+        "length": "Longitud (bits)",
+        "lengthHint": "Entre {{min}} y {{max}} bits.",
+        "lengthFixed_one": "El tipo impone {{count}} bit.",
+        "lengthFixed_other": "El tipo impone {{count}} bits.",
+        "documentation": "Documentación (opcional)",
+        "documentationPlaceholder": "RFC 791, sección 3.1",
+        "documentationHint": "Dónde está descrito este campo, si viene de un estándar.",
+        "groupName": "Nombre del grupo",
+        "groupNamePlaceholder": "Flags",
+        "groupMeaningPlaceholder": "Qué agrupa esta banda de bits.",
+        "save": "Guardar campo",
+        "cancel": "Cancelar",
+        "delete": "Eliminar",
+        "errors": {
+          "required": "Este dato es obligatorio.",
+          "range": "La longitud debe estar entre {{min}} y {{max}} bits.",
+          "fixed_one": "Este tipo ocupa siempre {{count}} bit.",
+          "fixed_other": "Este tipo ocupa siempre {{count}} bits."
+        }
+      },
+      "summary": {
+        "fields_one": "{{count}} campo",
+        "fields_other": "{{count}} campos",
+        "bits_one": "{{count}} bit en total",
+        "bits_other": "{{count}} bits en total",
+        "rows_one": "{{count}} fila",
+        "rows_other": "{{count}} filas"
+      },
+      "validation": {
+        "noName": "falta el nombre del protocolo",
+        "noFields": "el diagrama está vacío",
+        "freeFields_one": "queda {{count}} campo Libre sin definir",
+        "freeFields_other": "quedan {{count}} campos Libres sin definir",
+        "unnamedGroups_one": "hay {{count}} grupo sin nombre",
+        "unnamedGroups_other": "hay {{count}} grupos sin nombre"
+      },
+      "actions": {
+        "save": "Guardar",
+        "share": "Compartir",
+        "export": "Exportar",
+        "example": "Ejemplo",
+        "clear": "Limpiar",
+        "undo": "Deshacer",
+        "redo": "Rehacer"
+      },
+      "save": {
+        "saved": "Protocolo guardado. Ya aparece en Mis Protocolos.",
+        "savedSession": "Protocolo guardado en esta sesión. La persistencia en el servidor todavía no está conectada, así que se pierde al recargar la página.",
+        "blocked": "No se puede guardar todavía: {{problems}}.",
+        "error": "No se pudo guardar el protocolo."
+      },
+      "share": {
+        "title": "Compartir el protocolo",
+        "description": "Enlace de solo lectura al protocolo guardado.",
+        "pending": "El enlace queda reservado: la página pública se habilita cuando la persistencia en el servidor esté conectada.",
+        "needsSave": "Guarda el protocolo antes de compartirlo: sin guardar no hay nada detrás del enlace.",
+        "error": "No se pudo generar el enlace."
+      },
+      "export": {
+        "title": "Exportar el protocolo",
+        "description": "El esquema para volver a abrirlo, o el diagrama como imagen.",
+        "json": "Esquema (JSON)",
+        "jsonHint": "El protocolo completo, reimportable.",
+        "svg": "Diagrama (SVG)",
+        "svgHint": "Vectorial, para documentos e informes.",
+        "png": "Diagrama (PNG)",
+        "pngHint": "Imagen lista para diapositivas.",
+        "error": "No se pudo generar el archivo."
+      },
+      "clear": {
+        "title": "¿Limpiar el diagrama?",
+        "description": "Se borran todos los campos y el nombre del protocolo. Si no lo has guardado, no se puede recuperar.",
+        "confirm": "Limpiar",
+        "cancel": "Cancelar"
+      },
+      "examples": {
+        "udp": {
+          "name": "Encabezado UDP (RFC 768)",
+          "fields": {
+            "sourcePort": "Puerto del proceso que envía el datagrama.",
+            "destinationPort": "Puerto del proceso que debe recibirlo.",
+            "length": "Longitud total en bytes del encabezado más los datos.",
+            "checksum": "Verificación de errores sobre el encabezado y los datos."
+          }
+        },
+        "ipv4": {
+          "name": "Encabezado IPv4 (RFC 791)",
+          "fields": {
+            "version": "Versión del protocolo IP; vale 4 en IPv4.",
+            "ihl": "Longitud del encabezado en palabras de 32 bits.",
+            "dscp": "Clase de servicio solicitada para el paquete.",
+            "ecn": "Notificación explícita de congestión.",
+            "totalLength": "Longitud total del paquete en bytes, encabezado incluido.",
+            "identification": "Identificador que agrupa los fragmentos de un mismo paquete.",
+            "reservedFlag": "Bit reservado; siempre vale 0.",
+            "dontFragment": "Prohíbe fragmentar el paquete.",
+            "moreFragments": "Indica que vienen más fragmentos detrás de este.",
+            "fragmentOffset": "Posición de este fragmento dentro del paquete original.",
+            "ttl": "Saltos que le quedan al paquete antes de descartarse.",
+            "protocol": "Protocolo transportado en la carga útil.",
+            "headerChecksum": "Verificación de errores del encabezado únicamente.",
+            "sourceAddress": "Dirección IPv4 de origen.",
+            "destinationAddress": "Dirección IPv4 de destino."
+          },
+          "groups": {
+            "flags": "Banderas de control de la fragmentación."
+          }
+        },
+        "ethernet": {
+          "name": "Trama Ethernet II",
+          "fields": {
+            "destinationMac": "Dirección física de la interfaz que debe recibir la trama.",
+            "sourceMac": "Dirección física de la interfaz que la envía.",
+            "etherType": "Protocolo de capa superior transportado en la trama."
+          }
+        }
+      },
+      "select": {
+        "edit": "Editar",
+        "delete": "Eliminar",
+        "doubleClick": "Doble clic"
+      },
+      "keys": {
+        "delete": "Supr",
+        "backspace": "Backspace"
+      }
     }
   },
   "tabs": {

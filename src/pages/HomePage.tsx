@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 
-import { PAGES } from "@/config/pages";
+import { PAGES } from "@/config/navigation";
 
 /** Shown when no tab is active — the app's "new tab page". */
 export function HomePage() {

@@ -2,7 +2,7 @@
 
 **Componentes:** `src/components/layouts/TabBar.tsx`, `src/components/layouts/TabHost.tsx`, `src/components/layouts/ContentToolbar.tsx`, `src/context/TabsProvider.tsx`, `src/context/ToolActionsProvider.tsx`
 **Lógica de dominio:** `src/lib/tabs.ts` (máquina de estados de pestañas), `src/lib/tabHistory.ts` (pilas de navegación por pestaña)
-**Registro de páginas:** `src/config/pages.ts`
+**Registro de páginas:** `src/config/navigation.ts` (ver `docs/ui/Navigation.md`)
 
 ---
 
