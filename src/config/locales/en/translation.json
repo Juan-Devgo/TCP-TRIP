@@ -3,7 +3,8 @@
     "copy": "Copy",
     "copied": "Copied",
     "increment": "Increase",
-    "decrement": "Decrease"
+    "decrement": "Decrease",
+    "loading": "Loading…"
   },
   "tools": {
     "numberBaseConverter": {
@@ -289,17 +290,19 @@
         "redo": "Redo"
       },
       "save": {
-        "saved": "Protocol saved. It is now listed under My Protocols.",
+        "saved": "Protocol saved to your account.",
         "savedSession": "Protocol saved for this session. Server persistence is not wired up yet, so it is lost when the page reloads.",
         "blocked": "Cannot save yet: {{problems}}.",
-        "error": "The protocol could not be saved."
+        "error": "The protocol could not be saved.",
+        "signedOut": "Sign in to save your protocols."
       },
       "share": {
         "title": "Share the protocol",
         "description": "A read-only link to the saved protocol.",
         "pending": "The link is reserved: the public page goes live once server persistence is wired up.",
         "needsSave": "Save the protocol before sharing it: unsaved, there is nothing behind the link.",
-        "error": "The link could not be generated."
+        "error": "The link could not be generated.",
+        "signedOut": "Sign in to share your protocols."
       },
       "export": {
         "title": "Export the protocol",
@@ -310,7 +313,13 @@
         "svgHint": "Vector, for documents and reports.",
         "png": "Diagram (PNG)",
         "pngHint": "An image ready for slides.",
-        "error": "The file could not be generated."
+        "error": "The file could not be generated.",
+        "done": "{{filename}} downloaded."
+      },
+      "toast": {
+        "save": "Save protocol",
+        "share": "Share protocol",
+        "export": "Export protocol"
       },
       "clear": {
         "title": "Clear the diagram?",
@@ -392,6 +401,20 @@
     "notFound": {
       "title": "Page not found",
       "description": "There is nothing at {{path}}."
+    },
+    "shared": {
+      "badge": "Read-only",
+      "loading": "Loading the protocol…",
+      "offset": "Offset",
+      "openApp": "Open TCP-TRIP",
+      "notFound": {
+        "title": "This protocol is not shared",
+        "description": "The link is wrong, or its author stopped sharing the protocol."
+      },
+      "error": {
+        "title": "The protocol could not be loaded",
+        "description": "Try the link again in a moment."
+      }
     }
   },
   "theme": {
@@ -416,7 +439,9 @@
     "groups": {
       "tools": "Tools",
       "theory": "Theory",
-      "protocol": "Generic Protocol"
+      "protocol": "Generic Protocol",
+      "admin": "Administrator",
+      "teacher": "Professor"
     },
     "tools": {
       "converters": "Converters",
@@ -427,7 +452,8 @@
       "ascii": "ASCII Converter"
     },
     "theory": {
-      "tcpIpModel": "TCP/IP Model"
+      "tcpIpModel": "TCP/IP Model",
+      "presentations": "Theory Presentations"
     },
     "protocol": {
       "builder": "Build your Protocol",
@@ -442,6 +468,28 @@
     },
     "calculators": {
       "ipv4": "IPv4 Calculator"
+    },
+    "presentations": {
+      "mine": "My Presentations",
+      "new": "Create"
+    },
+    "admin": {
+      "presentations": "Review Presentations",
+      "users": "Users",
+      "teachers": "Professors",
+      "theory": "Theory Menu"
+    },
+    "teacher": {
+      "presentations": "Presentations",
+      "exercises": "Exercises",
+      "courses": "Courses"
+    },
+    "exercises": {
+      "new": "Create",
+      "mine": "My Exercises"
+    },
+    "courses": {
+      "mine": "My Courses"
     }
   },
   "exercises": {
@@ -486,5 +534,332 @@
     "rowsPerPage": "Rows",
     "expandRow": "Show details",
     "collapseRow": "Hide details"
+  },
+  "presentations": {
+    "topics": {
+      "tcp-ip-model": "TCP/IP model",
+      "application-layer": "Application layer",
+      "transport-layer": "Transport layer",
+      "internet-layer": "Internet layer",
+      "link-layer": "Link layer",
+      "general": "General"
+    },
+    "tokens": {
+      "foreground": "Body text",
+      "muted-foreground": "Muted text",
+      "primary": "Amber (primary)",
+      "secondary": "Violet (secondary)",
+      "tertiary": "Green (tertiary)",
+      "quaternary": "Purple (quaternary)",
+      "background": "Page background",
+      "card": "Card",
+      "muted": "Muted"
+    },
+    "editor": {
+      "untitled": "Untitled presentation",
+      "title": "Title",
+      "topic": "Theory topic",
+      "canvas": "Canvas",
+      "canvasLabel": "Slide canvas. Arrow keys move the selected element, Delete removes it.",
+      "addSlide": "Add a slide",
+      "duplicateSlide": "Duplicate the slide",
+      "deleteSlide": "Delete the slide",
+      "slideSection": "Slide",
+      "slideTitle": "Slide title",
+      "slideTitlePlaceholder": "For the outline and the thumbnail only",
+      "background": "Background",
+      "backgroundDefault": "Theme default",
+      "notes": "Speaker notes",
+      "notesPlaceholder": "What you want to remember while explaining this slide…",
+      "notesHint": "Only you see these in presentation mode; they are never projected.",
+      "elementSection": "Element",
+      "noSelection": "Select an element on the canvas to edit it.",
+      "text": "Text",
+      "fontSize": "Size",
+      "weight": "Weight",
+      "weights": {
+        "400": "Regular",
+        "600": "Semibold",
+        "700": "Bold"
+      },
+      "align": "Alignment",
+      "alignments": {
+        "left": "Left",
+        "center": "Center",
+        "right": "Right"
+      },
+      "color": "Colour",
+      "mono": "Monospaced",
+      "alt": "Alt text",
+      "altPlaceholder": "What the image shows",
+      "altHint": "Read out loud, and shown in place of the image if it fails to load.",
+      "fit": "Fit",
+      "fits": {
+        "contain": "Contain (no cropping)",
+        "cover": "Cover (crops)"
+      },
+      "box": {
+        "x": "X",
+        "y": "Y",
+        "width": "Width",
+        "height": "Height"
+      },
+      "rotation": "Rotation (degrees)",
+      "bringToFront": "Bring to front",
+      "sendToBack": "Send to back",
+      "lock": "Lock",
+      "unlock": "Unlock",
+      "deleteElement": "Delete",
+      "addText": "Add text",
+      "newText": "New text",
+      "images_one": "{{count}} image of {{max}}",
+      "images_other": "{{count}} images of {{max}}",
+      "upload": "Upload an image",
+      "uploading": "Uploading…",
+      "uploadHint": "{{formats}} · up to {{max}} MB per image.",
+      "saveBeforeUpload": "Save the presentation before uploading images: they are stored against it.",
+      "insertImage": "Insert into the slide",
+      "deleteImage": "Delete the image",
+      "modes": {
+        "slides": "Slides",
+        "markdown": "Markdown"
+      },
+      "markdown": "Markdown",
+      "markdownPlaceholder": "# Title\n\nWrite the lecture notes here…",
+      "preview": "Preview",
+      "untitledSlide": "Untitled",
+      "deckSection": "Presentation",
+      "menus": {
+        "file": "File",
+        "insert": "Insert",
+        "edit": "Edit"
+      },
+      "undo": "Undo",
+      "redo": "Redo",
+      "present": "Present",
+      "duplicateElement": "Duplicate the element",
+      "addImage": "Image…",
+      "addTable": "Table 3 × 2",
+      "addShape": "Figure",
+      "shapes": {
+        "rect": "Rectangle",
+        "ellipse": "Ellipse",
+        "triangle": "Triangle",
+        "line": "Line",
+        "arrow": "Arrow"
+      },
+      "shapeKind": "Figure",
+      "fill": "Fill",
+      "noFill": "No fill",
+      "stroke": "Outline",
+      "strokeWidth": "Outline width",
+      "tableRows": "Rows",
+      "tableColumns": "Columns",
+      "tableHeader": "First row is a heading",
+      "tableHint": "Double-click a cell on the canvas to type in it.",
+      "editText": "Edit the text",
+      "library": "The presentation's images",
+      "libraryHint": "Upload an image and insert it into the current slide.",
+      "previewEmpty": "Write something and it will show up here.",
+      "privateNotes": "My notes",
+      "privateNotesPlaceholder": "The plan for the class, what to ask, what went badly last term…",
+      "privateNotesHint": "Only you see these, here and in My Presentations. They are never published or projected.",
+      "modeTip": {
+        "slides": "A slide canvas: the only mode that can be projected in presentation mode.",
+        "markdown": "Linear writing for notes: it reads as a page, with no presentation mode."
+      },
+      "tips": {
+        "slidePicker": "Slide {{position}} of {{count}}: pick which one to edit.",
+        "addSlide": "Add an empty slide at the end.",
+        "undo": "Undo the last change (Ctrl+Z).",
+        "redo": "Redo what was undone (Ctrl+Shift+Z).",
+        "present": "Project the presentation full screen.",
+        "preview": "Show or hide the markdown preview.",
+        "topic": "The Theory topic it will be published under."
+      },
+      "snippets": {
+        "bold": "Bold",
+        "italic": "Italic",
+        "heading": "Heading",
+        "strikethrough": "Strikethrough",
+        "unorderedList": "List",
+        "orderedList": "Numbered list",
+        "checklist": "Checklist",
+        "link": "Link",
+        "image": "Image",
+        "table": "Table",
+        "code": "Code",
+        "quote": "Quote"
+      },
+      "snippetTips": {
+        "bold": "Inserts **bold**.",
+        "italic": "Inserts *italic*.",
+        "heading": "Marks the line as a heading with ##.",
+        "strikethrough": "Inserts ~~strikethrough~~.",
+        "unorderedList": "Turns the lines into a list with -.",
+        "orderedList": "Turns the lines into a numbered list.",
+        "checklist": "Inserts a task with - [ ].",
+        "link": "Inserts [text](url) and selects the url.",
+        "image": "Inserts ![text](url) and selects the url.",
+        "table": "Inserts the skeleton of a two-column table.",
+        "code": "Inserts `code`; a fenced ``` block for several lines.",
+        "quote": "Marks the line as a quote with >."
+      }
+    },
+    "actions": {
+      "save": "Save",
+      "saved": "Saved",
+      "present": "Presentation mode",
+      "submit": "Submit for review",
+      "submitUpdate": "Submit the new version",
+      "cancelSubmission": "Cancel the submission",
+      "unpublish": "Take off Theory"
+    },
+    "status": {
+      "unsaved": "Not saved yet. Save it to upload images and submit it for review.",
+      "unsavedChanges": "unsaved changes",
+      "draft": "Draft",
+      "pending": "In review",
+      "published": "Published in Theory",
+      "rejected": "Rejected",
+      "viewPublished": "View the published version",
+      "publishedIsSnapshot": "students keep seeing the approved version until the new one is approved.",
+      "reason": "Reason",
+      "pendingHint": "An administrator will review it. You can keep editing meanwhile, but what you submitted is what gets reviewed."
+    },
+    "toast": {
+      "save": "Save the presentation",
+      "savedBody": "The draft was saved.",
+      "submit": "Submit for review",
+      "submittedBody": "Submitted. An administrator will decide whether it is published.",
+      "withdraw": "Withdraw the presentation",
+      "withdrawnBody": "It is a draft again and no longer in Theory.",
+      "upload": "Upload the image",
+      "deleteImage": "Delete the image",
+      "delete": "Delete the presentation",
+      "deletedBody": "Deleted, along with its images and its published version."
+    },
+    "errors": {
+      "signedOut": "Sign in again to continue.",
+      "notTeacher": "Only a verified teacher can author presentations. Ask an administrator to validate your account.",
+      "conflict": "The state changed while you were working. Reload the list.",
+      "generic": "That did not go through. Try again.",
+      "list": "The list could not be loaded."
+    },
+    "mine": {
+      "title": "My presentations",
+      "intro": "Your theory presentations, and where each one stands in the review.",
+      "new": "New presentation",
+      "empty": "You have not created any presentation yet.",
+      "notFound": "That presentation does not exist, or is not yours.",
+      "backToList": "Back to the list",
+      "slides_one": "{{count}} slide",
+      "slides_other": "{{count}} slides",
+      "delete": "Delete the presentation"
+    },
+    "read": {
+      "missing": "This presentation is not published (or was withdrawn).",
+      "byline": "{{author}} · {{topic}}",
+      "present": "Presentation mode",
+      "progress": "You are {{percent}}% through",
+      "resume": "Pick up where you left off",
+      "emptyTitle": "Theory presentations",
+      "emptyHint": "Pick a presentation from the Theory menu in the sidebar. Your progress is saved on its own, whether you read the page or use presentation mode.",
+      "complete": "Complete"
+    },
+    "player": {
+      "label": "Presentation mode: {{title}}",
+      "notes": "Notes",
+      "close": "Leave presentation mode",
+      "noNotes": "This slide has no notes.",
+      "previous": "Previous",
+      "next": "Next",
+      "hint": "← → to change slide · N for notes · Esc to leave"
+    },
+    "review": {
+      "title": "Presentation review",
+      "intro": "What teachers have submitted. Approving freezes a copy of the document — that copy is what students read.",
+      "empty": "Nothing in this tray.",
+      "forbidden": "Only an administrator can review presentations.",
+      "meta_one": "{{author}} · {{topic}} · {{count}} slide",
+      "meta_other": "{{author}} · {{topic}} · {{count}} slides",
+      "submittedAt": "Submitted on {{date}}",
+      "read": "Read the content",
+      "hide": "Hide the content",
+      "present": "Open in presentation mode",
+      "notes": "Speaker notes",
+      "note": "Note for the teacher",
+      "notePlaceholder": "What needs fixing, or why it is approved…",
+      "noteHint": "Required when rejecting: it is the only thing the teacher gets to read.",
+      "noteRequired": "Write why it is rejected: the teacher needs to know what to fix.",
+      "approve": "Approve and publish",
+      "reject": "Reject",
+      "conflict": "Another administrator already decided on this presentation.",
+      "toast": {
+        "approve": "Approve the presentation",
+        "approvedBody": "“{{title}}” is now in Theory.",
+        "reject": "Reject the presentation",
+        "rejectedBody": "Rejected — the teacher will see the reason."
+      }
+    }
+  },
+  "theory": {
+    "icons": {
+      "book-open": "Book",
+      "layers": "Layers",
+      "network": "Network",
+      "globe": "Internet",
+      "route": "Route",
+      "cable": "Cable",
+      "server": "Server",
+      "mail": "Mail",
+      "radio": "Signal",
+      "shield": "Security",
+      "binary": "Binary",
+      "waypoints": "Nodes",
+      "file-text": "Document",
+      "presentation": "Presentation",
+      "graduation-cap": "Course"
+    },
+    "menu": {
+      "title": "Theory Menu",
+      "intro": "Group the approved presentations the way the course is taught: each section is a group of the Theory menu, and each entry opens a published presentation.",
+      "forbidden": "Only an administrator can edit the Theory menu.",
+      "empty": "No sections yet. Create the first one to start organising Theory.",
+      "sectionName": "Section name",
+      "sectionNamePlaceholder": "Transport layer",
+      "icon": "Icon",
+      "addSection": "Create section",
+      "deleteSection": "Delete the section",
+      "confirmDelete": "Delete",
+      "cancel": "Cancel",
+      "save": "Save",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "noItems": "This section has no presentations yet.",
+      "addPresentation": "Approved presentation",
+      "pickPresentation": "Pick a presentation",
+      "itemLabel": "Name in the menu (optional)",
+      "itemLabelPlaceholder": "The author's title is used",
+      "add": "Add",
+      "restoreTitle": "Use the author's title",
+      "removeItem": "Remove from the menu",
+      "hidden": "Not visible",
+      "hiddenHint": "Its presentation is not published right now, so nobody sees it in the menu. It comes back if it is approved again.",
+      "nothingToAdd": "No unfiled approved presentations. Approve one under Review Presentations.",
+      "unfiled_one": "{{count}} approved presentation is not in any section yet.",
+      "unfiled_other": "{{count}} approved presentations are not in any section yet.",
+      "errors": {
+        "load": "Could not load the Theory menu.",
+        "create": "Could not create the section",
+        "rename": "Could not save the change",
+        "move": "Could not move it",
+        "delete": "Could not delete it",
+        "add": "Could not add the presentation",
+        "forbidden": "Only an administrator can do this.",
+        "missing": "That no longer exists. The menu was reloaded.",
+        "conflict": "Not possible: the presentation is not published, it is already in the menu, or the section is full."
+      }
+    }
   }
 }

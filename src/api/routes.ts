@@ -1,5 +1,7 @@
 import { fail, ok } from "@/api/http";
+import { presentationRoutes } from "@/api/presentations";
 import { protocolRoutes } from "@/api/protocols";
+import { theoryRoutes } from "@/api/theory";
 
 /**
  * Every API route lives here. Add new modules under `src/api/` and mount them
@@ -19,6 +21,8 @@ export const apiRoutes = {
   },
 
   ...protocolRoutes,
+  ...presentationRoutes,
+  ...theoryRoutes,
 
   /**
    * Everything under `/api/` that matched nothing above. Without it a typo'd

@@ -3,7 +3,8 @@
     "copy": "Copiar",
     "copied": "Copiado",
     "increment": "Aumentar",
-    "decrement": "Disminuir"
+    "decrement": "Disminuir",
+    "loading": "Cargando…"
   },
   "tools": {
     "numberBaseConverter": {
@@ -289,17 +290,19 @@
         "redo": "Rehacer"
       },
       "save": {
-        "saved": "Protocolo guardado. Ya aparece en Mis Protocolos.",
+        "saved": "Protocolo guardado en tu cuenta.",
         "savedSession": "Protocolo guardado en esta sesión. La persistencia en el servidor todavía no está conectada, así que se pierde al recargar la página.",
         "blocked": "No se puede guardar todavía: {{problems}}.",
-        "error": "No se pudo guardar el protocolo."
+        "error": "No se pudo guardar el protocolo.",
+        "signedOut": "Inicia sesión para guardar tus protocolos."
       },
       "share": {
         "title": "Compartir el protocolo",
         "description": "Enlace de solo lectura al protocolo guardado.",
         "pending": "El enlace queda reservado: la página pública se habilita cuando la persistencia en el servidor esté conectada.",
         "needsSave": "Guarda el protocolo antes de compartirlo: sin guardar no hay nada detrás del enlace.",
-        "error": "No se pudo generar el enlace."
+        "error": "No se pudo generar el enlace.",
+        "signedOut": "Inicia sesión para compartir tus protocolos."
       },
       "export": {
         "title": "Exportar el protocolo",
@@ -310,7 +313,13 @@
         "svgHint": "Vectorial, para documentos e informes.",
         "png": "Diagrama (PNG)",
         "pngHint": "Imagen lista para diapositivas.",
-        "error": "No se pudo generar el archivo."
+        "error": "No se pudo generar el archivo.",
+        "done": "{{filename}} descargado."
+      },
+      "toast": {
+        "save": "Guardar protocolo",
+        "share": "Compartir protocolo",
+        "export": "Exportar protocolo"
       },
       "clear": {
         "title": "¿Limpiar el diagrama?",
@@ -392,6 +401,20 @@
     "notFound": {
       "title": "Página no encontrada",
       "description": "No hay nada en {{path}}."
+    },
+    "shared": {
+      "badge": "Solo lectura",
+      "loading": "Cargando el protocolo…",
+      "offset": "Offset",
+      "openApp": "Abrir TCP-TRIP",
+      "notFound": {
+        "title": "Este protocolo no está compartido",
+        "description": "El enlace es incorrecto, o su autor dejó de compartir el protocolo."
+      },
+      "error": {
+        "title": "No se pudo cargar el protocolo",
+        "description": "Vuelve a intentarlo con el enlace en un momento."
+      }
     }
   },
   "theme": {
@@ -416,7 +439,9 @@
     "groups": {
       "tools": "Herramientas",
       "theory": "Teoría",
-      "protocol": "Protocolo Genérico"
+      "protocol": "Protocolo Genérico",
+      "admin": "Administrador",
+      "teacher": "Profesor"
     },
     "tools": {
       "converters": "Conversores",
@@ -427,7 +452,8 @@
       "ascii": "Conversor ASCII"
     },
     "theory": {
-      "tcpIpModel": "Modelo TCP/IP"
+      "tcpIpModel": "Modelo TCP/IP",
+      "presentations": "Presentaciones de Teoría"
     },
     "protocol": {
       "builder": "Crea tu Protocolo",
@@ -442,6 +468,28 @@
     },
     "calculators": {
       "ipv4": "Calculadora IPv4"
+    },
+    "presentations": {
+      "mine": "Mis Presentaciones",
+      "new": "Crear"
+    },
+    "admin": {
+      "presentations": "Revisar Presentaciones",
+      "users": "Usuarios",
+      "teachers": "Profesores",
+      "theory": "Menú de Teoría"
+    },
+    "teacher": {
+      "presentations": "Presentaciones",
+      "exercises": "Ejercicios",
+      "courses": "Cursos"
+    },
+    "exercises": {
+      "new": "Crear",
+      "mine": "Mis Ejercicios"
+    },
+    "courses": {
+      "mine": "Mis Cursos"
     }
   },
   "exercises": {
@@ -486,5 +534,332 @@
     "rowsPerPage": "Filas",
     "expandRow": "Ver detalles",
     "collapseRow": "Ocultar detalles"
+  },
+  "presentations": {
+    "topics": {
+      "tcp-ip-model": "Modelo TCP/IP",
+      "application-layer": "Capa de aplicación",
+      "transport-layer": "Capa de transporte",
+      "internet-layer": "Capa de internet",
+      "link-layer": "Capa de enlace",
+      "general": "General"
+    },
+    "tokens": {
+      "foreground": "Texto principal",
+      "muted-foreground": "Texto secundario",
+      "primary": "Ámbar (primario)",
+      "secondary": "Violeta (secundario)",
+      "tertiary": "Verde (terciario)",
+      "quaternary": "Púrpura (cuaternario)",
+      "background": "Fondo de la página",
+      "card": "Tarjeta",
+      "muted": "Apagado"
+    },
+    "editor": {
+      "untitled": "Presentación sin título",
+      "title": "Título",
+      "topic": "Tema de teoría",
+      "canvas": "Lienzo",
+      "canvasLabel": "Lienzo de la diapositiva. Usa las flechas para mover el elemento seleccionado y Supr para borrarlo.",
+      "addSlide": "Añadir diapositiva",
+      "duplicateSlide": "Duplicar la diapositiva",
+      "deleteSlide": "Eliminar la diapositiva",
+      "slideSection": "Diapositiva",
+      "slideTitle": "Título de la diapositiva",
+      "slideTitlePlaceholder": "Solo para el índice y la miniatura",
+      "background": "Fondo",
+      "backgroundDefault": "El del tema",
+      "notes": "Notas del ponente",
+      "notesPlaceholder": "Lo que quieres recordar al explicar esta diapositiva…",
+      "notesHint": "Solo las ves tú en el modo presentación; nunca se proyectan.",
+      "elementSection": "Elemento",
+      "noSelection": "Selecciona un elemento del lienzo para editarlo.",
+      "text": "Texto",
+      "fontSize": "Tamaño",
+      "weight": "Grosor",
+      "weights": {
+        "400": "Normal",
+        "600": "Seminegrita",
+        "700": "Negrita"
+      },
+      "align": "Alineación",
+      "alignments": {
+        "left": "Izquierda",
+        "center": "Centro",
+        "right": "Derecha"
+      },
+      "color": "Color",
+      "mono": "Monoespaciada",
+      "alt": "Texto alternativo",
+      "altPlaceholder": "Qué muestra la imagen",
+      "altHint": "Se lee en voz alta y sustituye a la imagen si no carga.",
+      "fit": "Ajuste",
+      "fits": {
+        "contain": "Contener (sin recortar)",
+        "cover": "Cubrir (recorta)"
+      },
+      "box": {
+        "x": "X",
+        "y": "Y",
+        "width": "Ancho",
+        "height": "Alto"
+      },
+      "rotation": "Rotación (grados)",
+      "bringToFront": "Traer al frente",
+      "sendToBack": "Enviar al fondo",
+      "lock": "Bloquear",
+      "unlock": "Desbloquear",
+      "deleteElement": "Eliminar",
+      "addText": "Añadir texto",
+      "newText": "Texto nuevo",
+      "images_one": "{{count}} imagen de {{max}}",
+      "images_other": "{{count}} imágenes de {{max}}",
+      "upload": "Subir imagen",
+      "uploading": "Subiendo…",
+      "uploadHint": "{{formats}} · hasta {{max}} MB por imagen.",
+      "saveBeforeUpload": "Guarda la presentación antes de subir imágenes: se almacenan junto a ella.",
+      "insertImage": "Insertar en la diapositiva",
+      "deleteImage": "Eliminar la imagen",
+      "modes": {
+        "slides": "Diapositivas",
+        "markdown": "Markdown"
+      },
+      "markdown": "Markdown",
+      "markdownPlaceholder": "# Título\n\nEscribe aquí los apuntes de la clase…",
+      "preview": "Vista previa",
+      "untitledSlide": "Sin título",
+      "deckSection": "Presentación",
+      "menus": {
+        "file": "Archivo",
+        "insert": "Insertar",
+        "edit": "Editar"
+      },
+      "undo": "Deshacer",
+      "redo": "Rehacer",
+      "present": "Presentar",
+      "duplicateElement": "Duplicar el elemento",
+      "addImage": "Imagen…",
+      "addTable": "Tabla 3 × 2",
+      "addShape": "Figura",
+      "shapes": {
+        "rect": "Rectángulo",
+        "ellipse": "Elipse",
+        "triangle": "Triángulo",
+        "line": "Línea",
+        "arrow": "Flecha"
+      },
+      "shapeKind": "Figura",
+      "fill": "Relleno",
+      "noFill": "Sin relleno",
+      "stroke": "Borde",
+      "strokeWidth": "Grosor del borde",
+      "tableRows": "Filas",
+      "tableColumns": "Columnas",
+      "tableHeader": "Primera fila como encabezado",
+      "tableHint": "Haz doble clic en una celda del lienzo para escribir en ella.",
+      "editText": "Editar el texto",
+      "library": "Imágenes de la presentación",
+      "libraryHint": "Sube una imagen y insértala en la diapositiva actual.",
+      "previewEmpty": "Escribe algo y aparecerá aquí.",
+      "privateNotes": "Mis notas",
+      "privateNotesPlaceholder": "El plan de la clase, qué preguntar, qué salió mal el semestre pasado…",
+      "privateNotesHint": "Solo tú las ves, aquí y en Mis Presentaciones. Nunca se publican ni se proyectan.",
+      "modeTip": {
+        "slides": "Lienzo de diapositivas: es el único modo que se proyecta en modo presentación.",
+        "markdown": "Escritura lineal para apuntes: se lee como una página, sin modo presentación."
+      },
+      "tips": {
+        "slidePicker": "Diapositiva {{position}} de {{count}}: elige cuál editar.",
+        "addSlide": "Añade una diapositiva vacía al final.",
+        "undo": "Deshace el último cambio (Ctrl+Z).",
+        "redo": "Rehace lo deshecho (Ctrl+Mayús+Z).",
+        "present": "Proyecta la presentación a pantalla completa.",
+        "preview": "Muestra u oculta la vista previa del markdown.",
+        "topic": "Tema de teoría bajo el que se publicará."
+      },
+      "snippets": {
+        "bold": "Negrita",
+        "italic": "Cursiva",
+        "heading": "Encabezado",
+        "strikethrough": "Tachado",
+        "unorderedList": "Lista",
+        "orderedList": "Lista numerada",
+        "checklist": "Lista de tareas",
+        "link": "Enlace",
+        "image": "Imagen",
+        "table": "Tabla",
+        "code": "Código",
+        "quote": "Cita"
+      },
+      "snippetTips": {
+        "bold": "Inserta **negrita**.",
+        "italic": "Inserta *cursiva*.",
+        "heading": "Marca la línea como encabezado con ##.",
+        "strikethrough": "Inserta ~~tachado~~.",
+        "unorderedList": "Convierte las líneas en una lista con -.",
+        "orderedList": "Convierte las líneas en una lista numerada.",
+        "checklist": "Inserta una tarea con - [ ].",
+        "link": "Inserta [texto](url) y selecciona la url.",
+        "image": "Inserta ![texto](url) y selecciona la url.",
+        "table": "Inserta la estructura de una tabla de dos columnas.",
+        "code": "Inserta `código`; si hay varias líneas, un bloque ```.",
+        "quote": "Marca la línea como cita con >."
+      }
+    },
+    "actions": {
+      "save": "Guardar",
+      "saved": "Guardado",
+      "present": "Modo presentación",
+      "submit": "Enviar a revisión",
+      "submitUpdate": "Enviar la nueva versión",
+      "cancelSubmission": "Cancelar el envío",
+      "unpublish": "Quitar de Teoría"
+    },
+    "status": {
+      "unsaved": "Todavía sin guardar. Guarda para poder subir imágenes y enviarla a revisión.",
+      "unsavedChanges": "cambios sin guardar",
+      "draft": "Borrador",
+      "pending": "En revisión",
+      "published": "Publicada en Teoría",
+      "rejected": "Rechazada",
+      "viewPublished": "Ver la versión publicada",
+      "publishedIsSnapshot": "los estudiantes siguen viendo la versión aprobada hasta que se apruebe la nueva.",
+      "reason": "Motivo",
+      "pendingHint": "Un administrador la revisará. Mientras está en revisión puedes seguir editándola, pero se revisa lo que enviaste."
+    },
+    "toast": {
+      "save": "Guardar la presentación",
+      "savedBody": "Se guardó el borrador.",
+      "submit": "Enviar a revisión",
+      "submittedBody": "Enviada. Un administrador decidirá si se publica.",
+      "withdraw": "Retirar la presentación",
+      "withdrawnBody": "Vuelve a ser un borrador y ya no está en Teoría.",
+      "upload": "Subir la imagen",
+      "deleteImage": "Eliminar la imagen",
+      "delete": "Eliminar la presentación",
+      "deletedBody": "Se eliminó, junto con sus imágenes y su versión publicada."
+    },
+    "errors": {
+      "signedOut": "Inicia sesión otra vez para continuar.",
+      "notTeacher": "Solo un profesor verificado puede crear presentaciones. Pide a un administrador que valide tu cuenta.",
+      "conflict": "El estado cambió mientras trabajabas. Vuelve a cargar la lista.",
+      "generic": "No se pudo completar la operación. Inténtalo de nuevo.",
+      "list": "No se pudo cargar la lista."
+    },
+    "mine": {
+      "title": "Mis presentaciones",
+      "intro": "Tus presentaciones de teoría y en qué punto de la revisión está cada una.",
+      "new": "Nueva presentación",
+      "empty": "Todavía no has creado ninguna presentación.",
+      "notFound": "Esa presentación no existe o no es tuya.",
+      "backToList": "Volver a la lista",
+      "slides_one": "{{count}} diapositiva",
+      "slides_other": "{{count}} diapositivas",
+      "delete": "Eliminar la presentación"
+    },
+    "read": {
+      "missing": "Esta presentación no está publicada (o se retiró).",
+      "byline": "{{author}} · {{topic}}",
+      "present": "Modo presentación",
+      "progress": "Llevas el {{percent}} %",
+      "resume": "Seguir donde lo dejaste",
+      "emptyTitle": "Presentaciones de teoría",
+      "emptyHint": "Elige una presentación en el menú Teoría de la barra lateral. Tu avance se guarda solo, tanto si lees la página como si usas el modo presentación.",
+      "complete": "Completada"
+    },
+    "player": {
+      "label": "Modo presentación: {{title}}",
+      "notes": "Notas",
+      "close": "Salir del modo presentación",
+      "noNotes": "Esta diapositiva no tiene notas.",
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "hint": "← → para cambiar de diapositiva · N para las notas · Esc para salir"
+    },
+    "review": {
+      "title": "Revisión de presentaciones",
+      "intro": "Lo que los profesores han enviado. Al aprobar, se congela una copia del documento: es esa copia la que leen los estudiantes.",
+      "empty": "No hay nada en esta bandeja.",
+      "forbidden": "Solo un administrador puede revisar presentaciones.",
+      "meta_one": "{{author}} · {{topic}} · {{count}} diapositiva",
+      "meta_other": "{{author}} · {{topic}} · {{count}} diapositivas",
+      "submittedAt": "Enviada el {{date}}",
+      "read": "Leer el contenido",
+      "hide": "Ocultar el contenido",
+      "present": "Verla en modo presentación",
+      "notes": "Notas del ponente",
+      "note": "Nota para el profesor",
+      "notePlaceholder": "Qué hay que corregir, o por qué se aprueba…",
+      "noteHint": "Obligatoria al rechazar: es lo único que el profesor podrá leer.",
+      "noteRequired": "Escribe el motivo del rechazo: el profesor necesita saber qué corregir.",
+      "approve": "Aprobar y publicar",
+      "reject": "Rechazar",
+      "conflict": "Otro administrador ya decidió sobre esta presentación.",
+      "toast": {
+        "approve": "Aprobar la presentación",
+        "approvedBody": "«{{title}}» ya está en Teoría.",
+        "reject": "Rechazar la presentación",
+        "rejectedBody": "Se rechazó y el profesor verá el motivo."
+      }
+    }
+  },
+  "theory": {
+    "icons": {
+      "book-open": "Libro",
+      "layers": "Capas",
+      "network": "Red",
+      "globe": "Internet",
+      "route": "Ruta",
+      "cable": "Cable",
+      "server": "Servidor",
+      "mail": "Correo",
+      "radio": "Señal",
+      "shield": "Seguridad",
+      "binary": "Binario",
+      "waypoints": "Nodos",
+      "file-text": "Documento",
+      "presentation": "Presentación",
+      "graduation-cap": "Curso"
+    },
+    "menu": {
+      "title": "Menú de Teoría",
+      "intro": "Agrupa las presentaciones aprobadas como se enseña el curso: cada sección es un grupo del menú Teoría, y cada entrada abre una presentación publicada.",
+      "forbidden": "Solo un administrador puede editar el menú de Teoría.",
+      "empty": "Todavía no hay secciones. Crea la primera para empezar a organizar Teoría.",
+      "sectionName": "Nombre de la sección",
+      "sectionNamePlaceholder": "Capa de transporte",
+      "icon": "Icono",
+      "addSection": "Crear sección",
+      "deleteSection": "Eliminar la sección",
+      "confirmDelete": "Eliminar",
+      "cancel": "Cancelar",
+      "save": "Guardar",
+      "moveUp": "Subir",
+      "moveDown": "Bajar",
+      "noItems": "Esta sección todavía no tiene presentaciones.",
+      "addPresentation": "Presentación aprobada",
+      "pickPresentation": "Elige una presentación",
+      "itemLabel": "Nombre en el menú (opcional)",
+      "itemLabelPlaceholder": "Se usa el título del autor",
+      "add": "Añadir",
+      "restoreTitle": "Usar el título del autor",
+      "removeItem": "Quitar del menú",
+      "hidden": "No visible",
+      "hiddenHint": "Su presentación no está publicada ahora mismo, así que nadie la ve en el menú. Vuelve a aparecer si se aprueba otra vez.",
+      "nothingToAdd": "No hay presentaciones aprobadas sin asignar. Aprueba una en Revisar Presentaciones.",
+      "unfiled_one": "Queda {{count}} presentación aprobada sin asignar a ninguna sección.",
+      "unfiled_other": "Quedan {{count}} presentaciones aprobadas sin asignar a ninguna sección.",
+      "errors": {
+        "load": "No se pudo cargar el menú de Teoría.",
+        "create": "No se pudo crear la sección",
+        "rename": "No se pudo guardar el cambio",
+        "move": "No se pudo mover",
+        "delete": "No se pudo eliminar",
+        "add": "No se pudo añadir la presentación",
+        "forbidden": "Solo un administrador puede hacer esto.",
+        "missing": "Eso ya no existe. Se recargó el menú.",
+        "conflict": "No se puede: la presentación no está publicada, ya está en el menú, o la sección está llena."
+      }
+    }
   }
 }

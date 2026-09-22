@@ -5,7 +5,10 @@ import { TabScopeProvider, useTabs } from "@/context/TabsProvider";
 import { AsciiConverter } from "@/features/ascii-converter";
 import { IPv4Calculator } from "@/features/ipv4-calculator";
 import { NumberBaseConverter } from "@/features/number-base-converter";
+import { MyPresentations, PresentationEditor } from "@/features/presentation-editor";
+import { PresentationReview } from "@/features/presentation-review";
 import { ProtocolBuilder } from "@/features/protocol-builder";
+import { TheoryPresentationPage } from "@/features/theory-presentations";
 import { findPage, type PagePath } from "@/config/navigation";
 import { cn } from "@/lib/utils";
 import { HomePage } from "@/pages/HomePage";
@@ -24,6 +27,10 @@ const PAGE_COMPONENTS: Partial<Record<PagePath, ComponentType>> = {
   "/tools/converters/ascii": AsciiConverter,
   "/tools/calculators/ipv4": IPv4Calculator,
   "/generic-protocol/new": ProtocolBuilder,
+  "/theory/presentations": TheoryPresentationPage,
+  "/teacher/presentations/new": PresentationEditor,
+  "/teacher/presentations/mine": MyPresentations,
+  "/admin/presentations": PresentationReview,
 };
 
 export function TabHost() {

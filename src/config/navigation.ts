@@ -3,10 +3,19 @@ import {
   ArrowLeftRight,
   Calculator,
   FolderOpen,
+  GraduationCap,
+  Hammer,
   Layers,
+  ListTree,
   MessagesSquare,
-  PenLine,
+  MonitorPlay,
+  NotebookPen,
+  Presentation,
+  ShieldCheck,
+  Users,
 } from "lucide-react";
+
+import type { AppRole } from "@/lib/auth/roles";
 
 /**
  * The single source of navigation truth: sidebar, breadcrumb, tab registry and
@@ -38,6 +47,15 @@ export type NavNode = {
    * the "no items" hint. Absent = a leaf link.
    */
   readonly children?: readonly NavNode[];
+  /**
+   * Roles the sidebar shows this node to. Absent = everyone.
+   *
+   * **Cosmetic, not access control**: it keeps a teacher's editor out of a
+   * student's sidebar, and nothing more. The real check is the role the server
+   * resolves from Clerk on every request (`src/api/auth.ts`), so a hidden path
+   * typed by hand renders and then gets a 403 from every call it makes.
+   */
+  readonly roles?: readonly AppRole[];
 };
 
 export const NAVIGATION = [
@@ -86,6 +104,104 @@ export const NAVIGATION = [
         icon: Layers,
         children: [],
       },
+      {
+        // The reader of what teachers publish. One page for everyone: a
+        // published presentation is educational content, so there is no role
+        // on it — and reading one is navigation *inside* this tab, at
+        // `/theory/presentations/<slug>`.
+        //
+        // It is **not** a listing: the entries of this group are built by an
+        // administrator (`theory_sections`) and appended to it at runtime by
+        // `AppSidebar`, so a published presentation reaches a student through
+        // the syllabus rather than through a generated index.
+        segment: "presentations",
+        titleKey: "sidebar.theory.presentations",
+        icon: Presentation,
+        page: true,
+      },
+    ],
+  },
+  /**
+   * The teacher's own group. Everything in it is authoring, and the whole
+   * group is hidden from a student — cosmetically: every page below makes
+   * requests the server refuses without the teacher role.
+   */
+  {
+    segment: "teacher",
+    titleKey: "sidebar.groups.teacher",
+    roles: ["teacher"],
+    children: [
+      {
+        segment: "presentations",
+        titleKey: "sidebar.teacher.presentations",
+        icon: MonitorPlay,
+        children: [
+          {
+            segment: "new",
+            titleKey: "sidebar.presentations.new",
+            // A slide canvas needs the whole content column, like the protocol
+            // diagram does.
+            page: { wide: true },
+          },
+          {
+            segment: "mine",
+            titleKey: "sidebar.presentations.mine",
+            page: true,
+          },
+        ],
+      },
+      {
+        segment: "exercises",
+        titleKey: "sidebar.teacher.exercises",
+        icon: NotebookPen,
+        children: [
+          { segment: "new", titleKey: "sidebar.exercises.new", page: true },
+          { segment: "mine", titleKey: "sidebar.exercises.mine", page: true },
+        ],
+      },
+      {
+        segment: "courses",
+        titleKey: "sidebar.teacher.courses",
+        icon: GraduationCap,
+        children: [
+          { segment: "mine", titleKey: "sidebar.courses.mine", page: true },
+        ],
+      },
+    ],
+  },
+  /**
+   * The administrator's group: the two places this app acts on other people's
+   * accounts and content, plus the Theory menu they curate.
+   */
+  {
+    segment: "admin",
+    titleKey: "sidebar.groups.admin",
+    roles: ["admin"],
+    children: [
+      {
+        segment: "users",
+        titleKey: "sidebar.admin.users",
+        icon: Users,
+        page: true,
+      },
+      {
+        segment: "teachers",
+        titleKey: "sidebar.admin.teachers",
+        icon: GraduationCap,
+        page: true,
+      },
+      {
+        segment: "presentations",
+        titleKey: "sidebar.admin.presentations",
+        icon: ShieldCheck,
+        page: true,
+      },
+      {
+        segment: "theory",
+        titleKey: "sidebar.admin.theory",
+        icon: ListTree,
+        page: true,
+      },
     ],
   },
   {
@@ -95,7 +211,7 @@ export const NAVIGATION = [
       {
         segment: "new",
         titleKey: "sidebar.protocol.builder",
-        icon: PenLine,
+        icon: Hammer,
         page: { wide: true },
       },
       {
@@ -147,6 +263,8 @@ export type NavItem = {
   page: PageDefinition | null;
   /** `true` for a group/section (renders a collapsible), `false` for a link. */
   branch: boolean;
+  /** Roles the sidebar shows this to. Absent = everyone. See `NavNode`. */
+  roles?: readonly AppRole[];
   children: NavItem[];
 };
 
@@ -156,6 +274,8 @@ export type PageDefinition = {
   titleKey: string;
   /** Opts the page out of the reading-width column. `MainLayout` reads it. */
   wide?: true;
+  /** Roles the sidebar offers the page to. Absent = everyone. See `NavNode`. */
+  roles?: readonly AppRole[];
 };
 
 function build(nodes: readonly NavNode[], prefix: string): NavItem[] {
@@ -170,9 +290,11 @@ function build(nodes: readonly NavNode[], prefix: string): NavItem[] {
             path,
             titleKey: node.titleKey,
             ...(node.page !== true && node.page.wide ? { wide: true as const } : {}),
+            ...(node.roles ? { roles: node.roles } : {}),
           }
         : null,
       branch: node.children !== undefined,
+      ...(node.roles ? { roles: node.roles } : {}),
       children: build(node.children ?? [], path),
     };
   });
@@ -207,4 +329,15 @@ export function findPage(path: string): PageDefinition | undefined {
 
 export function isPagePath(path: string): boolean {
   return findPage(path) !== undefined;
+}
+
+/**
+ * Whether a role sees a node in the sidebar. Every navigation filter goes
+ * through this, so "absent means everyone" is decided in exactly one place.
+ */
+export function isVisibleTo(
+  item: { roles?: readonly AppRole[] },
+  role: AppRole,
+): boolean {
+  return item.roles === undefined || item.roles.includes(role);
 }
