@@ -8,6 +8,7 @@ import { NumberBaseConverter } from "@/features/number-base-converter";
 import { MyPresentations, PresentationEditor } from "@/features/presentation-editor";
 import { PresentationReview } from "@/features/presentation-review";
 import { ProtocolBuilder } from "@/features/protocol-builder";
+import { TheoryMenuManager } from "@/features/admin-theory";
 import { TheoryPresentationPage } from "@/features/theory-presentations";
 import { findPage, type PagePath } from "@/config/navigation";
 import { cn } from "@/lib/utils";
@@ -31,6 +32,7 @@ const PAGE_COMPONENTS: Partial<Record<PagePath, ComponentType>> = {
   "/teacher/presentations/new": PresentationEditor,
   "/teacher/presentations/mine": MyPresentations,
   "/admin/presentations": PresentationReview,
+  "/admin/theory": TheoryMenuManager,
 };
 
 export function TabHost() {
