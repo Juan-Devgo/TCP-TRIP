@@ -37,13 +37,16 @@ bun run ui <component>                   # bunx shadcn@latest add <component>
 
 Single Bun process serves both the API and the SPA — there is no separate frontend dev server and no Vite.
 
-- `src/index.ts` — `Bun.serve()` entry. Spreads `apiRoutes`, then `"/*": index` as the SPA fallback so any unmatched path renders the React app. `development: { hmr, console }` only when `NODE_ENV !== "production"`.
+- `src/index.ts` — `Bun.serve()` entry. Spreads `apiRoutes`, then `"/*": index` as the SPA fallback so any unmatched *page* path renders the React app — `/api/*` is claimed inside `apiRoutes` by a static JSON 404, so a wrong endpoint never answers HTML. `error: onError` catches every uncaught throw in one place. No `port` option: Bun already reads `$BUN_PORT`, `$PORT`, `$NODE_PORT`, then 3000. `development: { hmr, console }` only when `NODE_ENV !== "production"`.
+- **TLS is wired but dormant.** `readTls()` in `src/index.ts` returns a `tls` option only when `TLS_KEY_PATH` and `TLS_CERT_PATH` both point at readable PEM files (`Bun.file`, so they are read lazily and never inlined anywhere); optional `TLS_CA_PATH`, `TLS_PASSPHRASE`, `TLS_SERVER_NAME` ride along. Unset — the current state, no certificate yet — the same server stays on plain HTTP; set but unreadable, it warns and keeps serving. None of these take a `PUBLIC_` prefix.
 - `src/index.html` — imported directly by `index.ts`; Bun's bundler transpiles the `<script type="module" src="./main.tsx">` graph (TSX + CSS + Tailwind) with no separate build step in dev. `bunfig.toml` registers `bun-plugin-tailwind` for `serve.static`; `build.ts` registers the same plugin for production builds.
 - `src/api/routes.ts` — the single route map. **Add new API modules under `src/api/` and mount them in this map; `src/index.ts` should not change.**
-- `src/api/http.ts` — response contract for every route: `ok(data)`, `fail(status, message, details)` (shape `{ error: { message, details } }`), and `handler(fn)` which turns an uncaught throw into a logged 500. Wrap every route handler in `handler`.
+- `src/api/guards.ts` — the role guards every gated route starts with: `authorOnly(req)` (teacher) and `adminOnly(req)` return **either** the verified caller or the `Response` that refuses them, which `isRefusal` narrows. 401 ("sign in") and 403 ("ask an administrator") are separate answers because the UI says different things.
+- `src/api/http.ts` — response contract for every route: `ok(data)`, `fail(status, message, details)` (shape `{ error: { message, details } }`), and `onError` — `Bun.serve`'s `error` callback, mounted once in `src/index.ts`, which logs an uncaught throw and answers the same JSON 500 (message and stack in `details` outside production). **Route handlers are plain functions**: there is no per-handler wrapper to remember, and returning Bun's built-in HTML error page to an API client is exactly what `onError` prevents.
 - `src/main.tsx` — React root: `StrictMode` → `BrowserRouter` → `ClerkProvider` → `TabsProvider` → `ToolActionsProvider` → `App`. **There is no `<Routes>` map**: the pathname drives the tab system, which resolves it against the page registry.
 - `src/config/navigation.ts` — **the single source of navigation truth**: one `NAVIGATION` tree of nodes (`segment` + `titleKey` + optional `icon`, `page`, `children`) from which the sidebar (`NAV_TREE`), the breadcrumb labels (`findNavItem`), the tab registry (`PAGES`, `findPage`, `isPagePath`) and the `PagePath` literal union are all derived. Metadata only — no JSX, no feature imports — so the tab state layer can import it. **A node with `page` opens as a tab; anything else is navigation inside the active tab.** Paths are never written by hand: a node's path is the join of its ancestors' segments, so sidebar link, tab and crumb cannot drift.
-  - **Adding a page = one node in `NAVIGATION` + one entry in `PAGE_COMPONENTS` (`TabHost`) + the `titleKey` in both locale files.** `PAGE_COMPONENTS` is keyed on `PagePath`, so a stale or misspelled path fails `bun run typecheck` instead of silently rendering the placeholder. `page: { wide: true }` opts a canvas page out of the reading-width column.
+  - **The Theory group is extended at runtime.** Its static nodes live in the tree; the sections under them are rows an administrator created (`theory_sections`), which `AppSidebar` appends from `useTheoryMenu()`. Each entry links to `/theory/presentations/<slug>`, a non-registered path, so it is navigation inside the Theory reader's tab.
+  - **Adding a page = one node in `NAVIGATION` + one entry in `PAGE_COMPONENTS` (`TabHost`) + the `titleKey` in both locale files.** A node may carry `roles: ["teacher"]` to keep it out of other roles' sidebars — cosmetic only; the server decides (see Clerk below). `PAGE_COMPONENTS` is keyed on `PagePath`, so a stale or misspelled path fails `bun run typecheck` instead of silently rendering the placeholder. `page: { wide: true }` opts a canvas page out of the reading-width column.
 - `src/components/layouts/MainLayout.tsx` — page shell: `SidebarProvider` + `AppSidebar` + `AppHeader` + `ContentToolbar`, content constrained to `max-w-[42em]` and scoped with `typeset typeset-docs`. `AppHeader` holds the `SidebarTrigger`, the `TabBar`, and `ModeToggle`/`LanguageToggle`; `ContentToolbar` holds the per-tab back/forward buttons, the `AppBreadcrumb` and the active tool's actions. Breadcrumb segment labels reuse the `sidebar.*` i18n keys.
 - **Tab system** (spec: `docs/ui/Tab.md`, state machine: `src/lib/tabs.ts` + `src/lib/tabHistory.ts`): every sidebar page opens as a browser-like tab that keeps its state in memory while open — one tab per page, focus the existing tab instead of duplicating, no persistence across reloads. New tools must work mounted inside this tab system, not as routes that unmount on navigation. **Inactive tabs stay mounted**, so anything global inside a tool (a `document` listener, a timer) must be gated on `useIsTabActive()`.
   - The URL and the tab set are kept in step by two effects that run in the *same* commit, so the second one cannot see what the first just dispatched. `TabsState.syncedPath` records which pathname the state has been reconciled with, and `urlRealignTarget()` refuses to move the URL until it matches. Removing that guard makes every link ping-pong between the old and new page forever. Any new reducer case must carry `syncedPath` through (`...state`), never rebuild the state object from scratch.
@@ -59,22 +62,37 @@ src/
 ├── assets/         static assets (images, icons) — fonts come from npm
 ├── components/
 │   ├── common/     app-wide components (AppSidebar, AppBreadcrumb,
-│   │               ExerciseGeneratorDialog, ModeToggle, LanguageToggle)
+│   │               ExerciseGeneratorDialog, ModeToggle, LanguageToggle,
+│   │               PresentationStage, PresentationPlayer, Markdown,
+│   │               TheoryIcon)
 │   ├── layouts/    the shell (MainLayout, AppHeader, ContentToolbar,
 │   │               TabBar, TabHost)
 │   └── ui/         shadcn primitives — generated, don't hand-write
 ├── config/         i18n init, locales, the navigation tree
 ├── context/        React providers (ThemeProvider, TabsProvider,
 │                   ToolActionsProvider)
+├── db/             bun:sqlite data layer: singleton connection, schema,
+│                   DAO/Repository bases, one folder per domain (not React)
 ├── features/       one folder per tool — see below
 ├── hooks/          shared hooks
 ├── lib/            cross-cutting pure logic: tabs.ts, tabHistory.ts,
-│                   utils.ts (cn), pdf/, exercises/types.ts
+│                   utils.ts (cn), pdf/, exercises/types.ts,
+│                   auth/roles.ts, markdown/, and the contracts shared by
+│                   client and server: protocols/, presentations/,
+│                   theory/ (the admin-built Theory menu)
 ├── pages/          route-level views (HomePage, NotFoundPage, Placeholder)
-├── services/       API clients / query hooks (empty until persistence lands)
+├── services/       API clients: client.ts (the shared ApiError + request),
+│                   one module per API
 ├── styles/         globals.css + vendored typeset.css
 └── types/          ambient .d.ts declarations
 ```
+
+Features so far: `number-base-converter`, `ascii-converter`, `ipv4-calculator`, `protocol-builder`, `presentation-editor` (the teacher's slide/markdown editor), `presentation-review` (the admin's approval queue), `admin-theory` (the admin's builder for the Theory menu) and `theory-presentations` (the student's reader, with reading progress — **no index**: the sidebar is the index). What the presentation features share sits above them: the slide renderer and the projector player (`src/components/common/PresentationStage.tsx`, `PresentationPlayer.tsx`), the Markdown renderer (`src/components/common/Markdown.tsx` over the token parser in `src/lib/markdown/`) and the document contract (`src/lib/presentations/contract.ts`).
+
+**The presentation editor has two renderers on purpose.** Editing happens on a real `<canvas>` — `konva` + `react-konva`, the one drawing dependency in the project, because a transformer (scale and rotate handles), hit detection and a table drawn as a grid are what a slide editor is made of. Everything a *reader* sees stays DOM (`PresentationStage`), so slide text is selectable, screen-readable and themed by the same CSS variables as the rest of the app. Two consequences to respect:
+
+- A canvas cannot paint `var(--color-*)`, so `src/features/presentation-editor/lib/themeColors.ts` resolves the tokens off `:root` and re-reads them when the theme class flips. The document still stores **token names** — that is what keeps a slide readable in both themes.
+- Both renderers draw the same geometry from the same contract. A new element kind means a branch in `PresentationStage` **and** one in `SlideCanvas`; the element types are a discriminated union, so a missing one is a compile error.
 
 **A tool is a feature, not a component.** Everything a tool owns lives under `src/features/<tool>/`:
 
@@ -121,16 +139,39 @@ Why no store library:
 
 If per-Context re-renders ever become a real problem, split `TabsContext` into a frequently-changing state context and a stable actions context before adding any library.
 
-### Server data (planned: protocol persistence)
+### Server data (protocol persistence — shipped)
 
-The protocol builder will persist protocols so the message composer can consume them. That data is **server state, not client state** — a client store would mean hand-writing fetch dedupe, loading/error, invalidation and optimistic rollback.
+Protocols are persisted, so the message composer can consume them. That data is **server state, not client state** — a client store would mean hand-writing fetch dedupe, loading/error, invalidation and optimistic rollback.
 
 - Use a query cache (**TanStack Query**; `@tanstack/react-table` is already a dependency) — not a store, not bare `fetch` in `useEffect`.
 - Cross-tab sharing comes free: the builder tab invalidates `['protocols']` after a mutation and the composer tab, reading the same key, refetches. No store, no message passing between tabs.
 - **Draft is local, saved is server.** A protocol under construction stays in component state until it is POSTed.
-- Server side: `bun:sqlite` (never better-sqlite3), a new module under `src/api/` mounted in `src/api/routes.ts`, every handler wrapped in `handler` and answering through `ok`/`fail`. Ownership is scoped by the Clerk user id **verified server-side**, never taken from the client.
+- Server side: a route module under `src/api/` mounted in `src/api/routes.ts`, every handler a plain `BunRequest` function answering through `ok`/`fail` (a throw is the server's `onError`, not the handler's problem). The route calls a **repository** from `src/db/domains/<domain>` — it never writes SQL. Ownership is scoped by the Clerk user id **verified server-side**, never taken from the client.
+- The worked example is `src/api/protocols.ts` → `src/db/domains/protocols/`, with `src/services/protocols.ts` as the client. The query cache is not wired yet: the service is plain `fetch`, and TanStack Query goes on top of it when `Mis Protocolos` lands.
 
 Revisit a store library only for global client state that is not derivable from the URL, the server, or Clerk — presentation mode is the one plausible candidate, and a Context handles it today.
+
+## Database (`src/db/`, bun:sqlite)
+
+`bun:sqlite` only — never better-sqlite3, never an ORM. Three layers, and a new table touches all three:
+
+- `src/db/client.ts` — **the singleton connection.** `getDb()` opens the file lazily on first call (path from `DATABASE_PATH`, default `data/tcp-trip.sqlite`, gitignored), sets WAL + `foreign_keys` + `busy_timeout`, and applies the schema. Nothing else constructs a `Database`; `openDatabase(":memory:")` is how tests get an isolated one. Because it is lazy, importing a DAO is enough — `src/index.ts` stays untouched.
+- `src/db/schema/index.ts` — `SCHEMA_STATEMENTS`, every DDL statement in dependency order, applied in one transaction by `src/db/init.ts` on each boot. **Idempotent (`IF NOT EXISTS`) and append-only**: editing a shipped statement does nothing to an existing file.
+- `src/db/domains/<domain>/` — one folder per domain, mirroring `src/features/`: `*.queries.ts` (all SQL, as named constants), `*.dao.ts` (extends `BaseDao`, binds params, returns rows), `*.repository.ts` (extends `BaseRepository`, maps rows to entities, owns the rules and cross-table transactions), `index.ts` (the barrel — exports the repository). Layout and worked example: `src/db/domains/README.md`.
+
+Rules: routes import repositories, never DAOs or query strings; a domain is imported through its barrel; a domain never imports another domain's DAO. The connection is opened `strict: true`, so bindings are prefix-free (`{ userId }` for `$userId`) and a missing parameter throws.
+
+**Tables so far:**
+
+- `protocols` — one row per saved protocol, the schema itself stored as a JSON `document` column (the builder's shape changes without a migration). `user_id` is the **Clerk** id with no foreign key and no local users table: Clerk owns identity and the role, and mirroring it here would duplicate a source of truth. `share_id` is NULL until the protocol is shared.
+- `presentations` — a teacher's theory presentation **draft**, document as JSON, with `status` (`draft|pending|published|rejected`) describing the draft's place in the review, not the published copy.
+- `presentation_publications` — what the Theory section actually serves: a **frozen copy** of the document as an admin approved it, keyed on `presentation_id`, with a stable `slug` and a snapshot of the author's name. Approving copies the document here; the author's later edits stay in their draft. Theory never reads the draft row. The copy is stripped of **both kinds of note** (`withoutPrivateNotes`) on the way in and again on the way out: a published document is JSON a student can read in the network tab, so hiding notes in the UI would not hide them.
+- `presentation_reviews` — append-only log, one row per `submit`/`approve`/`reject`/`withdraw`, with who did it. The author reads the rejection reason from it; it is also the audit trail for the only place the app acts on another user's content.
+- `presentation_assets` — slide images as BLOBs (never data URIs in the document, never files on disk: the SQLite file stays the whole backup). The served type is sniffed from the bytes, and SVG is refused — it could carry a script.
+- `theory_sections` / `theory_section_items` — the Theory group of the sidebar, built by an administrator instead of hardcoded: a section is a name plus an icon **name** from the allowlist in `src/lib/theory/contract.ts`, and an item files a presentation under it. The item points at the **presentation**, never at a slug, so the menu resolves it through `presentation_publications` — an entry whose presentation is withdrawn disappears from every reader's sidebar on its own, and comes back if it is approved again. `presentation_id` is unique across the whole menu: the same material cannot be filed twice.
+- `presentation_progress` — one row per reader per presentation. **One percentage for both views**: the reading page and presentation mode write to the same row, `percent` kept monotonic by `MAX(...)` in the upsert (re-reading is not losing progress) and `position` an opaque resume hint (`slide:4`, `scroll:0.42`) the server stores but never parses. This is the one presentation table a *student* writes to.
+
+**Ownership lives in the `WHERE` clause.** Every owner-scoped query in `protocols.queries.ts` filters on `user_id`, so a request carrying somebody else's id matches zero rows — the check cannot be forgotten in a branch, and the route answers the same 404 it gives an unknown id.
 
 ## Project skills & agent docs
 
@@ -147,7 +188,10 @@ Reference docs checked into the repo. Read the relevant one before touching that
 - `@clerk/clerk-react` is the package in use (`@clerk/react` is also installed but not imported — don't mix them).
 - `ClerkProvider` is mounted in `src/main.tsx` **inside** `BrowserRouter`, wired to react-router via `routerPush`/`routerReplace` so Clerk navigations go through the SPA router. Keep that ordering when adding routes.
 - `publishableKey` is passed explicitly in `src/main.tsx` from `process.env.PUBLIC_CLERK_PUBLISHABLE_KEY` (`.env`, gitignored). There is no Vite: `import.meta.env` does nothing here. Bun inlines only literal `process.env.X` references matching the `PUBLIC_*` prefix, configured in `bunfig.toml` (`[serve.static] env = "PUBLIC_*"`, dev) and `build.ts` (`env: "PUBLIC_*"`, prod). Any new client-side env var must use the `PUBLIC_` prefix and be read as a literal `process.env.PUBLIC_FOO` (destructuring or indirect access won't be replaced).
-- Role model per the product spec: student / teacher / admin, where the teacher role is granted by manual validation in the admin panel — gate on Clerk metadata, not on client-only state.
+- Role model per the product spec: student / teacher / admin, where the teacher role is granted by manual validation in the admin panel — gate on Clerk metadata, not on client-only state. The role lives in the account's **`publicMetadata.role`** (Clerk's own recommendation for RBAC without organizations: the browser can read it, only the dashboard and the Backend API can write it). The role **names** live in `src/lib/auth/roles.ts` (both halves need them); the role is **decided** in `src/api/auth.ts` (`requireCaller`/`requireRole`) and gated in `src/api/guards.ts`. `useAppRole()` and `NavNode.roles` only *hide* things — a hidden path typed by hand renders and then gets a 403.
+- **The role travels inside the session token.** The Clerk Dashboard (Sessions → Customize session token) copies the metadata into the claims with `{ "metadata": "{{user.public_metadata}}" }`, declared as `CustomJwtSessionClaims` in `src/types/clerk.d.ts`, so the server reads the role off the verified token with **no API call**. If that claim is missing (an unconfigured dashboard, an old token) it falls back to reading the user and caches the answer for 60 s. How to grant a role by hand, including the first admin: `docs/users/roles.md`.
+- **Server side** is `@clerk/backend` in `src/api/auth.ts`: `requireUserId(req)` verifies the request and returns the user id, or `null` for a 401. It reads `CLERK_SECRET_KEY`, which deliberately has **no** `PUBLIC_` prefix so Bun cannot inline it into the client bundle. A route never takes an owner id from a body, a query string or a header.
+- The browser sends `Authorization: Bearer` with a token from `window.Clerk.session.getToken()` (`src/services/protocols.ts`, typed in `src/types/clerk.d.ts`), because a plain module cannot call `useAuth()`.
 
 ## shadcn/ui
 
