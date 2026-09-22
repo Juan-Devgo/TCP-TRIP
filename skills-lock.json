@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "konva": {
+      "source": "terminalskills/skills",
+      "sourceType": "github",
+      "skillPath": "skills/konva/SKILL.md",
+      "computedHash": "7cfe42609c26d349471b8bd2eb5d089d14223a73f534fd8dcb1c3ff9fa4d24ed"
+    },
     "shadcn": {
       "source": "shadcn/ui",
       "sourceType": "github",
