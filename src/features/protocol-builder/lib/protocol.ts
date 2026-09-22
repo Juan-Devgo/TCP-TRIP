@@ -9,9 +9,10 @@
  */
 
 import { findFieldType, type FieldType } from "@/features/protocol-builder/lib/fieldTypes";
+import { PROTOCOL_RULER_WIDTHS } from "@/lib/protocols/contract";
 
 /** The ruler presets. Shrinking re-wraps the fields; it never truncates them. */
-export const RULER_WIDTHS = [8, 16, 24, 32] as const;
+export const RULER_WIDTHS = PROTOCOL_RULER_WIDTHS;
 
 export type RulerWidth = (typeof RULER_WIDTHS)[number];
 

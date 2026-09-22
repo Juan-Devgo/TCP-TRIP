@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
+import { toast } from "@/components/ui/toast";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { FieldTypePalette } from "@/features/protocol-builder/components/FieldTypePalette";
 import {
@@ -79,14 +80,21 @@ import {
 import { useUndoHistory } from "@/hooks/useUndoHistory";
 import { downloadBlob } from "@/lib/pdf/exercisePdf";
 import {
+  ProtocolApiError,
   PROTOCOLS_PERSISTED,
   protocolShareUrl,
   saveProtocol,
   shareProtocol,
+  type StoredProtocol,
 } from "@/services/protocols";
-import { cn } from "@/lib/utils";
 
-type Status = { tone: "ok" | "error"; text: string };
+/**
+ * A protocol belongs to an account, so the honest answer to a signed-out save
+ * is "sign in", not "something went wrong".
+ */
+function isSignedOut(error: unknown): boolean {
+  return error instanceof ProtocolApiError && error.isUnauthenticated;
+}
 
 /**
  * The protocol builder: an RFC-style diagram the student edits. Fields are
@@ -116,10 +124,8 @@ export function ProtocolBuilder() {
   const [editing, setEditing] = useState<EditorTarget | null>(null);
   const [savedId, setSavedId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const [status, setStatus] = useState<Status | null>(null);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [exportOpen, setExportOpen] = useState(false);
-  const [exportError, setExportError] = useState<string | null>(null);
   const [clearOpen, setClearOpen] = useState(false);
 
   // A dialog owns the keyboard while it is open: `Ctrl+Z` in one of its text
@@ -209,10 +215,13 @@ export function ProtocolBuilder() {
   // --- actions ------------------------------------------------------------
 
   async function save() {
+    const title = t("tools.protocolBuilder.toast.save");
+
     if (issues.length > 0) {
-      setStatus({
-        tone: "error",
-        text: t("tools.protocolBuilder.save.blocked", {
+      toast.add({
+        title,
+        type: "warning",
+        description: t("tools.protocolBuilder.save.blocked", {
           problems: issues
             .map((issue) =>
               t(`tools.protocolBuilder.validation.${issue.code}`, {
@@ -227,42 +236,75 @@ export function ProtocolBuilder() {
 
     setSaving(true);
     try {
-      const saved = await saveProtocol(
-        toProtocolDocument(protocol),
-        savedId ?? undefined,
-      );
+      const document = toProtocolDocument(protocol);
+      let saved: StoredProtocol;
+      try {
+        saved = await saveProtocol(document, savedId ?? undefined);
+      } catch (error) {
+        // The record this tab was updating is gone — deleted elsewhere, or the
+        // database was reset. Pressing save must still leave the user with a
+        // saved protocol, so mint a new one instead of reporting a failure.
+        if (!(error instanceof ProtocolApiError && error.status === 404)) throw error;
+        saved = await saveProtocol(document);
+      }
       setSavedId(saved.id);
-      setStatus({
-        tone: "ok",
-        text: PROTOCOLS_PERSISTED
+      toast.add({
+        title,
+        type: "success",
+        description: PROTOCOLS_PERSISTED
           ? t("tools.protocolBuilder.save.saved")
           : t("tools.protocolBuilder.save.savedSession"),
       });
     } catch (error) {
       console.error("Could not save the protocol", error);
-      setStatus({ tone: "error", text: t("tools.protocolBuilder.save.error") });
+      toast.add({
+        title,
+        type: "error",
+        description: t(
+          isSignedOut(error)
+            ? "tools.protocolBuilder.save.signedOut"
+            : "tools.protocolBuilder.save.error",
+        ),
+      });
     } finally {
       setSaving(false);
     }
   }
 
   async function share() {
+    const title = t("tools.protocolBuilder.toast.share");
+
     // There is nothing behind a link to a protocol that was never saved.
     if (!savedId) {
-      setStatus({ tone: "error", text: t("tools.protocolBuilder.share.needsSave") });
+      toast.add({
+        title,
+        type: "warning",
+        description: t("tools.protocolBuilder.share.needsSave"),
+      });
       return;
     }
 
     try {
       const shareId = await shareProtocol(savedId);
+      // The link itself is the outcome, so it gets the dialog, not a toast.
       setShareUrl(protocolShareUrl(shareId));
     } catch (error) {
       console.error("Could not share the protocol", error);
-      setStatus({ tone: "error", text: t("tools.protocolBuilder.share.error") });
+      toast.add({
+        title,
+        type: "error",
+        description: t(
+          isSignedOut(error)
+            ? "tools.protocolBuilder.share.signedOut"
+            : "tools.protocolBuilder.share.error",
+        ),
+      });
     }
   }
 
   async function exportAs(format: ExportFormat) {
+    const title = t("tools.protocolBuilder.toast.export");
+
     try {
       const blob =
         format === "json"
@@ -271,12 +313,21 @@ export function ProtocolBuilder() {
             ? protocolSvgBlob(protocol, diagramLabels)
             : await protocolPngBlob(protocol, diagramLabels);
 
-      downloadBlob(blob, protocolFilename(protocol, format));
-      setExportError(null);
+      const filename = protocolFilename(protocol, format);
+      downloadBlob(blob, filename);
       setExportOpen(false);
+      toast.add({
+        title,
+        type: "success",
+        description: t("tools.protocolBuilder.export.done", { filename }),
+      });
     } catch (error) {
       console.error("Could not export the protocol", error);
-      setExportError(t("tools.protocolBuilder.export.error"));
+      toast.add({
+        title,
+        type: "error",
+        description: t("tools.protocolBuilder.export.error"),
+      });
     }
   }
 
@@ -288,14 +339,12 @@ export function ProtocolBuilder() {
     editProtocol(buildExampleProtocol(example, t));
     // A loaded example is a new draft, not an update to whatever was saved.
     setSavedId(null);
-    setStatus(null);
     setArmedTypeId(null);
   }
 
   function clearAll() {
     editProtocol(createProtocol());
     setSavedId(null);
-    setStatus(null);
     setArmedTypeId(null);
     setClearOpen(false);
     exampleIndex.current = 0;
@@ -310,10 +359,7 @@ export function ProtocolBuilder() {
         canRedo={canRedo && !dialogOpen}
         onSave={() => void save()}
         onShare={() => void share()}
-        onExport={() => {
-          setExportError(null);
-          setExportOpen(true);
-        }}
+        onExport={() => setExportOpen(true)}
         onLoadExample={loadExample}
         onClear={() => setClearOpen(true)}
         saving={saving}
@@ -466,18 +512,6 @@ export function ProtocolBuilder() {
                 </span>
               )}
             </div>
-
-            {status && (
-              <p
-                role={status.tone === "error" ? "alert" : "status"}
-                className={cn(
-                  "text-xs",
-                  status.tone === "error" ? "text-destructive" : "text-tertiary-ink",
-                )}
-              >
-                {status.text}
-              </p>
-            )}
           </CardContent>
         </Card>
 
@@ -513,7 +547,6 @@ export function ProtocolBuilder() {
         open={exportOpen}
         onOpenChange={setExportOpen}
         onExport={(format) => void exportAs(format)}
-        error={exportError}
       />
 
       <ProtocolShareDialog

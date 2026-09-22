@@ -21,13 +21,11 @@ export function ProtocolExportDialog({
   open,
   onOpenChange,
   onExport,
-  error,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** The outcome is reported by a toast, so the dialog just closes. */
   onExport: (format: ExportFormat) => void;
-  /** Already translated; set when the last attempt failed. */
-  error: string | null;
 }) {
   const { t } = useTranslation();
 
@@ -66,12 +64,6 @@ export function ProtocolExportDialog({
             </Button>
           ))}
         </div>
-
-        {error && (
-          <p role="alert" className="text-xs text-destructive">
-            {error}
-          </p>
-        )}
 
         <DialogFooter>
           <DialogClose render={<Button variant="outline" />}>

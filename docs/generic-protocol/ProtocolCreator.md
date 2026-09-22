@@ -3,6 +3,8 @@
 **Componente:** `src/features/protocol-builder/components/ProtocolBuilder.tsx`
 **Lógica de dominio:** `src/features/protocol-builder/lib/protocol.ts`
 **Cliente de datos:** `src/services/protocols.ts`
+**API:** `src/api/protocols.ts` · **Persistencia:** `src/db/domains/protocols/`
+**Vista pública:** `src/pages/SharedProtocolPage.tsx`
 
 ---
 
@@ -13,7 +15,7 @@
 - **Para** entender por manipulación directa cómo se lee un diagrama de encabezado (qué bits ocupa cada campo, en qué offset queda, cómo se envuelve entre filas) sin tener que preguntarle al docente cómo interpretar la notación del RFC.
 
 **Prioridad:** Must
-**Estado:** Parcialmente implementado
+**Estado:** Hecho
 
 ---
 
@@ -80,12 +82,12 @@ THEN el formulario se bloquea mostrando el error junto al campo correspondiente;
 **CA-11 — Guardar (atajo `S`)**
 GIVEN el protocolo tiene nombre y ningún campo `Libre`
 WHEN el usuario activa la acción `Guardar` o presiona la tecla `S` (con la pestaña activa y el foco fuera de un campo de texto)
-THEN el esquema se guarda en el servidor asociado a su cuenta y aparece en `Mis Protocolos`; y GIVEN quedan campos `Libre` o falta el nombre del protocolo, THEN el guardado se bloquea señalando qué falta.
+THEN el esquema se guarda en el servidor asociado a su cuenta de Clerk y sobrevive a la recarga de la página; y GIVEN quedan campos `Libre` o falta el nombre del protocolo, THEN el guardado se bloquea señalando qué falta; y GIVEN el usuario no ha iniciado sesión, THEN se le pide iniciar sesión en lugar de anunciar un error genérico. *(La propiedad se verifica en el servidor: el id de usuario sale del token, nunca del cuerpo de la petición, y va en el `WHERE` de cada consulta.)*
 
 **CA-12 — Compartir**
 GIVEN el protocolo está guardado
 WHEN el usuario activa la acción `Compartir`
-THEN se genera un enlace público de solo lectura al protocolo y se copia/muestra para distribuirlo; y GIVEN el protocolo no se ha guardado aún, THEN la acción lo indica en lugar de generar un enlace roto.
+THEN se genera un enlace público de solo lectura al protocolo (`/protocol/shared/<shareId>`) y se copia/muestra para distribuirlo; y WHEN alguien abre ese enlace sin haber iniciado sesión, THEN ve el diagrama y la tabla de campos en modo lectura, sin barra lateral ni pestañas; y GIVEN el protocolo no se ha guardado aún, THEN la acción lo indica en lugar de generar un enlace roto. *(El enlace se acuña una sola vez y no rota: un enlace ya repartido sigue funcionando tras editar el protocolo.)*
 
 **CA-13 — Exportar**
 GIVEN el diagrama tiene contenido
@@ -128,13 +130,16 @@ THEN el campo de destino se marca con un anillo mientras dura el arrastre —igu
 
 ## Estado de la implementación
 
-Implementado y cubierto por pruebas (`src/features/protocol-builder/lib/*.test.ts`): CA-1 a CA-10, CA-13 a CA-17.
+Implementado y cubierto por pruebas: CA-1 a CA-17.
 
-Pendiente de la capa de persistencia:
+- Lógica del diagrama: `src/features/protocol-builder/lib/*.test.ts`.
+- Persistencia: `src/db/domains/protocols/protocols.repository.test.ts`, que incluye los casos de propiedad —un segundo id de Clerk no puede leer, editar ni borrar el protocolo de otro—, y `src/lib/protocols/contract.test.ts` para el documento que el servidor acepta.
 
-- **CA-11 (Guardar):** el diagrama, la validación y el atajo `S` funcionan, pero `src/services/protocols.ts` es todavía un sustituto en memoria — el protocolo sobrevive al cambio de pestaña y se pierde al recargar. La interfaz lo dice explícitamente en lugar de aparentar lo contrario. Falta el módulo `bun:sqlite` bajo `src/api/` montado en `src/api/routes.ts`, con la propiedad verificada contra el id de usuario de Clerk en el servidor.
-- **CA-12 (Compartir):** el enlace se genera y se copia, pero la ruta pública `/protocol/shared/<id>` aún no existe; el diálogo lo advierte.
-- **CA-11 (Mis Protocolos):** el protocolo guardado no se lista todavía porque esa pantalla sigue siendo un marcador de posición.
+Queda fuera de esta historia, no pendiente de ella:
+
+- **`Mis Protocolos`** sigue siendo un marcador de posición: `listProtocols()` ya existe en el cliente y `GET /api/protocols` responde, pero ninguna pantalla los consume todavía (lo cubre esa historia).
+- **Caché de consultas:** el cliente es `fetch` directo; TanStack Query se monta encima cuando llegue esa pantalla.
+- **Borrado por webhook de Clerk:** al eliminar una cuenta, sus filas siguen ahí; hace falta un webhook que borre por `user_id`.
 
 ---
 

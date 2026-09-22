@@ -4,6 +4,7 @@
  * report or a slide.
  */
 
+import { PROTOCOL_SCHEMA_VERSION } from "@/lib/protocols/contract";
 import {
   DEFAULT_RULER_WIDTH,
   isRulerWidth,
@@ -13,8 +14,12 @@ import {
   type Protocol,
 } from "@/features/protocol-builder/lib/protocol";
 
-/** Bumped whenever the shape below stops being readable by an older reader. */
-export const PROTOCOL_SCHEMA_VERSION = 1;
+/**
+ * The version and the limits are the server's too, so they live in
+ * `@/lib/protocols/contract` and are re-exported here: the feature's public
+ * surface does not change, and there is one definition of the format.
+ */
+export { PROTOCOL_SCHEMA_VERSION } from "@/lib/protocols/contract";
 
 export type ProtocolDocument = {
   version: number;

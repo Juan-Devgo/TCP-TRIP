@@ -1,42 +1,83 @@
 /**
  * Client for the protocols API — the contract the builder codes against.
  *
- * **The API does not exist yet.** Persistence lands with a `bun:sqlite` module
- * under `src/api/` mounted in `src/api/routes.ts`, with ownership scoped to the
- * Clerk user id verified server-side. Until then every call here resolves
- * against a module-level map that dies with the page, so a save survives a tab
- * switch but not a reload — `PROTOCOLS_PERSISTED` says so, and the UI must
- * tell the user rather than pretend otherwise.
+ * Every call goes to `src/api/protocols.ts` and reads the `ok`/`fail` envelope
+ * from `src/api/http.ts`. Ownership is not decided here: the request carries a
+ * Clerk session token and the server resolves the user from it, so this module
+ * never sends, and never needs to know, a user id.
  *
- * Wiring the real endpoints is a change inside this file: swap each body for a
- * `fetch` against `/api/protocols` reading the `ok`/`fail` envelope from
- * `src/api/http.ts`, and flip the flag. When that happens these functions
- * become the place a query cache (TanStack Query) calls into — the cache keys
- * (`['protocols']`, `['protocols', id]`) are what the message composer will
- * invalidate against.
+ * These functions are the place a query cache (TanStack Query) would call into
+ * when `Mis Protocolos` lands — the keys it will invalidate are `['protocols']`
+ * and `['protocols', id]`.
  */
 
 // Type-only, so the feature's barrel can point back here without a cycle.
 import type { ProtocolDocument } from "@/features/protocol-builder";
+import { SHARED_PROTOCOL_PREFIX } from "@/lib/protocols/contract";
 
-/** `false` while the store below is in memory. Read it before promising a user anything. */
-export const PROTOCOLS_PERSISTED = false;
+/** The store is real now: a save survives a reload. */
+export const PROTOCOLS_PERSISTED = true;
 
 export type StoredProtocol = {
   id: string;
   document: ProtocolDocument;
-  /** ISO timestamps, as the API will return them. */
+  /** ISO timestamps, as the API returns them. */
   createdAt: string;
   updatedAt: string;
   /** Set once the protocol has been shared; `null` until then. */
   shareId: string | null;
 };
 
-/** Stands in for the `protocols` table. */
-const store = new Map<string, StoredProtocol>();
+/**
+ * Thrown by every call below, carrying the HTTP status so the UI can tell the
+ * cases apart — 401 asks the user to sign in, 404 means it is gone.
+ */
+export class ProtocolApiError extends Error {
+  constructor(
+    readonly status: number,
+    message: string,
+  ) {
+    super(message);
+    this.name = "ProtocolApiError";
+  }
 
-function now(): string {
-  return new Date().toISOString();
+  /** The user is signed out (or the session expired mid-session). */
+  get isUnauthenticated(): boolean {
+    return this.status === 401;
+  }
+}
+
+/**
+ * `ClerkProvider` mounts the instance on `window`, which is how a plain module
+ * reaches the session. A same-origin session cookie would also authenticate the
+ * request, but the header is deterministic and needs no handshake.
+ */
+async function authHeaders(): Promise<HeadersInit> {
+  const token = await window.Clerk?.session?.getToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const response = await fetch(path, {
+    ...init,
+    headers: {
+      ...(init.body === undefined ? {} : { "Content-Type": "application/json" }),
+      ...(await authHeaders()),
+      ...init.headers,
+    },
+  });
+
+  if (!response.ok) {
+    const body = (await response.json().catch(() => null)) as {
+      error?: { message?: string };
+    } | null;
+    throw new ProtocolApiError(
+      response.status,
+      body?.error?.message ?? `Request failed with ${response.status}`,
+    );
+  }
+
+  return (await response.json()) as T;
 }
 
 /**
@@ -47,29 +88,29 @@ export async function saveProtocol(
   document: ProtocolDocument,
   id?: string,
 ): Promise<StoredProtocol> {
-  const existing = id ? store.get(id) : undefined;
-  const saved: StoredProtocol = {
-    id: existing?.id ?? crypto.randomUUID(),
-    document,
-    createdAt: existing?.createdAt ?? now(),
-    updatedAt: now(),
-    shareId: existing?.shareId ?? null,
-  };
-  store.set(saved.id, saved);
-  return saved;
+  return request<StoredProtocol>(id ? `/api/protocols/${id}` : "/api/protocols", {
+    method: id ? "PUT" : "POST",
+    body: JSON.stringify({ document }),
+  });
 }
 
 /** What `Mis Protocolos` lists, most recently touched first. */
 export async function listProtocols(): Promise<StoredProtocol[]> {
-  return [...store.values()].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  return request<StoredProtocol[]>("/api/protocols");
 }
 
 export async function getProtocol(id: string): Promise<StoredProtocol | null> {
-  return store.get(id) ?? null;
+  try {
+    return await request<StoredProtocol>(`/api/protocols/${id}`);
+  } catch (error) {
+    // "Not there" and "not yours" are the same answer, and neither is a fault.
+    if (error instanceof ProtocolApiError && error.status === 404) return null;
+    throw error;
+  }
 }
 
 export async function deleteProtocol(id: string): Promise<void> {
-  store.delete(id);
+  await request(`/api/protocols/${id}`, { method: "DELETE" });
 }
 
 /**
@@ -77,16 +118,28 @@ export async function deleteProtocol(id: string): Promise<void> {
  * unsaved protocol is not a thing: there would be nothing behind the link.
  */
 export async function shareProtocol(id: string): Promise<string> {
-  const saved = store.get(id);
-  if (!saved) throw new Error(`Unknown protocol: ${id}`);
-
-  const shareId = saved.shareId ?? crypto.randomUUID().slice(0, 8);
-  store.set(id, { ...saved, shareId, updatedAt: now() });
+  const { shareId } = await request<{ shareId: string }>(
+    `/api/protocols/${id}/share`,
+    { method: "POST" },
+  );
   return shareId;
 }
 
-/** The public URL a share id resolves to, once the route exists. */
+/** What a share link points at — the page `src/app.tsx` routes to. */
 export function protocolShareUrl(shareId: string): string {
   const origin = typeof window === "undefined" ? "" : window.location.origin;
-  return `${origin}/protocol/shared/${shareId}`;
+  return `${origin}${SHARED_PROTOCOL_PREFIX}${shareId}`;
+}
+
+/** The public read behind a share link. No session: that is the point of it. */
+export async function getSharedProtocol(
+  shareId: string,
+): Promise<{ name: string; document: ProtocolDocument } | null> {
+  const response = await fetch(`/api/shared/protocols/${shareId}`);
+  if (response.status === 404) return null;
+  if (!response.ok) {
+    throw new ProtocolApiError(response.status, `Request failed with ${response.status}`);
+  }
+
+  return (await response.json()) as { name: string; document: ProtocolDocument };
 }

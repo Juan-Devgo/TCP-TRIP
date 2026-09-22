@@ -1,4 +1,5 @@
 import { fail, ok } from "@/api/http";
+import { protocolRoutes } from "@/api/protocols";
 
 /**
  * Every API route lives here. Add new modules under `src/api/` and mount them
@@ -16,6 +17,8 @@ export const apiRoutes = {
     // `Response` — those are frozen at boot.
     GET: () => ok({ status: "ok", uptime: process.uptime() }),
   },
+
+  ...protocolRoutes,
 
   /**
    * Everything under `/api/` that matched nothing above. Without it a typo'd

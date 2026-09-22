@@ -6,6 +6,8 @@
  * what `Mis Protocolos` lists and what the message composer will read back.
  */
 export { ProtocolBuilder } from "./components/ProtocolBuilder";
+/** Read-only render of a saved protocol, for the public share link. */
+export { SharedProtocolView } from "./components/SharedProtocolView";
 export {
   fromProtocolDocument,
   toProtocolDocument,

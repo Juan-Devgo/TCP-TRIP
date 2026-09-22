@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, useNavigate } from "react-router";
 import { ClerkProvider } from "@clerk/clerk-react";
 import { App } from "@/app";
+import { Toaster } from "@/components/ui/toast";
 import { TabsProvider } from "@/context/TabsProvider";
 import { ThemeProvider } from "@/context/ThemeProvider";
 import { ToolActionsProvider } from "@/context/ToolActionsProvider";
@@ -31,7 +32,12 @@ function RootLayout() {
           resolves it against the page registry in `src/config/navigation.ts`. */}
       <TabsProvider>
         <ToolActionsProvider>
-          <App />
+          {/* One viewport for the whole app, bound to the `toast` manager the
+              tools import directly — a tool reports an outcome without having
+              to reach the provider through context. */}
+          <Toaster>
+            <App />
+          </Toaster>
         </ToolActionsProvider>
       </TabsProvider>
     </ClerkProvider>
