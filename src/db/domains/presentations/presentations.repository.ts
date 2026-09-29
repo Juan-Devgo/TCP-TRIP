@@ -17,7 +17,9 @@
  *    the deck and a slide's speaker notes — are stripped on the way into
  *    `presentation_publications` and again on the way out, because a published
  *    document is JSON a student can read in the network tab. Hiding them in
- *    the UI would not be hiding them.
+ *    the UI would not be hiding them. The speaker notes of the approved
+ *    version are frozen **beside** it (`presentation_speaker_notes`), and
+ *    only an author-scoped read returns them.
  */
 
 import type { Database } from "bun:sqlite";
@@ -25,6 +27,7 @@ import type { Database } from "bun:sqlite";
 import { getDb } from "@/db/client";
 import { BaseRepository } from "@/db/core/repository";
 import { PresentationsDao } from "@/db/domains/presentations/presentations.dao";
+import { TheoryMenuRepository, type MenuRefusal } from "@/db/domains/theory-menu";
 import type {
   AssetMetaRow,
   ProgressRow,
@@ -48,7 +51,9 @@ import {
   MAX_PROGRESS_POSITION_LENGTH,
   SLUG_SUFFIX_LENGTH,
   slugifyTitle,
+  speakerNotesOf,
   withoutPrivateNotes,
+  type SpeakerNotes,
   type PresentationDocument,
   type PresentationMode,
   type PresentationStatus,
@@ -56,6 +61,7 @@ import {
   type ReadingProgress,
   type ReviewAction,
 } from "@/lib/presentations/contract";
+import type { TheoryPlacement } from "@/lib/theory/contract";
 
 /** Slug suffixes are random; a collision is retried, never handed to a user. */
 const SLUG_ATTEMPTS = 5;
@@ -70,6 +76,23 @@ export type AddAssetResult =
 export type RemoveAssetResult =
   | { ok: true }
   | { ok: false; reason: Extract<AssetRefusal, "notFound" | "published"> };
+
+/**
+ * Why an approval did not happen. `not-pending` covers "unknown", "not in the
+ * queue" and "another admin decided first" — the route tells them apart.
+ */
+export type ApproveRefusal = "not-pending" | "placement-required" | MenuRefusal;
+
+export type ApproveResult =
+  | { ok: true; published: PublishedPresentation }
+  | { ok: false; reason: ApproveRefusal };
+
+/** Thrown inside a transaction to roll it back and still answer a refusal. */
+class Refused extends Error {
+  constructor(readonly reason: ApproveRefusal) {
+    super(reason);
+  }
+}
 
 export class PresentationsRepository extends BaseRepository<
   PresentationRow,
@@ -265,6 +288,13 @@ export class PresentationsRepository extends BaseRepository<
         publishedAt: now,
       });
 
+      // The approved version's speaker notes, frozen with it: its author
+      // projects this version, not whatever the draft says by then.
+      this.dao.upsertSpeakerNotes(
+        id,
+        JSON.stringify(speakerNotesOf(JSON.parse(draft.document) as PresentationDocument)),
+      );
+
       this.log(id, adminId, "approve", note, now);
 
       const publication = this.dao.findPublicationByPresentation(id);
@@ -272,6 +302,60 @@ export class PresentationsRepository extends BaseRepository<
     });
 
     return write();
+  }
+
+  /**
+   * Approves a submission **and** gives it a place in the Theory menu, as one
+   * decision: either both happen or neither does.
+   *
+   * A presentation that already has an entry keeps it (a re-approved edit stays
+   * where readers know it), so `placement` is ignored for it. One that has no
+   * entry needs a `placement` — an existing section, or a section created here
+   * — and without one nothing is approved: published material with no place
+   * in the menu is material nobody can find.
+   */
+  approveIntoMenu(
+    adminId: string,
+    id: string,
+    authorName: string,
+    note: string | null,
+    placement: TheoryPlacement | null,
+  ): ApproveResult {
+    const menu = new TheoryMenuRepository(this.db);
+
+    const write = this.transaction((): PublishedPresentation => {
+      const listed = menu.isListed(id);
+      if (!listed && placement === null) throw new Refused("placement-required");
+
+      const published = this.approve(adminId, id, authorName, note);
+      if (!published) throw new Refused("not-pending");
+      if (listed || placement === null) return published;
+
+      let sectionId: string;
+      if ("sectionId" in placement) {
+        sectionId = placement.sectionId;
+      } else {
+        const created = menu.createSection(
+          adminId,
+          placement.section.label,
+          placement.section.icon,
+        );
+        if (!created.ok) throw new Refused(created.reason);
+        sectionId = created.section.id;
+      }
+
+      const added = menu.addItem(adminId, sectionId, id, null);
+      if (!added.ok) throw new Refused(added.reason);
+
+      return published;
+    });
+
+    try {
+      return { ok: true, published: write() };
+    } catch (error) {
+      if (error instanceof Refused) return { ok: false, reason: error.reason };
+      throw error;
+    }
   }
 
   /**
@@ -303,6 +387,16 @@ export class PresentationsRepository extends BaseRepository<
   findPublishedBySlug(slug: string): PublishedPresentation | null {
     const row = this.dao.findPublicationBySlug(slug);
     return row === null ? null : this.toPublished(row);
+  }
+
+  /**
+   * The speaker notes of the published version, for its **author** only.
+   * `null` when the slug is unknown or belongs to somebody else — one answer
+   * for both, like every owner-scoped read.
+   */
+  findSpeakerNotes(userId: string, slug: string): SpeakerNotes | null {
+    const notes = this.dao.findSpeakerNotesForAuthor(userId, slug);
+    return notes === null ? null : (JSON.parse(notes) as SpeakerNotes);
   }
 
   /* ----------------------------------------------------------------- assets */

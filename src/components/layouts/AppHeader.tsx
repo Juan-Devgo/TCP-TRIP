@@ -1,6 +1,7 @@
 import { LanguageToggle } from "@/components/common/LanguageToggle";
 import { TabBar } from "@/components/layouts/TabBar";
 import { ModeToggle } from "@/components/common/ModeToggle";
+import { PresentButton } from "@/components/common/PresentButton";
 import { Separator } from "@/components/ui/separator";
 import { AppSidebarTrigger } from "@/components/ui/app-sidebar-trigger";
 
@@ -22,6 +23,7 @@ export function AppHeader() {
         className="h-4! data-vertical:self-center bg-sidebar-foreground/40"
       />
       <div className="flex shrink-0 items-center gap-2">
+        <PresentButton />
         <ModeToggle />
         <LanguageToggle />
       </div>

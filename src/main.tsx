@@ -4,6 +4,8 @@ import { BrowserRouter, useNavigate } from "react-router";
 import { ClerkProvider } from "@clerk/clerk-react";
 import { App } from "@/app";
 import { Toaster } from "@/components/ui/toast";
+import { PageChromeProvider } from "@/context/PageChromeProvider";
+import { PresentableProvider } from "@/context/PresentableProvider";
 import { TabsProvider } from "@/context/TabsProvider";
 import { ThemeProvider } from "@/context/ThemeProvider";
 import { ToolActionsProvider } from "@/context/ToolActionsProvider";
@@ -32,12 +34,16 @@ function RootLayout() {
           resolves it against the page registry in `src/config/navigation.ts`. */}
       <TabsProvider>
         <ToolActionsProvider>
-          {/* One viewport for the whole app, bound to the `toast` manager the
-              tools import directly — a tool reports an outcome without having
-              to reach the provider through context. */}
-          <Toaster>
-            <App />
-          </Toaster>
+          <PresentableProvider>
+            <PageChromeProvider>
+              {/* One viewport for the whole app, bound to the `toast` manager the
+                  tools import directly — a tool reports an outcome without having
+                  to reach the provider through context. */}
+              <Toaster>
+                <App />
+              </Toaster>
+            </PageChromeProvider>
+          </PresentableProvider>
         </ToolActionsProvider>
       </TabsProvider>
     </ClerkProvider>

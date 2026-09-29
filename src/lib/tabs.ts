@@ -67,6 +67,15 @@ export function urlRealignTarget(
   return target === pathname ? null : target;
 }
 
+/** The closest registered page above `path`, or `null` when none is. */
+function ownerPage(path: string): string | null {
+  for (let end = path.lastIndexOf("/"); end > 0; end = path.lastIndexOf("/", end - 1)) {
+    const candidate = path.slice(0, end);
+    if (isPagePath(candidate)) return candidate;
+  }
+  return null;
+}
+
 function newTab(id: string, path: string): Tab {
   return { id, rootPath: path, history: createTabHistory(path) };
 }
@@ -88,8 +97,22 @@ function syncToPath(state: TabsState, path: string, newTabId: string): TabsState
   if (showing) return { ...state, activeTabId: showing.id };
 
   if (isPagePath(path)) {
-    // One tab per page: reopening a page focuses its tab and leaves it on
-    // whatever it had navigated to (the URL is realigned to that path).
+    // A link to the root of the tab on screen (its breadcrumb, a "back to the
+    // list" button) is navigation inside that tab, like any other path —
+    // focusing it instead would realign the URL right back to where it was.
+    if (active?.rootPath === path) {
+      return {
+        ...state,
+        tabs: state.tabs.map((tab) =>
+          tab.id === active.id
+            ? { ...tab, history: pushPath(tab.history, path) }
+            : tab,
+        ),
+      };
+    }
+
+    // One tab per page: reopening a page from elsewhere focuses its tab and
+    // leaves it on whatever it had navigated to (the URL is realigned to it).
     const existing = state.tabs.find((tab) => tab.rootPath === path);
     if (existing) return { ...state, activeTabId: existing.id };
 
@@ -97,7 +120,33 @@ function syncToPath(state: TabsState, path: string, newTabId: string): TabsState
     return { ...state, tabs: [...state.tabs, tab], activeTabId: tab.id };
   }
 
-  // Not a page: this is navigation inside the tab currently on screen.
+  // Not a page: navigation inside the page it sits under
+  // (`/teacher/presentations/mine/<id>` belongs to `.../mine`). That page's tab
+  // takes it — opened if need be, with the page one step back — so a reload or
+  // a pasted link renders the page that knows the path, never a tab rooted at
+  // the path itself.
+  const owner = ownerPage(path);
+  if (owner !== null) {
+    const host =
+      active?.rootPath === owner
+        ? active
+        : state.tabs.find((tab) => tab.rootPath === owner);
+
+    if (host) {
+      return {
+        ...state,
+        tabs: state.tabs.map((tab) =>
+          tab.id === host.id ? { ...tab, history: pushPath(tab.history, path) } : tab,
+        ),
+        activeTabId: host.id,
+      };
+    }
+
+    const tab = { ...newTab(newTabId, owner), history: pushPath(createTabHistory(owner), path) };
+    return { ...state, tabs: [...state.tabs, tab], activeTabId: tab.id };
+  }
+
+  // Under no page at all: navigation inside the tab currently on screen.
   if (active) {
     return {
       ...state,

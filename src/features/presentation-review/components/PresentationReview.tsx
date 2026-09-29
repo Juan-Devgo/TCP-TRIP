@@ -5,16 +5,22 @@ import { Check, MonitorPlay, X } from "lucide-react";
 import { Markdown } from "@/components/common/Markdown";
 import { PresentationPlayer } from "@/components/common/PresentationPlayer";
 import { PresentationStage } from "@/components/common/PresentationStage";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
+import {
+  ApproveDialog,
+  type SectionChoice,
+} from "@/features/presentation-review/components/ApproveDialog";
 import { refreshTheoryMenu } from "@/hooks/useTheoryMenu";
 import {
   MAX_REVIEW_NOTE_LENGTH,
   PRESENTATION_STATUSES,
   type PresentationStatus,
 } from "@/lib/presentations/contract";
+import type { TheoryPlacement } from "@/lib/theory/contract";
 import {
   approvePresentation,
   listReviewQueue,
@@ -22,6 +28,7 @@ import {
   rejectPresentation,
   type PresentationInReview,
 } from "@/services/presentations";
+import { getTheoryMenuForAdmin } from "@/services/theory";
 import { cn } from "@/lib/utils";
 
 type State =
@@ -41,6 +48,10 @@ type State =
  *
  * A rejection needs a reason — the server refuses one without a note, because
  * the note is the only channel back to the teacher.
+ *
+ * A first approval also decides **where** the presentation goes in the Theory
+ * menu (`ApproveDialog`); an edit of something already published comes back
+ * through the same queue with an `Edit` badge and keeps its place.
  */
 export function PresentationReview() {
   const { t } = useTranslation();
@@ -50,6 +61,10 @@ export function PresentationReview() {
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [busyId, setBusyId] = useState<string | null>(null);
   const [presentingId, setPresentingId] = useState<string | null>(null);
+  const [placing, setPlacing] = useState<{
+    entry: PresentationInReview;
+    sections: SectionChoice[];
+  } | null>(null);
 
   const load = useCallback(() => {
     let cancelled = false;
@@ -90,11 +105,45 @@ export function PresentationReview() {
     setOpenId((current) => (current === id ? null : current));
   }
 
-  async function approve(entry: PresentationInReview) {
+  /**
+   * Approves at once when the presentation already has a place in the menu;
+   * otherwise asks for one first. The menu is read fresh each time — another
+   * admin may have filed or created something since this tab loaded.
+   */
+  async function requestApproval(entry: PresentationInReview) {
+    setBusyId(entry.id);
+    try {
+      const { sections } = await getTheoryMenuForAdmin();
+      const listed = sections.some((section) =>
+        section.items.some((item) => item.presentationId === entry.id),
+      );
+
+      if (listed) {
+        await approve(entry);
+        return;
+      }
+
+      setPlacing({
+        entry,
+        sections: sections.map(({ id, label, icon }) => ({ id, label, icon })),
+      });
+    } catch (error) {
+      report(t("presentations.review.toast.approve"), error);
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function approve(entry: PresentationInReview, placement?: TheoryPlacement) {
     const title = t("presentations.review.toast.approve");
     setBusyId(entry.id);
     try {
-      const published = await approvePresentation(entry.id, notes[entry.id] ?? "");
+      const published = await approvePresentation(
+        entry.id,
+        notes[entry.id] ?? "",
+        placement,
+      );
+      setPlacing(null);
       drop(entry.id);
       // Approving can restore an entry that was hidden because this
       // presentation had been withdrawn, so the sidebar reloads.
@@ -204,6 +253,10 @@ export function PresentationReview() {
             >
               <header className="flex flex-wrap items-baseline gap-2">
                 <h3 className="m-0 min-w-0 flex-1 truncate text-base">{entry.title}</h3>
+                {/* Already live: approving replaces what readers see now. */}
+                {entry.status === "pending" && entry.publishedSlug !== null && (
+                  <Badge variant="secondary">{t("presentations.review.editBadge")}</Badge>
+                )}
                 <span className="text-muted-foreground text-xs">
                   {t("presentations.review.meta", {
                     author: entry.authorName,
@@ -291,7 +344,7 @@ export function PresentationReview() {
                     <Button
                       size="sm"
                       disabled={busyId === entry.id}
-                      onClick={() => void approve(entry)}
+                      onClick={() => void requestApproval(entry)}
                     >
                       <Check />
                       {t("presentations.review.approve")}
@@ -330,6 +383,15 @@ export function PresentationReview() {
             </article>
           );
         })}
+
+      <ApproveDialog
+        open={placing !== null}
+        title={placing?.entry.title ?? ""}
+        sections={placing?.sections ?? []}
+        busy={placing !== null && busyId === placing.entry.id}
+        onCancel={() => setPlacing(null)}
+        onConfirm={(placement) => placing && void approve(placing.entry, placement)}
+      />
     </section>
   );
 }

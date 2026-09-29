@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
-import { useLocation } from "react-router";
 import { Presentation } from "lucide-react";
 
+import { useTabPath } from "@/context/TabsProvider";
 import { PublishedPresentationView } from "@/features/theory-presentations/components/PublishedPresentationView";
 import { PUBLISHED_PRESENTATION_PREFIX } from "@/lib/presentations/contract";
 
@@ -28,7 +28,7 @@ export function publishedSlugFromPath(pathname: string): string | null {
  */
 export function TheoryPresentationPage() {
   const { t } = useTranslation();
-  const { pathname } = useLocation();
+  const pathname = useTabPath();
 
   const slug = publishedSlugFromPath(pathname);
   if (slug !== null) return <PublishedPresentationView slug={slug} />;

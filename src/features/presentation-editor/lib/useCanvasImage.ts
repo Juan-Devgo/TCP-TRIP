@@ -41,3 +41,23 @@ export function useCanvasImage(url: string): HTMLImageElement | null {
 
   return image;
 }
+
+/**
+ * Loads an image into the same cache ahead of a render that cannot wait for
+ * it — an export draws once, so every picture has to be decoded before the
+ * stage is built. A broken asset resolves too: it is simply left out, as on
+ * the canvas.
+ */
+export function preloadCanvasImage(url: string): Promise<void> {
+  if (cache.has(url)) return Promise.resolve();
+
+  return new Promise((resolve) => {
+    const loading = new window.Image();
+    loading.onload = () => {
+      cache.set(url, loading);
+      resolve();
+    };
+    loading.onerror = () => resolve();
+    loading.src = url;
+  });
+}

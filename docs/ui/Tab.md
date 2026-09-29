@@ -36,6 +36,7 @@ THEN aparece una pestaña nueva en el navbar (después del `SidebarTrigger` y su
 GIVEN una página ya abierta en una pestaña
 WHEN el usuario vuelve a hacer clic en su ítem del sidebar
 THEN se activa la pestaña existente sin crear una nueva, conservando el estado que tenía.
+Si esa pestaña ya es la activa y está en una ruta interna (p. ej. un borrador abierto desde Mis Presentaciones), el enlace a su raíz — ítem del sidebar, breadcrumb o un botón "volver" — navega dentro de la pestaña hasta la raíz y apila la ruta anterior en su historial de "atrás".
 
 **CA-3 — El estado se conserva al cambiar de pestaña**
 GIVEN el estudiante escribió valores en la herramienta de la pestaña A
@@ -80,7 +81,7 @@ THEN ve un botón si la acción es una sola, o un menú desplegable si son varia
 **CA-11 — Recarga de la página**
 GIVEN hay pestañas abiertas con estado
 WHEN el usuario recarga la aplicación (F5)
-THEN las pestañas y su estado no se restauran: la aplicación abre en la pantalla de inicio sin pestañas.
+THEN las pestañas y su estado no se restauran: la aplicación abre en la pantalla de inicio sin pestañas. Si la URL recargada (o pegada) es una ruta interna de una página (por ejemplo `/teacher/presentations/mine/<id>`), se abre la pestaña de esa página ya en esa ruta, con la página misma un paso atrás en su historial; y desde cualquier otra pestaña, un enlace a esa ruta interna lleva a la pestaña de su página, nunca a una pestaña propia.
 
 **CA-12 — Bilingüe**
 GIVEN el usuario cambia el idioma de la aplicación

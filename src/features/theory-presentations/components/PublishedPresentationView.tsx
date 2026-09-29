@@ -6,14 +6,19 @@ import { Markdown } from "@/components/common/Markdown";
 import { PresentationPlayer } from "@/components/common/PresentationPlayer";
 import { PresentationStage } from "@/components/common/PresentationStage";
 import { Button } from "@/components/ui/button";
+import { usePresentable } from "@/context/PresentableProvider";
 import { useIsTabActive } from "@/context/TabsProvider";
 import { useReadingProgress } from "@/features/theory-presentations/lib/useReadingProgress";
+import { useAppRole } from "@/hooks/useAppRole";
 import {
   scrollProgressPercent,
   slideProgressPercent,
+  withSpeakerNotes,
+  type SpeakerNotes,
 } from "@/lib/presentations/contract";
 import {
   getPublishedPresentation,
+  getSpeakerNotes,
   type PublishedPresentation,
 } from "@/services/presentations";
 
@@ -49,6 +54,11 @@ function resumeRatio(position: string | null): number | null {
  * Progress needs a session, so a signed-out reader gets the content and no
  * tracking; the hook stops asking after the first 401 rather than reporting an
  * error over a lecture.
+ *
+ * The page is **presentable**: it declares so to the header, which shows the
+ * presentation-mode button while this tab is on screen and the deck has slides.
+ * A teacher also asks for the deck's speaker notes — the server answers only
+ * its author, so for anybody else the player simply has none.
  */
 export function PublishedPresentationView({ slug }: { slug: string }) {
   const { t } = useTranslation();
@@ -57,8 +67,34 @@ export function PublishedPresentationView({ slug }: { slug: string }) {
   const [presenting, setPresenting] = useState<number | null>(null);
   const article = useRef<HTMLDivElement>(null);
 
+  const [speakerNotes, setSpeakerNotes] = useState<SpeakerNotes | null>(null);
+  const { role, isLoaded } = useAppRole();
+
   const found = state.status === "found" ? state.presentation : null;
   const { progress, report } = useReadingProgress(slug, found !== null);
+
+  usePresentable(
+    found && found.document.slides.length > 0 ? { open: () => setPresenting(0) } : null,
+  );
+
+  useEffect(() => {
+    setSpeakerNotes(null);
+    if (!isLoaded || role !== "teacher" || found === null) return;
+
+    let cancelled = false;
+    getSpeakerNotes(slug)
+      .then((notes) => {
+        if (!cancelled) setSpeakerNotes(notes);
+      })
+      .catch((error: unknown) => {
+        // Not worth an error over a lecture: the deck still projects.
+        console.error("Could not load the speaker notes", error);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [slug, role, isLoaded, found]);
 
   useEffect(() => {
     let cancelled = false;
@@ -151,13 +187,13 @@ export function PublishedPresentationView({ slug }: { slug: string }) {
       </header>
 
       <div className="flex flex-wrap items-center gap-2">
-        <Button
-          onClick={() => setPresenting(slideResume ?? 0)}
-          disabled={presentation.document.slides.length === 0}
-        >
-          <MonitorPlay />
-          {t("presentations.read.present")}
-        </Button>
+        {/* Presentation mode opens from the header; this only resumes it. */}
+        {slideResume !== null && slideResume > 0 && presentation.document.slides.length > 0 && (
+          <Button variant="outline" size="sm" onClick={() => setPresenting(slideResume)}>
+            <MonitorPlay />
+            {t("presentations.read.resumeSlide", { number: slideResume + 1 })}
+          </Button>
+        )}
 
         {progress && progress.percent > 0 && (
           <span className="text-muted-foreground text-sm">
@@ -209,7 +245,12 @@ export function PublishedPresentationView({ slug }: { slug: string }) {
 
       {presenting !== null && (
         <PresentationPlayer
-          document={presentation.document}
+          document={
+            speakerNotes
+              ? withSpeakerNotes(presentation.document, speakerNotes)
+              : presentation.document
+          }
+          speakerNotes={speakerNotes !== null}
           initialSlide={presenting}
           // Presentation mode's measure — the same percentage, counted the way
           // that view can count it.

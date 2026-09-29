@@ -10,6 +10,7 @@ import {
   FONT,
   PAGE,
 } from "@/lib/pdf/template";
+import { collectBlob, loadPdfKit } from "@/lib/pdf/pdfkit";
 
 export type ExercisePdfOptions = {
   exercises: Exercise[];
@@ -22,25 +23,6 @@ export type ExercisePdfOptions = {
 
 /** Vertical space left under each statement for the student to work in. */
 const WORK_SPACE = 30;
-
-/**
- * The browser build weighs ~2.4 MB, so it is imported on demand: only a user
- * who actually generates a sheet pays for it.
- */
-async function loadPdfKit(): Promise<typeof import("pdfkit")> {
-  const module = await import("pdfkit/js/pdfkit.standalone.js");
-  return module.default;
-}
-
-/** Resolve once the document has flushed every byte. */
-function collectBlob(doc: PDFKit.PDFDocument): Promise<Blob> {
-  return new Promise((resolve, reject) => {
-    const chunks: Uint8Array<ArrayBuffer>[] = [];
-    doc.on("data", (chunk: Uint8Array<ArrayBuffer>) => chunks.push(chunk));
-    doc.on("end", () => resolve(new Blob(chunks, { type: "application/pdf" })));
-    doc.on("error", reject);
-  });
-}
 
 /**
  * Render a set of exercises as a printable PDF. Every tool goes through this

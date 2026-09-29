@@ -146,7 +146,8 @@ export const NAVIGATION = [
           {
             segment: "mine",
             titleKey: "sidebar.presentations.mine",
-            page: true,
+            // The card grid, and the same editor as "new" once a draft is open.
+            page: { wide: true },
           },
         ],
       },

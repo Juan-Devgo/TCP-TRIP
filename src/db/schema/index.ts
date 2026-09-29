@@ -272,4 +272,23 @@ export const SCHEMA_STATEMENTS: readonly string[] = [
   /** One section's entries, in order — and the per-section count check. */
   `CREATE INDEX IF NOT EXISTS theory_section_items_section_idx
     ON theory_section_items (section_id, position, created_at);`,
+
+  /**
+   * The speaker notes of a publication, kept **beside** the frozen copy rather
+   * than inside it.
+   *
+   * The published `document` is served to anyone and stays stripped of notes.
+   * The author, projecting their own approved deck, still needs the notes that
+   * belong to *that* version — not to whatever the draft says today — so the
+   * approval freezes them here too, and only an owner-scoped read (joined to
+   * `presentations.user_id`) returns them. `notes` is a JSON object keyed on
+   * slide id. The row dies with the publication (`ON DELETE CASCADE`), so
+   * withdrawing a presentation takes its notes out of reach as well.
+   */
+  `CREATE TABLE IF NOT EXISTS presentation_speaker_notes (
+    presentation_id TEXT PRIMARY KEY
+                      REFERENCES presentation_publications (presentation_id)
+                      ON DELETE CASCADE,
+    notes           TEXT NOT NULL CHECK (json_valid(notes))
+  );`,
 ];

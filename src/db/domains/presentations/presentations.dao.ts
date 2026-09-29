@@ -27,6 +27,7 @@ import {
   SELECT_PRESENTATION,
   SELECT_PRESENTATION_FOR_REVIEW,
   SELECT_PRESENTATION_ID_BY_SLUG,
+  SELECT_SPEAKER_NOTES_FOR_AUTHOR,
   SELECT_PRESENTATIONS_BY_STATUS,
   SELECT_PRESENTATIONS_BY_USER,
   SELECT_PUBLICATION_BY_PRESENTATION,
@@ -41,6 +42,7 @@ import {
   UPDATE_PRESENTATION,
   UPSERT_PROGRESS,
   UPSERT_PUBLICATION,
+  UPSERT_SPEAKER_NOTES,
   WITHDRAW_PRESENTATION,
 } from "@/db/domains/presentations/presentations.queries";
 import type {
@@ -252,6 +254,18 @@ export class PresentationsDao extends BaseDao<PresentationRow> {
     return (
       this.one<{ presentation_id: string }>(SELECT_PRESENTATION_ID_BY_SLUG, { slug })
         ?.presentation_id ?? null
+    );
+  }
+
+  upsertSpeakerNotes(presentationId: string, notes: string): WriteResult {
+    return this.write(UPSERT_SPEAKER_NOTES, { presentationId, notes });
+  }
+
+  /** `null` when the slug is unknown **or** the caller is not its author. */
+  findSpeakerNotesForAuthor(userId: string, slug: string): string | null {
+    return (
+      this.one<{ notes: string }>(SELECT_SPEAKER_NOTES_FOR_AUTHOR, { userId, slug })?.notes ??
+      null
     );
   }
 }

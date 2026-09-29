@@ -44,7 +44,12 @@ export function TabHost() {
         const isActive = tab.id === activeTabId;
 
         return (
-          <TabScopeProvider key={tab.id} tabId={tab.id} isActive={isActive}>
+          <TabScopeProvider
+            key={tab.id}
+            tabId={tab.id}
+            isActive={isActive}
+            path={tab.history.current}
+          >
             {/* Inactive tabs stay mounted — that is what preserves their state.
                 Anything global inside them must gate on `useIsTabActive()`. */}
             <div

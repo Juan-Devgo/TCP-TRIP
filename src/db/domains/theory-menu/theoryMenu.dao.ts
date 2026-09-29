@@ -19,6 +19,7 @@ import {
   SELECT_ADMIN_MENU,
   SELECT_ASSIGNABLE,
   SELECT_ITEM,
+  SELECT_ITEM_BY_PRESENTATION,
   SELECT_ITEM_ORDER,
   SELECT_PUBLICATION_FOR_PRESENTATION,
   SELECT_PUBLIC_MENU,
@@ -147,6 +148,10 @@ export class TheoryMenuDao extends BaseDao<SectionRow> {
   }
 
   /** The live publication of a presentation, or `null` when it has none. */
+  findItemByPresentation(presentationId: string): { id: string } | null {
+    return this.one<{ id: string }>(SELECT_ITEM_BY_PRESENTATION, { presentationId });
+  }
+
   findPublication(presentationId: string): { slug: string; title: string } | null {
     return this.one<{ slug: string; title: string }>(
       SELECT_PUBLICATION_FOR_PRESENTATION,

@@ -44,6 +44,13 @@ import {
   type PresentationStatus,
   type PresentationTopic,
 } from "@/lib/presentations/contract";
+import {
+  isTheoryIconName,
+  MAX_THEORY_SECTION_LABEL_LENGTH,
+  normalizeLabel,
+  THEORY_ICON_NAMES,
+  type TheoryPlacement,
+} from "@/lib/theory/contract";
 
 function repository(): PresentationsRepository {
   // Cheap: the connection is the process-wide singleton and `db.query` caches
@@ -87,7 +94,10 @@ async function readDocument(
 
 /** The `note` of a decision, which a rejection may not go without. */
 async function readNote(req: Request, required: boolean): Promise<string | Response> {
-  const payload = (await req.json().catch(() => null)) as { note?: unknown } | null;
+  return noteOf((await req.json().catch(() => null)) as { note?: unknown } | null, required);
+}
+
+function noteOf(payload: { note?: unknown } | null, required: boolean): string | Response {
   const note = typeof payload?.note === "string" ? payload.note.trim() : "";
 
   if (required && note === "") {
@@ -126,6 +136,35 @@ function sniffMime(bytes: Uint8Array): AssetMimeType | null {
   if (tag(4, "ftypavif") || tag(4, "ftypavis")) return "image/avif";
 
   return null;
+}
+
+/**
+ * Where an approval files the presentation in the Theory menu, or `null` when
+ * the body says nothing about it. The icon is checked against the allowlist
+ * here for the same reason `src/api/theory.ts` checks it: it is rendered as a
+ * component, so an unknown name is a bad request, never a stored value.
+ */
+function placementOf(value: unknown): TheoryPlacement | null | Response {
+  if (value === undefined || value === null) return null;
+  if (typeof value !== "object") return fail(400, "`placement` must be an object");
+
+  const placement = value as { sectionId?: unknown; section?: unknown };
+  if (typeof placement.sectionId === "string" && placement.sectionId !== "") {
+    return { sectionId: placement.sectionId };
+  }
+
+  const section = placement.section as { label?: unknown; icon?: unknown } | undefined;
+  const label = normalizeLabel(section?.label, MAX_THEORY_SECTION_LABEL_LENGTH);
+  if (label === null) {
+    return fail(400, "`placement.section.label` is required", {
+      maxLength: MAX_THEORY_SECTION_LABEL_LENGTH,
+    });
+  }
+  if (!isTheoryIconName(section?.icon)) {
+    return fail(400, "Unknown icon", { allowed: THEORY_ICON_NAMES });
+  }
+
+  return { section: { label, icon: section.icon } };
 }
 
 function parseTopic(value: string | null): PresentationTopic | null {
@@ -404,8 +443,16 @@ export const presentationRoutes = {
       const caller = await adminOnly(req);
       if (isRefusal(caller)) return caller;
 
-      const note = await readNote(req, false);
+      const payload = (await req.json().catch(() => null)) as {
+        note?: unknown;
+        placement?: unknown;
+      } | null;
+
+      const note = noteOf(payload, false);
       if (note instanceof Response) return note;
+
+      const placement = placementOf(payload?.placement);
+      if (placement instanceof Response) return placement;
 
       const presentations = repository();
       const draft = presentations.findForReview(req.params.id);
@@ -414,15 +461,30 @@ export const presentationRoutes = {
         return fail(409, "This presentation is not waiting for review");
       }
 
-      const published = presentations.approve(
+      const approved = presentations.approveIntoMenu(
         caller.userId,
         req.params.id,
         await getDisplayName(draft.authorId),
         note === "" ? null : note,
+        placement,
       );
+      if (approved.ok) return ok(approved.published);
 
-      // Lost the race with another admin deciding the same submission.
-      return published ? ok(published) : fail(409, "This presentation was just decided");
+      switch (approved.reason) {
+        case "placement-required":
+          return fail(400, "A first approval needs a place in the Theory menu");
+        case "not-pending":
+          // Lost the race with another admin deciding the same submission.
+          return fail(409, "This presentation was just decided");
+        case "section-missing":
+          return fail(404, "Theory section not found");
+        case "full":
+          return fail(409, "The menu cannot hold any more entries here");
+        default:
+          return fail(409, "The presentation could not be placed in the menu", {
+            reason: approved.reason,
+          });
+      }
     },
   },
 
@@ -474,6 +536,22 @@ export const presentationRoutes = {
     GET: (req: BunRequest<"/api/theory/presentations/:slug">) => {
       const published = repository().findPublishedBySlug(req.params.slug);
       return published ? ok(published) : fail(404, NOT_FOUND);
+    },
+  },
+
+  /**
+   * The speaker notes of the published version — **for its author only**, so
+   * they can project their own approved deck with them. Anybody else, teacher
+   * or not, gets the same 404 as an unknown slug: the ownership check is in the
+   * query, and the public read above never carries notes at all.
+   */
+  "/api/theory/presentations/:slug/notes": {
+    GET: async (req: BunRequest<"/api/theory/presentations/:slug/notes">) => {
+      const caller = await authorOnly(req);
+      if (isRefusal(caller)) return caller;
+
+      const notes = repository().findSpeakerNotes(caller.userId, req.params.slug);
+      return notes ? ok(notes) : fail(404, NOT_FOUND);
     },
   },
 

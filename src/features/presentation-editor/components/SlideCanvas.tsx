@@ -1,44 +1,49 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  Arrow,
-  Ellipse,
-  Group,
-  Image as KonvaImage,
-  Layer,
-  Line,
-  Rect,
-  Stage,
-  Text,
-  Transformer,
-} from "react-konva";
+import { Group, Layer, Line, Rect, Stage, Transformer } from "react-konva";
 import type Konva from "konva";
+import { Loader2 } from "lucide-react";
 
+import { ElementArt } from "@/features/presentation-editor/components/SlideArt";
 import {
   CanvasRulers,
   RULER_SIZE,
 } from "@/features/presentation-editor/components/CanvasRulers";
-import { useThemeColors, type ThemePaint } from "@/features/presentation-editor/lib/themeColors";
-import { useCanvasImage } from "@/features/presentation-editor/lib/useCanvasImage";
 import {
-  NO_FILL,
-  presentationAssetUrl,
-  type PresentationCanvas,
-  type PresentationElement,
-  type PresentationSlide,
-  type ShapeElementProps,
-  type TableElementProps,
+  GRID,
+  intersects,
+  marquee,
+  ROTATION_SNAPS,
+  ROTATION_SNAP_TOLERANCE,
+  rotatedBounds,
+} from "@/features/presentation-editor/lib/geometry";
+import { useThemeColors, type ThemePaint } from "@/features/presentation-editor/lib/themeColors";
+import type {
+  PresentationCanvas,
+  PresentationElement,
+  PresentationSlide,
 } from "@/lib/presentations/contract";
+import { cn } from "@/lib/utils";
 
 /** How far an arrow key nudges, in canvas units. Shift multiplies it. */
 const NUDGE = 8;
 const NUDGE_FAST = 48;
 
-/** The alignment grid, in canvas units. Drawn, never snapped to. */
-const GRID = 120;
-
 /** Handles are sized in screen pixels, so zooming does not resize them. */
 const ANCHOR = 9;
+
+/** A Ctrl+drag shorter than this, in canvas units, is a Ctrl+click. */
+const CLICK_SLOP = 4;
+
+type Point = { x: number; y: number };
+
+/** A Ctrl+drag in progress, in canvas units. */
+type Area = {
+  from: Point;
+  to: Point;
+  /** The element the drag started on, for a Ctrl+click that toggles it. */
+  origin: string | null;
+};
 
 /** The box an element occupies, as the reducer stores it. */
 export type CanvasBox = {
@@ -81,12 +86,22 @@ type Editing = {
  *
  * Typing happens in a real `<textarea>` laid over the node, the way every
  * canvas editor does it: a canvas has no caret, no IME and no spellcheck.
+ *
+ * Holding Ctrl and dragging across the board draws a marquee; whatever it
+ * touches becomes a **group**, which the transformer carries as a whole — the
+ * group only moves (no resize, no rotation), because scaling several elements
+ * of different kinds by one handle has no answer a teacher would expect.
+ * Ctrl+click adds or removes one element. The group is not in the reducer:
+ * it is a selection, not an edit, and only its move becomes one.
  */
 export function SlideCanvas({
   slide,
   canvas,
   selectedElementId,
+  group,
   onSelect,
+  onGroup,
+  onMoveGroup,
   onTransform,
   onCommit,
   onText,
@@ -96,7 +111,12 @@ export function SlideCanvas({
   slide: PresentationSlide;
   canvas: PresentationCanvas;
   selectedElementId: string | null;
+  /** Elements selected together; empty unless there are two or more. */
+  group: readonly string[];
   onSelect: (id: string | null) => void;
+  onGroup: (ids: string[]) => void;
+  /** A group was dropped: every member's new position, in canvas units. */
+  onMoveGroup: (moves: { id: string; x: number; y: number }[]) => void;
   /** Position, size and angle, in canvas units — one gesture, one call. */
   onTransform: (id: string, box: CanvasBox) => void;
   /** The gesture ended: the next edit starts a new undo step. */
@@ -112,17 +132,31 @@ export function SlideCanvas({
   const nodes = useRef(new Map<string, Konva.Group>());
   const [available, setAvailable] = useState(0);
   const [editing, setEditing] = useState<Editing | null>(null);
+  const [area, setArea] = useState<Area | null>(null);
+  /** Read inside Konva handlers, which may run before React re-renders. */
+  const selecting = useRef(false);
+  selecting.current = area !== null;
+  /** Several members end one drag: they must still be one undo step. */
+  const settling = useRef(false);
 
-  // One measurement is all the geometry the stage needs: it scales.
-  useEffect(() => {
+  // One measurement is all the geometry the stage needs: it scales. Taken
+  // before the first paint, so the board never shows up empty for a frame;
+  // the observer then follows the column as it resizes.
+  useLayoutEffect(() => {
     const element = frame.current;
     if (!element) return;
+
+    const style = getComputedStyle(element);
+    setAvailable(
+      element.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight),
+    );
 
     const observer = new ResizeObserver(([entry]) => {
       setAvailable(entry?.contentRect.width ?? 0);
     });
+    // Observing fires once straight away, with the content box — the frame's
+    // padding already taken out, which `clientWidth` would include.
     observer.observe(element);
-    setAvailable(element.clientWidth);
 
     return () => observer.disconnect();
   }, []);
@@ -132,20 +166,101 @@ export function SlideCanvas({
   const scale = Math.min(1, Math.max(0, (available - RULER_SIZE) / canvas.width));
 
   const selected = slide.elements.find((element) => element.id === selectedElementId);
+  // What the rulers band: the box the element really covers once it is turned.
+  const bounds = selected ? rotatedBounds(selected) : null;
+  const grouped = group.length > 0;
 
   /** Keeps the transformer on whatever is selected, and off what is locked. */
   useEffect(() => {
     const handles = transformer.current;
     if (!handles) return;
 
-    const node =
-      selectedElementId !== null && selected?.locked !== true
-        ? nodes.current.get(selectedElementId)
-        : undefined;
+    const ids = grouped ? group : selectedElementId !== null ? [selectedElementId] : [];
+    const attached = ids.flatMap((id) => {
+      const element = slide.elements.find((candidate) => candidate.id === id);
+      const node = nodes.current.get(id);
+      return element && element.locked !== true && node ? [node] : [];
+    });
 
-    handles.nodes(node ? [node] : []);
+    handles.nodes(attached);
     handles.getLayer()?.batchDraw();
-  }, [selectedElementId, selected, slide.elements]);
+  }, [grouped, group, selectedElementId, slide.elements]);
+
+  // Only while a marquee is being drawn, and on `window`, so letting go
+  // outside the board still ends it.
+  useEffect(() => {
+    if (!area) return;
+
+    function finish() {
+      if (!area) return;
+      setArea(null);
+
+      const drawn = marquee(area.from, area.to);
+      const click =
+        drawn.right - drawn.left < CLICK_SLOP && drawn.bottom - drawn.top < CLICK_SLOP;
+
+      if (!click) {
+        choose(
+          slide.elements
+            .filter((element) => !element.locked && intersects(rotatedBounds(element), drawn))
+            .map((element) => element.id),
+        );
+        return;
+      }
+
+      // Ctrl+click: toggles one element in or out of what is selected.
+      const origin = slide.elements.find((element) => element.id === area.origin);
+      if (!origin || origin.locked) return;
+
+      const current = grouped ? group : selectedElementId !== null ? [selectedElementId] : [];
+      choose(
+        current.includes(origin.id)
+          ? current.filter((id) => id !== origin.id)
+          : [...current, origin.id],
+      );
+    }
+
+    window.addEventListener("mouseup", finish);
+    return () => window.removeEventListener("mouseup", finish);
+  });
+
+  /** One element is an ordinary selection; two or more are a group. */
+  function choose(ids: string[]) {
+    if (ids.length > 1) onGroup(ids);
+    else onSelect(ids[0] ?? null);
+  }
+
+  /** The element a Konva node belongs to, climbing out of its children. */
+  function ownerOf(target: Konva.Node): string | null {
+    const owner = target.findAncestor(
+      (node: Konva.Node) => nodes.current.get(node.id()) === node,
+      true,
+    );
+    return owner ? owner.id() : null;
+  }
+
+  /** Clicking a member of the group keeps the group, so it can be dragged. */
+  function pick(id: string) {
+    if (selecting.current || group.includes(id)) return;
+    onSelect(id);
+  }
+
+  /** Every dragged member ends the drag; the first one settles all of them. */
+  function dropGroup() {
+    onMoveGroup(
+      group.flatMap((id) => {
+        const node = nodes.current.get(id);
+        return node ? [{ id, x: node.x(), y: node.y() }] : [];
+      }),
+    );
+
+    if (settling.current) return;
+    settling.current = true;
+    queueMicrotask(() => {
+      settling.current = false;
+      onCommit();
+    });
+  }
 
   /** Closing the editor ends the undo step the typing belonged to. */
   function closeEditor() {
@@ -156,7 +271,14 @@ export function SlideCanvas({
   function onKeyDown(event: React.KeyboardEvent) {
     // The textarea is a child of this node: while it is open, the keys are
     // the author's text, not canvas commands.
-    if (editing || !selected || selected.locked) return;
+    if (editing) return;
+
+    if (event.key === "Escape") {
+      onSelect(null);
+      return;
+    }
+
+    if (!selected || selected.locked) return;
 
     const step = event.shiftKey ? NUDGE_FAST : NUDGE;
     const nudge: Record<string, [number, number]> = {
@@ -180,15 +302,42 @@ export function SlideCanvas({
     if (event.key === "Delete" || event.key === "Backspace") {
       event.preventDefault();
       onDelete(selected.id);
+    }
+  }
+
+  /**
+   * Ctrl+press starts a marquee wherever it lands; a plain click that did not
+   * land on an element is a deselection.
+   */
+  function onStagePointer(event: Konva.KonvaEventObject<MouseEvent | TouchEvent>) {
+    const stage = event.target.getStage();
+    if (!stage) return;
+
+    const primary = !("button" in event.evt) || event.evt.button === 0;
+    if (primary && (event.evt.ctrlKey || event.evt.metaKey)) {
+      const point = stage.getRelativePointerPosition();
+      if (point) setArea({ from: point, to: point, origin: ownerOf(event.target) });
       return;
     }
 
-    if (event.key === "Escape") onSelect(null);
+    if (event.target === stage) onSelect(null);
   }
 
-  /** A click that did not land on an element is a deselection. */
-  function onStagePointer(event: Konva.KonvaEventObject<MouseEvent | TouchEvent>) {
-    if (event.target === event.target.getStage()) onSelect(null);
+  /**
+   * A right-click selects what it lands on before the context menu opens, so
+   * the menu acts on what the author pointed at. A group member keeps the
+   * group.
+   */
+  function onStageContext(event: Konva.KonvaEventObject<PointerEvent>) {
+    const id = ownerOf(event.target);
+    if (id === null) onSelect(null);
+    else if (!group.includes(id)) onSelect(id);
+  }
+
+  function onStageMove(event: Konva.KonvaEventObject<MouseEvent>) {
+    if (!area) return;
+    const point = event.target.getStage()?.getRelativePointerPosition();
+    if (point) setArea({ ...area, to: point });
   }
 
   const grid: number[] = [];
@@ -197,7 +346,10 @@ export function SlideCanvas({
   return (
     <div
       ref={frame}
-      className="focus-visible:ring-ring w-full rounded-lg focus-visible:ring-2 focus-visible:outline-none"
+      // No focus ring: the transformer already shows what the keys act on, and
+      // a ring would light up the whole board the moment Shift is pressed to
+      // scale.
+      className="w-full p-1 outline-none"
       // Focusable so the nudge and delete keys have somewhere to land. Bound
       // here and not to `document`: inactive tabs stay mounted in this app.
       tabIndex={0}
@@ -205,7 +357,19 @@ export function SlideCanvas({
       aria-label={t("presentations.editor.canvasLabel")}
       onKeyDown={onKeyDown}
     >
-      <div className="flex">
+      {/* Not measured yet (or in a hidden tab): the board's own space, busy. */}
+      {scale === 0 && (
+        <div
+          role="status"
+          className="bg-muted/40 text-muted-foreground flex w-full items-center justify-center rounded-md border"
+          style={{ aspectRatio: `${canvas.width} / ${canvas.height}` }}
+        >
+          <Loader2 className="size-8 animate-spin" aria-hidden />
+          <span className="sr-only">{t("common.loading")}</span>
+        </div>
+      )}
+
+      <div className={cn("flex", scale === 0 && "hidden")}>
         <div
           aria-hidden
           className="border-border bg-muted/40 shrink-0 border-r border-b"
@@ -215,16 +379,16 @@ export function SlideCanvas({
           axis="x"
           canvas={canvas}
           scale={scale}
-          {...(selected ? { from: selected.x, to: selected.x + selected.width } : {})}
+          {...(bounds ? { from: bounds.left, to: bounds.right } : {})}
         />
       </div>
 
-      <div className="flex">
+      <div className={cn("flex", scale === 0 && "hidden")}>
         <CanvasRulers
           axis="y"
           canvas={canvas}
           scale={scale}
-          {...(selected ? { from: selected.y, to: selected.y + selected.height } : {})}
+          {...(bounds ? { from: bounds.top, to: bounds.bottom } : {})}
         />
 
         <div
@@ -239,6 +403,8 @@ export function SlideCanvas({
               scaleY={scale}
               onMouseDown={onStagePointer}
               onTouchStart={onStagePointer}
+              onMouseMove={onStageMove}
+              onContextMenu={onStageContext}
             >
               {/* Nothing here listens, so a click on the slide reaches the
                   stage and counts as a deselection. */}
@@ -280,20 +446,33 @@ export function SlideCanvas({
                     element={element}
                     paint={paint}
                     scale={scale}
+                    draggable={element.locked !== true && area === null}
+                    grouped={group.includes(element.id)}
+                    selecting={selecting}
                     register={(node) => {
                       if (node) nodes.current.set(element.id, node);
                       else nodes.current.delete(element.id);
                     }}
-                    onSelect={() => onSelect(element.id)}
+                    onSelect={() => pick(element.id)}
+                    onDropGroup={dropGroup}
                     onTransform={(next) => onTransform(element.id, next)}
                     onCommit={onCommit}
                     onEdit={(next) => setEditing(next)}
                   />
                 ))}
 
+                {area && (
+                  <MarqueeNode area={area} scale={scale} color={paint.color("primary")} />
+                )}
+
                 <Transformer
                   ref={transformer}
-                  rotateEnabled
+                  // A group only moves. A table stays upright; everything else
+                  // settles every 45°.
+                  resizeEnabled={!grouped}
+                  rotateEnabled={!grouped && selected?.type !== "table"}
+                  rotationSnaps={ROTATION_SNAPS}
+                  rotationSnapTolerance={ROTATION_SNAP_TOLERANCE}
                   keepRatio={false}
                   flipEnabled={false}
                   // Sized in screen pixels: the transformer lives inside the
@@ -333,6 +512,9 @@ export function SlideCanvas({
               }}
               value={editing.value}
               aria-label={t("presentations.editor.editText")}
+              // The browser's own menu (spellcheck, paste) is the one that
+              // belongs to a text field, not the canvas menu around it.
+              onContextMenu={(event) => event.stopPropagation()}
               onChange={(event) => {
                 const value = event.target.value;
                 setEditing({ ...editing, value });
@@ -359,6 +541,24 @@ export function SlideCanvas({
   );
 }
 
+/** The Ctrl+drag marquee: a tinted box with a hairline edge. */
+function MarqueeNode({ area, scale, color }: { area: Area; scale: number; color: string }) {
+  const drawn = marquee(area.from, area.to);
+  const geometry = {
+    x: drawn.left,
+    y: drawn.top,
+    width: drawn.right - drawn.left,
+    height: drawn.bottom - drawn.top,
+  };
+
+  return (
+    <>
+      <Rect listening={false} {...geometry} fill={color} opacity={0.12} />
+      <Rect listening={false} {...geometry} stroke={color} strokeWidth={1 / scale} />
+    </>
+  );
+}
+
 function box(element: PresentationElement): CanvasBox {
   return {
     x: element.x,
@@ -378,8 +578,12 @@ function CanvasElement({
   element,
   paint,
   scale,
+  draggable,
+  grouped,
+  selecting,
   register,
   onSelect,
+  onDropGroup,
   onTransform,
   onCommit,
   onEdit,
@@ -387,8 +591,14 @@ function CanvasElement({
   element: PresentationElement;
   paint: ThemePaint;
   scale: number;
+  draggable: boolean;
+  /** A member of a multi-selection: its moves are the group's, not its own. */
+  grouped: boolean;
+  /** Whether a marquee is being drawn — true before React has re-rendered. */
+  selecting: React.RefObject<boolean>;
   register: (node: Konva.Group | null) => void;
   onSelect: () => void;
+  onDropGroup: () => void;
   onTransform: (box: CanvasBox) => void;
   onCommit: () => void;
   onEdit: (editing: Editing) => void;
@@ -412,13 +622,26 @@ function CanvasElement({
       width={element.width}
       height={element.height}
       rotation={element.rotation}
-      draggable={element.locked !== true}
+      draggable={draggable}
       onMouseDown={onSelect}
       onTouchStart={onSelect}
-      onDragMove={(event) =>
-        onTransform({ ...box(element), x: event.target.x(), y: event.target.y() })
-      }
-      onDragEnd={onCommit}
+      onDragStart={(event) => {
+        // Ctrl+press on an element starts a marquee, not a move — Konva may
+        // have armed the drag before `draggable` was re-rendered off.
+        if (!selecting.current) return;
+        event.target.stopDrag();
+        event.target.position({ x: element.x, y: element.y });
+      }}
+      onDragMove={(event) => {
+        // A group's members are moved by the transformer, together; the
+        // document catches up once, on drop.
+        if (grouped || selecting.current) return;
+        onTransform({ ...box(element), x: event.target.x(), y: event.target.y() });
+      }}
+      onDragEnd={() => {
+        if (grouped) onDropGroup();
+        else onCommit();
+      }}
       onTransformEnd={(event) => {
         const node = event.target;
         const next = {
@@ -458,299 +681,24 @@ function CanvasElement({
         }}
       />
 
-      {element.type === "text" && (
-        <Text
-          listening={false}
-          width={element.width}
-          height={element.height}
-          text={element.props.text}
-          fontSize={element.props.size}
-          fontFamily={paint.font(element.props.mono === true)}
-          fontStyle={element.props.weight >= 600 ? "bold" : "normal"}
-          align={element.props.align}
-          fill={paint.color(element.props.color)}
-          lineHeight={1.2}
-          wrap="word"
-        />
-      )}
-
-      {element.type === "image" && (
-        <ImageNode
-          assetId={element.props.assetId}
-          fit={element.props.fit}
-          width={element.width}
-          height={element.height}
-        />
-      )}
-
-      {element.type === "table" && (
-        <TableNode
-          props={element.props}
-          paint={paint}
-          width={element.width}
-          height={element.height}
-          onEditCell={(row, column, cell) =>
-            onEdit({
-              id: element.id,
-              row,
-              column,
-              value: element.props.rows[row]?.[column] ?? "",
-              box: screen(cell),
-              fontSize: element.props.size,
-              fontFamily: paint.font(element.props.mono === true),
-              align: "left",
-              color: paint.color(element.props.color),
-            })
-          }
-        />
-      )}
-
-      {element.type === "shape" && (
-        <ShapeNode
-          props={element.props}
-          paint={paint}
-          width={element.width}
-          height={element.height}
-        />
-      )}
+      <ElementArt
+        element={element}
+        paint={paint}
+        onEditCell={(row, column, cell) => {
+          if (element.type !== "table") return;
+          onEdit({
+            id: element.id,
+            row,
+            column,
+            value: element.props.rows[row]?.[column] ?? "",
+            box: screen(cell),
+            fontSize: element.props.size,
+            fontFamily: paint.font(element.props.mono === true),
+            align: "left",
+            color: paint.color(element.props.color),
+          });
+        }}
+      />
     </Group>
-  );
-}
-
-/** An uploaded image, letterboxed or centre-cropped to the box it is given. */
-function ImageNode({
-  assetId,
-  fit,
-  width,
-  height,
-}: {
-  assetId: string;
-  fit: "contain" | "cover";
-  width: number;
-  height: number;
-}) {
-  const image = useCanvasImage(presentationAssetUrl(assetId));
-  if (!image) return null;
-
-  const natural = { width: image.naturalWidth || width, height: image.naturalHeight || height };
-
-  if (fit === "contain") {
-    const ratio = Math.min(width / natural.width, height / natural.height);
-    const drawn = { width: natural.width * ratio, height: natural.height * ratio };
-
-    return (
-      <KonvaImage
-        listening={false}
-        image={image}
-        x={(width - drawn.width) / 2}
-        y={(height - drawn.height) / 2}
-        width={drawn.width}
-        height={drawn.height}
-      />
-    );
-  }
-
-  // Cover: fill the box and crop what does not fit, from the centre.
-  const ratio = Math.max(width / natural.width, height / natural.height);
-  const crop = { width: width / ratio, height: height / ratio };
-
-  return (
-    <KonvaImage
-      listening={false}
-      image={image}
-      width={width}
-      height={height}
-      crop={{
-        x: (natural.width - crop.width) / 2,
-        y: (natural.height - crop.height) / 2,
-        width: crop.width,
-        height: crop.height,
-      }}
-    />
-  );
-}
-
-/**
- * A table drawn as what it is: a grid of equal cells over the element's box.
- * The document stores the cells, so resizing the element re-lays the grid
- * instead of scattering text boxes.
- */
-function TableNode({
-  props,
-  paint,
-  width,
-  height,
-  onEditCell,
-}: {
-  props: TableElementProps;
-  paint: ThemePaint;
-  width: number;
-  height: number;
-  onEditCell: (
-    row: number,
-    column: number,
-    cell: { x: number; y: number; width: number; height: number },
-  ) => void;
-}) {
-  const rows = props.rows.length;
-  const columns = props.rows[0]?.length ?? 1;
-  const cellWidth = width / columns;
-  const cellHeight = height / rows;
-  const line = Math.max(1, props.size * 0.05);
-  const padding = props.size * 0.3;
-
-  return (
-    <>
-      {props.header && (
-        <Rect
-          listening={false}
-          width={width}
-          height={cellHeight}
-          fill={paint.color("muted")}
-        />
-      )}
-
-      {props.rows.map((row, rowIndex) =>
-        row.map((cell, columnIndex) => {
-          const geometry = {
-            x: columnIndex * cellWidth,
-            y: rowIndex * cellHeight,
-            width: cellWidth,
-            height: cellHeight,
-          };
-
-          return (
-            <Group key={`${rowIndex}-${columnIndex}`} x={geometry.x} y={geometry.y}>
-              <Rect
-                width={cellWidth}
-                height={cellHeight}
-                fill="rgba(0,0,0,0.001)"
-                onDblClick={() => onEditCell(rowIndex, columnIndex, geometry)}
-              />
-              <Text
-                listening={false}
-                x={padding}
-                y={padding}
-                width={Math.max(1, cellWidth - padding * 2)}
-                height={Math.max(1, cellHeight - padding * 2)}
-                text={cell}
-                fontSize={props.size}
-                fontFamily={paint.font(props.mono === true)}
-                fontStyle={props.header && rowIndex === 0 ? "bold" : "normal"}
-                fill={paint.color(props.color)}
-                verticalAlign="middle"
-                wrap="word"
-                ellipsis
-              />
-            </Group>
-          );
-        }),
-      )}
-
-      {/* The rules, drawn last so they sit over the header fill. */}
-      {Array.from({ length: rows + 1 }, (_unused, index) => (
-        <Line
-          key={`h${index}`}
-          listening={false}
-          points={[0, index * cellHeight, width, index * cellHeight]}
-          stroke={paint.color("border")}
-          strokeWidth={line}
-        />
-      ))}
-      {Array.from({ length: columns + 1 }, (_unused, index) => (
-        <Line
-          key={`v${index}`}
-          listening={false}
-          points={[index * cellWidth, 0, index * cellWidth, height]}
-          stroke={paint.color("border")}
-          strokeWidth={line}
-        />
-      ))}
-    </>
-  );
-}
-
-/** A figure. `none` really means no fill, so the prop is omitted, not empty. */
-function ShapeNode({
-  props,
-  paint,
-  width,
-  height,
-}: {
-  props: ShapeElementProps;
-  paint: ThemePaint;
-  width: number;
-  height: number;
-}) {
-  const stroke = paint.color(props.stroke);
-  const fill = props.fill === NO_FILL ? {} : { fill: paint.color(props.fill) };
-  const inset = props.strokeWidth / 2;
-  const common = { listening: false, stroke, strokeWidth: props.strokeWidth } as const;
-
-  if (props.kind === "rect") {
-    return (
-      <Rect
-        {...common}
-        {...fill}
-        x={inset}
-        y={inset}
-        width={Math.max(1, width - props.strokeWidth)}
-        height={Math.max(1, height - props.strokeWidth)}
-      />
-    );
-  }
-
-  if (props.kind === "ellipse") {
-    return (
-      <Ellipse
-        {...common}
-        {...fill}
-        x={width / 2}
-        y={height / 2}
-        radiusX={Math.max(1, (width - props.strokeWidth) / 2)}
-        radiusY={Math.max(1, (height - props.strokeWidth) / 2)}
-      />
-    );
-  }
-
-  if (props.kind === "triangle") {
-    return (
-      <Line
-        {...common}
-        {...fill}
-        closed
-        points={[width / 2, inset, width - inset, height - inset, inset, height - inset]}
-      />
-    );
-  }
-
-  // A connector is drawn along the middle of its box, which is why it is born
-  // wide and thin: its height is the room the stroke and the head get.
-  const thickness = props.strokeWidth > 0 ? props.strokeWidth : Math.max(2, height / 3);
-
-  if (props.kind === "line") {
-    return (
-      <Line
-        listening={false}
-        stroke={stroke}
-        strokeWidth={thickness}
-        points={[0, height / 2, width, height / 2]}
-        lineCap="round"
-      />
-    );
-  }
-
-  return (
-    <Arrow
-      listening={false}
-      stroke={stroke}
-      // An arrowhead is filled, and a connector's fill is `none` — so it takes
-      // the stroke colour rather than disappearing.
-      fill={props.fill === NO_FILL ? stroke : paint.color(props.fill)}
-      strokeWidth={thickness}
-      pointerLength={Math.max(thickness * 2.5, 16)}
-      pointerWidth={Math.max(thickness * 2.5, 16)}
-      points={[0, height / 2, width, height / 2]}
-    />
   );
 }

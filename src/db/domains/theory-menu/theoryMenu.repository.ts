@@ -131,6 +131,16 @@ export class TheoryMenuRepository extends BaseRepository<SectionRow, TheoryAdmin
     return this.dao.assignable().map(toAssignable);
   }
 
+  /**
+   * Whether the presentation already has an entry — even one hidden because it
+   * was withdrawn. An approval uses it to decide whether the admin still has to
+   * say where the presentation goes: an entry keeps its place across
+   * re-approvals.
+   */
+  isListed(presentationId: string): boolean {
+    return this.dao.findItemByPresentation(presentationId) !== null;
+  }
+
   /* ------------------------------------------------------------- sections */
 
   createSection(

@@ -8,7 +8,7 @@
 **Componentes compartidos:** `src/components/common/PresentationStage.tsx`, `PresentationPlayer.tsx`, `Markdown.tsx`
 **Lienzo (Konva):** `src/features/presentation-editor/components/SlideCanvas.tsx` · `CanvasRulers.tsx`
 **Barras:** `EditorTopBar.tsx` · `SlidesToolbar.tsx` · `MarkdownToolbar.tsx` · `MarkdownWriter.tsx` · `NotesPanel.tsx`
-**Lógica de dominio:** `src/features/presentation-editor/lib/editorState.ts` · `markdownSnippets.ts` · `src/lib/markdown/markdown.ts`
+**Lógica de dominio:** `src/features/presentation-editor/lib/editorState.ts` · `markdownSnippets.ts` · `src/components/common/Markdown.tsx` (`markdown-to-jsx`)
 **Contrato compartido:** `src/lib/presentations/contract.ts` · **Roles:** `src/lib/auth/roles.ts`
 **Cliente de datos:** `src/services/presentations.ts` sobre `src/services/client.ts`
 **API:** `src/api/presentations.ts` · **Persistencia:** `src/db/domains/presentations/`
@@ -48,7 +48,7 @@ THEN el grupo `Presentaciones` no aparece en el sidebar; y GIVEN el usuario escr
 **CA-2 — Estado inicial del editor**
 GIVEN un profesor abre `Nueva Presentación`
 WHEN la pestaña carga
-THEN el título es editable **en su sitio, arriba a la izquierda**; las pestañas `Diapositivas` / `Markdown` están arriba a la derecha con su tooltip; debajo hay **una sola barra del ancho del componente**; el contenido principal es el lienzo (1920×1080 por defecto) con una diapositiva vacía; al final hay una sección de notas privadas; y el aviso de que aún no se ha guardado. *(El tema de teoría y el lienzo se eligen en el panel derecho, que es donde vive todo lo que no es una acción.)*
+THEN el título es editable **en su sitio, arriba a la izquierda**; las pestañas `Diapositivas` / `Markdown` están arriba a la derecha con su tooltip; debajo hay **una sola barra del ancho del componente**; el contenido principal es el lienzo (1920×1080 por defecto) con una diapositiva vacía; al final hay una sección de notas privadas; y el aviso de que aún no se ha guardado. *(El tamaño del tablero y el fondo de la diapositiva se eligen en `Ver`; el panel derecho muestra solo las propiedades del elemento seleccionado y se desplaza dentro de la altura del lienzo.)*
 
 **CA-3 — Dos modos, ninguno derivado del otro**
 GIVEN el profesor escribe texto en Markdown y además coloca elementos en el lienzo
@@ -91,9 +91,9 @@ WHEN el profesor abre `Insertar ▸ Imagen…`
 THEN se le pide guardar primero, porque los bytes se almacenan junto a la presentación; y GIVEN ya está guardada, WHEN sube un PNG/JPEG/WEBP/GIF/AVIF de hasta 2 MB, THEN queda listado y puede insertarlo en la diapositiva con su proporción original; y THEN el servidor determina el tipo **por los bytes**, no por lo que declare el navegador, y rechaza SVG.
 
 **CA-11 — Notas del ponente (de una diapositiva)**
-GIVEN una diapositiva está seleccionada
-WHEN el profesor escribe en `Notas del ponente`
-THEN el texto se guarda en la diapositiva y solo se muestra en el modo presentación al pulsar `Notas` (tecla `N`); nunca se proyecta como parte de la diapositiva.
+GIVEN una diapositiva tiene notas del ponente guardadas
+WHEN se abre en el modo presentación
+THEN solo su autor las muestra, con la tecla `N`; nunca se proyectan como parte de la diapositiva. *(Reglas del reproductor por rol: `docs/ui/PresentationMode.md`.)* *(El campo que las editaba salió del panel derecho: el editor ya no ofrece dónde escribirlas; las notas del profesor viven en `Mis notas`, debajo del editor.)*
 
 **CA-12 — Guardar es explícito**
 GIVEN hay cambios sin guardar
@@ -255,10 +255,10 @@ GIVEN el profesor ha hecho cambios
 WHEN pulsa `Ctrl+Z` (o `Editar ▸ Deshacer`)
 THEN vuelve el documento anterior con la selección corregida —si el elemento seleccionado ya no existe, la selección se mueve—; y WHEN pulsa `Ctrl+Mayús+Z`, THEN se rehace; y GIVEN acaba de arrastrar un elemento a lo largo de doscientos eventos de puntero, WHEN deshace, THEN se deshace **el gesto entero**, no el último píxel; y GIVEN deshace y luego edita, THEN lo deshecho se descarta. *(El historial guarda 50 pasos; el atajo está en el editor y no en `document`, porque las pestañas inactivas siguen montadas.)*
 
-**CA-42 — Una barra, tres menús**
+**CA-42 — Una barra, cuatro menús**
 GIVEN el modo `Diapositivas` está activo
 WHEN el profesor mira la barra
-THEN ocupa todo el ancho y contiene, en este orden: el selector de diapositiva, el botón de añadir, los menús `Archivo` / `Insertar` / `Editar`, y a la derecha deshacer, rehacer y `Presentar`; y THEN cada control tiene un tooltip de una línea que dice qué hace; y THEN los menús llevan los atajos de teclado y desactivan lo que no aplica (enviar a revisión sin haber guardado, o una acción de elemento sin selección).
+THEN ocupa todo el ancho y contiene, a la izquierda, el selector de diapositiva y los botones de añadir y eliminar; y a la derecha los menús `Archivo` / `Insertar` / `Editar` / `Ver`, deshacer, rehacer y `Presentar`; y THEN `Ver` agrupa lo que cambia cómo se ve el tablero —su tamaño y el fondo de la diapositiva—; y THEN cada control tiene un tooltip de una línea que dice qué hace; y THEN los menús llevan los atajos de teclado y desactivan lo que no aplica (enviar a revisión sin haber guardado, o una acción de elemento sin selección).
 
 **CA-43 — La barra de markdown inserta, no formatea**
 GIVEN el modo `Markdown` está activo
@@ -275,6 +275,21 @@ GIVEN la presentación tiene al menos una diapositiva
 WHEN el profesor pulsa `Presentar`
 THEN el modo presentación se abre y pide **pantalla completa** al navegador; y GIVEN el navegador la deniega, THEN queda como la superposición a ventana completa que ya era; y WHEN se cierra, THEN se sale de pantalla completa.
 
+**CA-46 — Menú contextual del lienzo**
+GIVEN el modo `Diapositivas` está activo
+WHEN el profesor hace clic derecho sobre el tablero vacío
+THEN ve `Pegar`, `Deshacer`, `Rehacer` y `Vaciar la diapositiva` en estilo destructivo, que quita todos los elementos en **un solo paso de deshacer**; y WHEN hace clic derecho sobre un elemento, THEN ese elemento queda seleccionado y el menú ofrece copiar, pegar, duplicar, traer al frente, enviar al fondo, bloquear/desbloquear y eliminar; y GIVEN hay un grupo seleccionado, WHEN hace clic derecho sobre uno de sus miembros, THEN el grupo se conserva y el menú ofrece copiar, pegar, deshacer y rehacer.
+
+**CA-47 — Copiar y pegar elementos**
+GIVEN hay un elemento o un grupo seleccionado y el foco no está en un campo de texto
+WHEN el profesor pulsa `Ctrl+C` y luego `Ctrl+V`
+THEN se pegan copias con ids nuevos en la **diapositiva activa**, desplazadas 32 unidades para que se vean como copias —así es como un elemento pasa a otra diapositiva—; y WHEN vuelve a pegar, THEN la siguiente copia se desplaza otra vez en lugar de apilarse; y GIVEN el foco está en un campo de texto, THEN `Ctrl+C`/`Ctrl+V` son los del navegador. *(El portapapeles es de memoria y del editor: un elemento no significa nada fuera de una presentación.)*
+
+**CA-48 — Selección múltiple para mover**
+GIVEN hay varios elementos en la diapositiva
+WHEN el profesor mantiene `Ctrl` y arrastra sobre el tablero
+THEN se dibuja un rectángulo de selección y todo elemento no bloqueado que toca queda en un grupo; y WHEN arrastra cualquiera de ellos, THEN el grupo entero se mueve y el movimiento es **un solo paso de deshacer**; y THEN el grupo solo se mueve —sin tiradores de escala ni de rotación— y el panel derecho indica cuántos elementos hay seleccionados; y WHEN hace `Ctrl+clic` sobre un elemento, THEN lo añade o lo quita de la selección; y WHEN hace clic en el tablero vacío o pulsa `Esc`, THEN el grupo se deshace.
+
 ---
 
 ## Fuera de alcance
@@ -287,7 +302,7 @@ THEN el modo presentación se abre y pide **pantalla completa** al navegador; y 
 - Exportar a PDF o PPTX.
 - Vídeo, audio y animaciones en las diapositivas.
 - Ajuste automático a la cuadrícula o a otros elementos (la cuadrícula se dibuja, no imanta).
-- Selección múltiple de elementos y agrupación.
+- Editar, escalar, rotar o eliminar varios elementos a la vez (la selección múltiple solo mueve y copia) y agrupaciones persistentes.
 - Pegar una imagen desde el portapapeles (se sube desde `Insertar ▸ Imagen…`).
 - Combinar celdas de una tabla o dar ancho distinto a cada columna.
 - Un panel de administración de usuarios y de concesión del rol de profesor (esta historia solo usa el rol, no lo otorga).
@@ -297,12 +312,11 @@ THEN el modo presentación se abre y pide **pantalla completa** al navegador; y 
 
 ## Estado de la implementación
 
-Implementado y cubierto por pruebas: CA-1 a CA-45.
+Implementado y cubierto por pruebas: CA-1 a CA-48.
 
-- Estado del editor (diapositivas, elementos, bloqueo, apilado, los dos modos, tablas, figuras, deshacer/rehacer y la fusión de un gesto en un solo paso): `src/features/presentation-editor/lib/editorState.test.ts`.
+- Estado del editor (diapositivas, elementos, bloqueo, apilado, los dos modos, tablas, figuras, deshacer/rehacer, la fusión de un gesto en un solo paso, pegar, mover un grupo y vaciar la diapositiva): `src/features/presentation-editor/lib/editorState.test.ts`.
 - Inserciones de markdown y la aritmética del cursor: `src/features/presentation-editor/lib/markdownSnippets.test.ts`.
 - Contrato del documento y helpers de progreso: `src/lib/presentations/contract.test.ts`.
-- Markdown y su seguridad: `src/lib/markdown/markdown.test.ts`.
 - Ciclo de revisión, congelado de la copia publicada **sin notas**, imágenes y progreso de lectura: `src/db/domains/presentations/presentations.repository.test.ts`, que incluye los casos de propiedad —un segundo id de Clerk no puede leer, editar, enviar ni borrar la presentación de otro— y los de progreso monotónico.
 
 Queda fuera de esta historia, no pendiente de ella:

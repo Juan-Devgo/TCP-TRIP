@@ -88,7 +88,10 @@
   --font-jetbrains-mono: 'JetBrains Mono Variable', monospace;
 }
 
-:root {
+/* `.light` too, so a subtree can be forced back to the light values under a
+   dark page — the slide exporter resolves its palette that way. */
+:root,
+.light {
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -201,5 +204,72 @@
   [role="button"]:disabled {
     pointer-events: none;
     cursor: not-allowed;
+  }
+}
+
+/* Code highlighting (highlight.js scopes, rendered by `Markdown`). Instead of a
+   vendored hljs theme, each scope takes a theme ink token — the per-theme text
+   variants of the brand colours — so a block reads in both light and dark and
+   matches the rest of the app. Scope reference:
+   https://highlightjs.readthedocs.io/en/latest/css-classes-reference.html */
+@layer components {
+  .hljs-keyword,
+  .hljs-selector-tag,
+  .hljs-doctag,
+  .hljs-name,
+  .hljs-meta .hljs-keyword {
+    color: var(--color-secondary-ink);
+  }
+
+  .hljs-string,
+  .hljs-regexp,
+  .hljs-char,
+  .hljs-template-tag,
+  .hljs-addition,
+  .hljs-meta .hljs-string {
+    color: var(--color-tertiary-ink);
+  }
+
+  .hljs-number,
+  .hljs-literal,
+  .hljs-symbol,
+  .hljs-bullet,
+  .hljs-variable,
+  .hljs-template-variable,
+  .hljs-attr,
+  .hljs-attribute,
+  .hljs-property,
+  .hljs-selector-attr,
+  .hljs-selector-id,
+  .hljs-selector-class,
+  .hljs-selector-pseudo {
+    color: var(--color-primary-ink);
+  }
+
+  .hljs-title,
+  .hljs-section,
+  .hljs-type,
+  .hljs-built_in {
+    color: var(--color-quaternary-ink);
+    font-weight: 600;
+  }
+
+  .hljs-comment,
+  .hljs-quote,
+  .hljs-meta {
+    color: var(--color-muted-foreground);
+    font-style: italic;
+  }
+
+  .hljs-deletion {
+    color: var(--color-destructive);
+  }
+
+  .hljs-emphasis {
+    font-style: italic;
+  }
+
+  .hljs-strong {
+    font-weight: 700;
   }
 }

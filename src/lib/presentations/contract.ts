@@ -661,6 +661,35 @@ export function withoutPrivateNotes(document: PresentationDocument): Presentatio
 }
 
 /**
+ * A deck's speaker notes, keyed on slide id — what an approval freezes beside
+ * the publication, for its author only. Slides without notes have no key.
+ */
+export type SpeakerNotes = Readonly<Record<string, string>>;
+
+/** The speaker notes a document carries, before `withoutPrivateNotes` drops them. */
+export function speakerNotesOf(document: PresentationDocument): SpeakerNotes {
+  const notes: Record<string, string> = {};
+  for (const slide of document.slides) {
+    if (slide.notes && slide.notes.trim() !== "") notes[slide.id] = slide.notes;
+  }
+  return notes;
+}
+
+/** Puts frozen speaker notes back onto a published document, for its author. */
+export function withSpeakerNotes(
+  document: PresentationDocument,
+  notes: SpeakerNotes,
+): PresentationDocument {
+  return {
+    ...document,
+    slides: document.slides.map((slide) => {
+      const text = notes[slide.id];
+      return text === undefined ? slide : { ...slide, notes: text };
+    }),
+  };
+}
+
+/**
  * The readable half of a publication slug. The random half is added by the
  * repository, which is what makes two presentations with the same title work.
  */

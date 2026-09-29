@@ -185,3 +185,8 @@ export const SET_ITEM_POSITION = `
 export const SELECT_PUBLICATION_FOR_PRESENTATION = `
   SELECT slug, title FROM presentation_publications WHERE presentation_id = $presentationId;
 `;
+
+/** Whether a presentation already has a place in the menu, withdrawn or not. */
+export const SELECT_ITEM_BY_PRESENTATION = `
+  SELECT id FROM theory_section_items WHERE presentation_id = $presentationId;
+`;

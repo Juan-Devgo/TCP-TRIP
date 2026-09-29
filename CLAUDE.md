@@ -43,7 +43,7 @@ Single Bun process serves both the API and the SPA — there is no separate fron
 - `src/api/routes.ts` — the single route map. **Add new API modules under `src/api/` and mount them in this map; `src/index.ts` should not change.**
 - `src/api/guards.ts` — the role guards every gated route starts with: `authorOnly(req)` (teacher) and `adminOnly(req)` return **either** the verified caller or the `Response` that refuses them, which `isRefusal` narrows. 401 ("sign in") and 403 ("ask an administrator") are separate answers because the UI says different things.
 - `src/api/http.ts` — response contract for every route: `ok(data)`, `fail(status, message, details)` (shape `{ error: { message, details } }`), and `onError` — `Bun.serve`'s `error` callback, mounted once in `src/index.ts`, which logs an uncaught throw and answers the same JSON 500 (message and stack in `details` outside production). **Route handlers are plain functions**: there is no per-handler wrapper to remember, and returning Bun's built-in HTML error page to an API client is exactly what `onError` prevents.
-- `src/main.tsx` — React root: `StrictMode` → `BrowserRouter` → `ClerkProvider` → `TabsProvider` → `ToolActionsProvider` → `App`. **There is no `<Routes>` map**: the pathname drives the tab system, which resolves it against the page registry.
+- `src/main.tsx` — React root: `StrictMode` → `BrowserRouter` → `ClerkProvider` → `TabsProvider` → `ToolActionsProvider` → `PresentableProvider` → `PageChromeProvider` → `App`. **There is no `<Routes>` map**: the pathname drives the tab system, which resolves it against the page registry.
 - `src/config/navigation.ts` — **the single source of navigation truth**: one `NAVIGATION` tree of nodes (`segment` + `titleKey` + optional `icon`, `page`, `children`) from which the sidebar (`NAV_TREE`), the breadcrumb labels (`findNavItem`), the tab registry (`PAGES`, `findPage`, `isPagePath`) and the `PagePath` literal union are all derived. Metadata only — no JSX, no feature imports — so the tab state layer can import it. **A node with `page` opens as a tab; anything else is navigation inside the active tab.** Paths are never written by hand: a node's path is the join of its ancestors' segments, so sidebar link, tab and crumb cannot drift.
   - **The Theory group is extended at runtime.** Its static nodes live in the tree; the sections under them are rows an administrator created (`theory_sections`), which `AppSidebar` appends from `useTheoryMenu()`. Each entry links to `/theory/presentations/<slug>`, a non-registered path, so it is navigation inside the Theory reader's tab.
   - **Adding a page = one node in `NAVIGATION` + one entry in `PAGE_COMPONENTS` (`TabHost`) + the `titleKey` in both locale files.** A node may carry `roles: ["teacher"]` to keep it out of other roles' sidebars — cosmetic only; the server decides (see Clerk below). `PAGE_COMPONENTS` is keyed on `PagePath`, so a stale or misspelled path fails `bun run typecheck` instead of silently rendering the placeholder. `page: { wide: true }` opts a canvas page out of the reading-width column.
@@ -51,6 +51,8 @@ Single Bun process serves both the API and the SPA — there is no separate fron
 - **Tab system** (spec: `docs/ui/Tab.md`, state machine: `src/lib/tabs.ts` + `src/lib/tabHistory.ts`): every sidebar page opens as a browser-like tab that keeps its state in memory while open — one tab per page, focus the existing tab instead of duplicating, no persistence across reloads. New tools must work mounted inside this tab system, not as routes that unmount on navigation. **Inactive tabs stay mounted**, so anything global inside a tool (a `document` listener, a timer) must be gated on `useIsTabActive()`.
   - The URL and the tab set are kept in step by two effects that run in the *same* commit, so the second one cannot see what the first just dispatched. `TabsState.syncedPath` records which pathname the state has been reconciled with, and `urlRealignTarget()` refuses to move the URL until it matches. Removing that guard makes every link ping-pong between the old and new page forever. Any new reducer case must carry `syncedPath` through (`...state`), never rebuild the state object from scratch.
 - **Tool actions**: each tool exposes its actions (e.g. Generate Exercises) through `useToolActions()`, rendered at the top-right of the content — a button for one action, a dropdown menu for several. Actions are defined in a small tool-owned component (e.g. `src/features/number-base-converter/components/NumberBaseConverterActions.tsx`) that renders `null`, never inside the layout.
+- **Page chrome**: a path reached by navigation inside a tab is not a nav node, so only the page knows how to label it: `useCrumbLabel(path, label)` names its breadcrumb segment (a draft's title, not its id) (`src/context/PageChromeProvider.tsx`). Such a page reads the path it is on with `useTabPath()`, **never `useLocation()`**: the address bar belongs to the tab on screen, and a hidden tab reading it renders another tab's path. A pasted or reloaded path under a page (`/teacher/presentations/mine/<id>`) opens that page's tab, with the page one step back.
+- **Presentable pages**: a page whose content can be projected opts in through the presentable registry (like tool actions); only then does the header show the presentation-mode button. Every presentable page opens the shared `PresentationPlayer` with the same action set (Export, Ask, Report, Board) and the same role rules (student progress bar, author-only notes) — a page owns only what it projects. Spec: `docs/ui/PresentationMode.md`.
 
 ### Folder structure
 
@@ -70,14 +72,16 @@ src/
 │   └── ui/         shadcn primitives — generated, don't hand-write
 ├── config/         i18n init, locales, the navigation tree
 ├── context/        React providers (ThemeProvider, TabsProvider,
-│                   ToolActionsProvider)
+│                   ToolActionsProvider, PageChromeProvider)
 ├── db/             bun:sqlite data layer: singleton connection, schema,
 │                   DAO/Repository bases, one folder per domain (not React)
 ├── features/       one folder per tool — see below
 ├── hooks/          shared hooks
 ├── lib/            cross-cutting pure logic: tabs.ts, tabHistory.ts,
 │                   utils.ts (cn), pdf/, exercises/types.ts,
-│                   auth/roles.ts, markdown/, and the contracts shared by
+│                   auth/roles.ts, highlight/ (highlight.js core
+│                   + curated languages, as a span tree — never
+│                   innerHTML), and the contracts shared by
 │                   client and server: protocols/, presentations/,
 │                   theory/ (the admin-built Theory menu)
 ├── pages/          route-level views (HomePage, NotFoundPage, Placeholder)
@@ -87,7 +91,7 @@ src/
 └── types/          ambient .d.ts declarations
 ```
 
-Features so far: `number-base-converter`, `ascii-converter`, `ipv4-calculator`, `protocol-builder`, `presentation-editor` (the teacher's slide/markdown editor), `presentation-review` (the admin's approval queue), `admin-theory` (the admin's builder for the Theory menu) and `theory-presentations` (the student's reader, with reading progress — **no index**: the sidebar is the index). What the presentation features share sits above them: the slide renderer and the projector player (`src/components/common/PresentationStage.tsx`, `PresentationPlayer.tsx`), the Markdown renderer (`src/components/common/Markdown.tsx` over the token parser in `src/lib/markdown/`) and the document contract (`src/lib/presentations/contract.ts`).
+Features so far: `number-base-converter`, `ascii-converter`, `ipv4-calculator`, `protocol-builder`, `presentation-editor` (the teacher's slide/markdown editor), `presentation-review` (the admin's approval queue), `admin-theory` (the admin's builder for the Theory menu) and `theory-presentations` (the student's reader, with reading progress — **no index**: the sidebar is the index). What the presentation features share sits above them: the slide renderer and the projector player (`src/components/common/PresentationStage.tsx`, `PresentationPlayer.tsx`), the Markdown renderer (`src/components/common/Markdown.tsx` over `markdown-to-jsx`, raw HTML parsing off) and the document contract (`src/lib/presentations/contract.ts`).
 
 **The presentation editor has two renderers on purpose.** Editing happens on a real `<canvas>` — `konva` + `react-konva`, the one drawing dependency in the project, because a transformer (scale and rotate handles), hit detection and a table drawn as a grid are what a slide editor is made of. Everything a *reader* sees stays DOM (`PresentationStage`), so slide text is selectable, screen-readable and themed by the same CSS variables as the rest of the app. Two consequences to respect:
 

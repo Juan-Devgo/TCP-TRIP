@@ -128,14 +128,27 @@ describe("links never bounce the URL", () => {
     expect(activePath(session)).toBe(MESSAGES);
   });
 
-  test("a breadcrumb link to a page that is already open", () => {
+  test("a breadcrumb link to the root of the tab on screen", () => {
     let session = go(go(HOME, MESSAGES), "/generic-protocol/messages/42");
     session = go(session, MESSAGES);
 
-    // Focusing an open page keeps its place (CA-2), so the URL settles back on
-    // where the tab was — the point here is only that it settles at all.
-    expect(session.pathname).toBe("/generic-protocol/messages/42");
+    // Navigation inside the tab, not a refocus: the URL lands on the root and
+    // the page it came from is one step back.
+    expect(session.pathname).toBe(MESSAGES);
     expect(session.state.tabs).toHaveLength(1);
+    expect(session.state.tabs[0]?.history.back).toEqual([
+      MESSAGES,
+      "/generic-protocol/messages/42",
+    ]);
+  });
+
+  test("a link to an open page from another tab still keeps its place", () => {
+    let session = go(go(HOME, MESSAGES), "/generic-protocol/messages/42");
+    session = go(session, BUILDER);
+    session = go(session, MESSAGES);
+
+    expect(session.pathname).toBe("/generic-protocol/messages/42");
+    expect(session.state.tabs).toHaveLength(2);
   });
 
   test("home, then straight back into the tab that stayed open", () => {
@@ -269,6 +282,34 @@ describe("reordering tabs", () => {
 });
 
 describe("deep links", () => {
+  test("a path under a page opens that page's tab, with the page one step back", () => {
+    const session = go(HOME, "/generic-protocol/messages/42");
+
+    expect(titles(session)).toEqual([MESSAGES]);
+    expect(session.pathname).toBe("/generic-protocol/messages/42");
+    expect(session.state.tabs[0]?.history).toEqual({
+      back: [MESSAGES],
+      current: "/generic-protocol/messages/42",
+      forward: [],
+    });
+  });
+
+  test("a path under a page goes to that page's tab from any other tab", () => {
+    let session = go(go(HOME, MESSAGES), BUILDER);
+    session = go(session, "/generic-protocol/messages/42");
+
+    expect(titles(session)).toEqual([MESSAGES, BUILDER]);
+    expect(activePath(session)).toBe(MESSAGES);
+    expect(session.pathname).toBe("/generic-protocol/messages/42");
+  });
+
+  test("a path under a page opens its tab when another tab is on screen", () => {
+    const session = go(go(HOME, BUILDER), "/generic-protocol/messages/42");
+
+    expect(titles(session)).toEqual([BUILDER, MESSAGES]);
+    expect(activePath(session)).toBe(MESSAGES);
+  });
+
   test("an unknown path with nothing open still gets a tab", () => {
     const session = go(HOME, "/tools/converters/unknown");
 

@@ -79,7 +79,6 @@ export type EditorAction =
   | { type: "duplicateSlide"; id: string }
   | { type: "deleteSlide"; id: string; replacementId: string }
   | { type: "moveSlide"; from: number; to: number }
-  | { type: "slideTitle"; value: string }
   | { type: "slideNotes"; value: string }
   | { type: "slideBackground"; value: string | null }
   | { type: "selectElement"; id: string | null }
@@ -95,6 +94,8 @@ export type EditorAction =
   | { type: "addTable"; id: string; rows: number; columns: number }
   | { type: "addShape"; id: string; kind: ShapeKind }
   | { type: "moveElement"; id: string; x: number; y: number }
+  /** One drag of a multi-selection: every element's new position at once. */
+  | { type: "moveElements"; moves: readonly { id: string; x: number; y: number }[] }
   | { type: "resizeElement"; id: string; width: number; height: number }
   | { type: "rotateElement"; id: string; rotation: number }
   /** One drag of the canvas transformer: position, size and angle together. */
@@ -118,11 +119,23 @@ export type EditorAction =
   | { type: "sendToBack"; id: string }
   | { type: "deleteElement"; id: string }
   | { type: "duplicateElement"; id: string; newId: string }
+  /**
+   * Copies from the editor's clipboard, already carrying fresh ids. They land
+   * offset from where they were copied, so a paste is visibly a paste.
+   */
+  | { type: "pasteElements"; elements: readonly PresentationElement[] }
+  /** Empties the selected slide — undoable like any other edit. */
+  | { type: "clearSlide" }
   | { type: "undo" }
   | { type: "redo" }
   /** Ends a gesture: the next edit starts a fresh history entry. */
   | { type: "commit" }
-  | { type: "saved" };
+  /**
+   * The server now holds `document`. Only that exact document is clean: an
+   * edit made while the request was in flight (autosave makes that common)
+   * is newer than what was stored, so it stays unsaved.
+   */
+  | { type: "saved"; document: PresentationDocument };
 
 /** A new deck, before it has ever been saved. */
 export function emptyDocument(title: string, slideId: string): PresentationDocument {
@@ -342,7 +355,14 @@ function reselect(
   state: EditorState,
   document: PresentationDocument,
 ): Pick<EditorState, "selectedSlideId" | "selectedElementId"> {
+  // A slide that comes back — undoing its deletion, redoing its creation — is
+  // the one the author is looking for, so it takes the selection.
+  const returned = document.slides.find(
+    (candidate) => !state.document.slides.some((current) => current.id === candidate.id),
+  );
+
   const slide =
+    returned ??
     document.slides.find((candidate) => candidate.id === state.selectedSlideId) ??
     document.slides[0];
 
@@ -400,6 +420,9 @@ function inserted(
     selectedElementId: element.id,
   };
 }
+
+/** How far a duplicate or a paste lands from its source, in canvas units. */
+export const PASTE_OFFSET = 32;
 
 /** Reorders one element within its slide — the only stacking there is. */
 function restack(
@@ -505,16 +528,6 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
       return edited(state, { ...state.document, slides });
     }
 
-    case "slideTitle":
-      return edited(
-        state,
-        mapSlides(state, (slide) => {
-          const { title: _dropped, ...rest } = slide;
-          return action.value === "" ? rest : { ...rest, title: action.value };
-        }),
-        `slideTitle:${state.selectedSlideId}`,
-      );
-
     case "slideNotes":
       return edited(
         state,
@@ -572,8 +585,8 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
       return inserted(state, {
         ...source,
         id: action.newId,
-        x: source.x + 32,
-        y: source.y + 32,
+        x: source.x + PASTE_OFFSET,
+        y: source.y + PASTE_OFFSET,
       });
     }
 
@@ -587,6 +600,65 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
         ),
         `move:${action.id}`,
       );
+
+    case "pasteElements": {
+      const slide = selectedSlide(state);
+      if (!slide || action.elements.length === 0) return state;
+
+      // All or nothing: half a paste is harder to notice than none.
+      if (slide.elements.length + action.elements.length > MAX_ELEMENTS_PER_SLIDE) {
+        return state;
+      }
+
+      const pasted = action.elements.map((element) => ({
+        ...element,
+        x: element.x + PASTE_OFFSET,
+        y: element.y + PASTE_OFFSET,
+      }));
+
+      return {
+        ...edited(
+          state,
+          mapSlides(state, (current) => ({
+            ...current,
+            elements: [...current.elements, ...pasted],
+          })),
+        ),
+        // One pasted element is selected, ready to edit; several are left to
+        // the canvas, which selects them as a group.
+        selectedElementId: pasted.length === 1 ? (pasted[0]?.id ?? null) : null,
+      };
+    }
+
+    case "moveElements": {
+      const moves = new Map(action.moves.map((move) => [move.id, move]));
+
+      return edited(
+        state,
+        mapSlides(state, (slide) => ({
+          ...slide,
+          elements: slide.elements.map((element) => {
+            const move = moves.get(element.id);
+            return !move || element.locked
+              ? element
+              : { ...element, x: Math.round(move.x), y: Math.round(move.y) };
+          }),
+        })),
+        "move:group",
+      );
+    }
+
+    case "clearSlide": {
+      if ((selectedSlide(state)?.elements.length ?? 0) === 0) return state;
+
+      return {
+        ...edited(
+          state,
+          mapSlides(state, (slide) => ({ ...slide, elements: [] })),
+        ),
+        selectedElementId: null,
+      };
+    }
 
     case "resizeElement":
       return edited(
@@ -603,7 +675,7 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
         mapElements(state, action.id, (element) =>
           element.locked
             ? element
-            : { ...element, rotation: normalizeRotation(action.rotation) },
+            : { ...element, rotation: rotationOf(element, action.rotation) },
         ),
         `rotate:${action.id}`,
       );
@@ -619,7 +691,7 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
                 x: Math.round(action.x),
                 y: Math.round(action.y),
                 ...sizeOf(action),
-                rotation: normalizeRotation(action.rotation),
+                rotation: rotationOf(element, action.rotation),
               },
         ),
         `transform:${action.id}`,
@@ -769,7 +841,9 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
       return state.lastEdit === null ? state : { ...state, lastEdit: null };
 
     case "saved":
-      return state.dirty ? { ...state, dirty: false } : state;
+      return state.dirty && state.document === action.document
+        ? { ...state, dirty: false }
+        : state;
   }
 }
 
@@ -782,6 +856,14 @@ function sizeOf(box: { width: number; height: number }): {
     width: Math.max(16, Math.round(box.width)),
     height: Math.max(16, Math.round(box.height)),
   };
+}
+
+/**
+ * A table never turns: its cells are edited through a textarea laid over the
+ * grid, and a tilted grid would put every cell's editor somewhere else.
+ */
+function rotationOf(element: PresentationElement, degrees: number): number {
+  return element.type === "table" ? 0 : normalizeRotation(degrees);
 }
 
 /** Keeps rotation inside the ±360 the contract stores. */

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   SHAPE_COLOR_TOKENS,
@@ -57,6 +57,66 @@ function resolve(): Resolved {
   };
 }
 
+/** A theme an export can be drawn in, whatever the page is showing. */
+export type PaintTheme = "light" | "dark";
+
+/**
+ * The palette of a theme the page may not be in — an export is drawn light on
+ * a dark screen, or the other way round.
+ *
+ * A probe element carrying the theme class re-declares the neutral variables
+ * (`.light` and `.dark` both set `--background`, `--muted` …), so reading them
+ * off the probe gives that theme's values. The `--color-*` names cannot be
+ * read there: they are declared once on `:root` as `var(--background)` and
+ * inherited already substituted. So a token is taken from the probe only when
+ * `:root` maps it onto its own neutral variable; the brand colours are
+ * hardcoded and identical in both themes.
+ */
+function resolveFor(theme: PaintTheme): Resolved {
+  if (typeof window === "undefined") return BLIND;
+
+  const root = window.getComputedStyle(window.document.documentElement);
+  const probe = window.document.createElement("div");
+  probe.className = theme;
+  probe.hidden = true;
+  window.document.body.append(probe);
+
+  try {
+    const style = window.getComputedStyle(probe);
+    const read = (from: CSSStyleDeclaration, name: string) =>
+      from.getPropertyValue(name).trim();
+
+    return {
+      colors: Object.fromEntries(
+        COLOR_TOKENS.map((token) => {
+          const mapped = read(root, `--color-${token}`);
+          const neutral = read(root, `--${token}`);
+          return [
+            token,
+            neutral !== "" && neutral === mapped ? read(style, `--${token}`) : mapped,
+          ];
+        }),
+      ),
+      sans: read(root, "--font-sans") || BLIND.sans,
+      mono: read(root, "--font-mono") || BLIND.mono,
+    };
+  } finally {
+    probe.remove();
+  }
+}
+
+function paintFrom(resolved: Resolved): ThemePaint {
+  return {
+    color: (token) => resolved.colors[token] || resolved.colors["foreground"] || "#000000",
+    font: (mono) => (mono ? resolved.mono : resolved.sans),
+  };
+}
+
+/** A fixed theme's palette, read once — what an export draws with. */
+export function themePaint(theme: PaintTheme): ThemePaint {
+  return paintFrom(resolveFor(theme));
+}
+
 export function useThemeColors(): ThemePaint {
   const [paint, setPaint] = useState<Resolved>(BLIND);
 
@@ -71,15 +131,5 @@ export function useThemeColors(): ThemePaint {
     return () => observer.disconnect();
   }, []);
 
-  const color = useCallback(
-    (token: string) => paint.colors[token] || paint.colors["foreground"] || "#000000",
-    [paint],
-  );
-
-  const font = useCallback(
-    (mono: boolean) => (mono ? paint.mono : paint.sans),
-    [paint],
-  );
-
-  return { color, font };
+  return useMemo(() => paintFrom(paint), [paint]);
 }

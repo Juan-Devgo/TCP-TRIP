@@ -96,7 +96,12 @@ export function useTabs(): TabsContextValue {
   return value;
 }
 
-type TabScope = { tabId: string; isActive: boolean };
+type TabScope = {
+  tabId: string;
+  isActive: boolean;
+  /** Where this tab is — its own history, not the address bar. */
+  path: string;
+};
 
 const TabScopeContext = createContext<TabScope | null>(null);
 
@@ -104,9 +109,10 @@ const TabScopeContext = createContext<TabScope | null>(null);
 export function TabScopeProvider({
   tabId,
   isActive,
+  path,
   children,
 }: TabScope & { children: React.ReactNode }) {
-  const value = useMemo(() => ({ tabId, isActive }), [tabId, isActive]);
+  const value = useMemo(() => ({ tabId, isActive, path }), [tabId, isActive, path]);
   return <TabScopeContext value={value}>{children}</TabScopeContext>;
 }
 
@@ -122,4 +128,17 @@ export function useTabId(): string | null {
  */
 export function useIsTabActive(): boolean {
   return useContext(TabScopeContext)?.isActive ?? true;
+}
+
+/**
+ * The path this tab is showing. A page that routes on the path below its own
+ * (a draft id, a slug) reads it here, not from `useLocation()`: inactive tabs
+ * stay mounted, and the address bar belongs to whichever tab is on screen — a
+ * hidden tab reading it would render another tab's path, and the moment it is
+ * focused, before the URL catches up, show that for a frame. Outside a tab it
+ * is the address bar.
+ */
+export function useTabPath(): string {
+  const { pathname } = useLocation();
+  return useContext(TabScopeContext)?.path ?? pathname;
 }

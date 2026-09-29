@@ -471,7 +471,7 @@
     },
     "presentations": {
       "mine": "Mis Presentaciones",
-      "new": "Crear"
+      "new": "Crea tu Presentación"
     },
     "admin": {
       "presentations": "Revisar Presentaciones",
@@ -560,13 +560,11 @@
       "title": "Título",
       "topic": "Tema de teoría",
       "canvas": "Lienzo",
-      "canvasLabel": "Lienzo de la diapositiva. Usa las flechas para mover el elemento seleccionado y Supr para borrarlo.",
+      "canvasLabel": "Lienzo de la diapositiva. Las flechas mueven el elemento seleccionado, Supr lo elimina, Ctrl+C y Ctrl+V lo copian y pegan. Mantén Ctrl y arrastra para seleccionar varios elementos.",
       "addSlide": "Añadir diapositiva",
       "duplicateSlide": "Duplicar la diapositiva",
       "deleteSlide": "Eliminar la diapositiva",
       "slideSection": "Diapositiva",
-      "slideTitle": "Título de la diapositiva",
-      "slideTitlePlaceholder": "Solo para el índice y la miniatura",
       "background": "Fondo",
       "backgroundDefault": "El del tema",
       "notes": "Notas del ponente",
@@ -627,12 +625,13 @@
       "markdown": "Markdown",
       "markdownPlaceholder": "# Título\n\nEscribe aquí los apuntes de la clase…",
       "preview": "Vista previa",
-      "untitledSlide": "Sin título",
+      "slideName": "Diapositiva {{number}}",
       "deckSection": "Presentación",
       "menus": {
         "file": "Archivo",
         "insert": "Insertar",
-        "edit": "Editar"
+        "edit": "Editar",
+        "view": "Ver"
       },
       "undo": "Deshacer",
       "redo": "Rehacer",
@@ -670,12 +669,15 @@
       },
       "tips": {
         "slidePicker": "Diapositiva {{position}} de {{count}}: elige cuál editar.",
+        "deleteSlide": "Elimina esta diapositiva (Ctrl+Z la recupera).",
         "addSlide": "Añade una diapositiva vacía al final.",
         "undo": "Deshace el último cambio (Ctrl+Z).",
         "redo": "Rehace lo deshecho (Ctrl+Mayús+Z).",
         "present": "Proyecta la presentación a pantalla completa.",
         "preview": "Muestra u oculta la vista previa del markdown.",
-        "topic": "Tema de teoría bajo el que se publicará."
+        "topic": "Tema de teoría bajo el que se publicará.",
+        "downloadMarkdown": "Descarga lo escrito aquí como archivo .md",
+        "importMarkdown": "Reemplaza el texto con un archivo .md (Ctrl+Z lo deshace)"
       },
       "snippets": {
         "bold": "Negrita",
@@ -704,6 +706,28 @@
         "table": "Inserta la estructura de una tabla de dos columnas.",
         "code": "Inserta `código`; si hay varias líneas, un bloque ```.",
         "quote": "Marca la línea como cita con >."
+      },
+      "boardSize": "Tamaño del tablero",
+      "slideBackground": "Fondo de la diapositiva",
+      "copy": "Copiar",
+      "paste": "Pegar",
+      "clearSlide": "Vaciar la diapositiva",
+      "group_one": "{{count}} elemento seleccionado",
+      "group_other": "{{count}} elementos seleccionados",
+      "groupHint": "Arrastra cualquiera de ellos para moverlos juntos. Mantén Ctrl y arrastra sobre el tablero para seleccionar varios.",
+      "newPresentation": "Nueva presentación",
+      "downloadMarkdown": "Descargar markdown",
+      "importMarkdown": "Importar markdown",
+      "namePrompt": {
+        "title": "Ponle un nombre a tu presentación",
+        "body": "El autoguardado se activa en cuanto tenga uno. Hasta entonces, nada de lo que escribas aquí se guarda.",
+        "dismiss": "Cerrar"
+      },
+      "discard": {
+        "title": "¿Empezar una nueva presentación?",
+        "body": "La presentación abierta en esta pestaña tiene cambios sin guardar. Empezar de nuevo los descarta.",
+        "keep": "Seguir editando",
+        "confirm": "Descartar y empezar de nuevo"
       }
     },
     "actions": {
@@ -716,6 +740,7 @@
       "unpublish": "Quitar de Teoría"
     },
     "status": {
+      "new": "Sin guardar",
       "unsaved": "Todavía sin guardar. Guarda para poder subir imágenes y enviarla a revisión.",
       "unsavedChanges": "cambios sin guardar",
       "draft": "Borrador",
@@ -725,7 +750,12 @@
       "viewPublished": "Ver la versión publicada",
       "publishedIsSnapshot": "los estudiantes siguen viendo la versión aprobada hasta que se apruebe la nueva.",
       "reason": "Motivo",
-      "pendingHint": "Un administrador la revisará. Mientras está en revisión puedes seguir editándola, pero se revisa lo que enviaste."
+      "pendingHint": "Un administrador la revisará. Mientras está en revisión puedes seguir editándola, pero se revisa lo que enviaste.",
+      "autosave": {
+        "on": "Autoguardado activado",
+        "paused": "Autoguardado en pausa durante la revisión",
+        "off": "Ponle nombre para activar el autoguardado"
+      }
     },
     "toast": {
       "save": "Guardar la presentación",
@@ -737,7 +767,10 @@
       "upload": "Subir la imagen",
       "deleteImage": "Eliminar la imagen",
       "delete": "Eliminar la presentación",
-      "deletedBody": "Se eliminó, junto con sus imágenes y su versión publicada."
+      "deletedBody": "Se eliminó, junto con sus imágenes y su versión publicada.",
+      "importMarkdown": "Importar markdown",
+      "importTooLong": "El archivo supera los {{max}} caracteres.",
+      "importedBody": "{{name}} reemplazó el texto. Ctrl+Z recupera lo que había."
     },
     "errors": {
       "signedOut": "Inicia sesión otra vez para continuar.",
@@ -750,31 +783,46 @@
       "title": "Mis presentaciones",
       "intro": "Tus presentaciones de teoría y en qué punto de la revisión está cada una.",
       "new": "Nueva presentación",
-      "empty": "Todavía no has creado ninguna presentación.",
+      "emptyTitle": "Aún no tienes presentaciones",
+      "emptyHint": "Tus presentaciones de teoría aparecerán aquí en cuanto crees una y le pongas nombre. Empieza con diapositivas en blanco o con una página en markdown.",
       "notFound": "Esa presentación no existe o no es tuya.",
       "backToList": "Volver a la lista",
       "slides_one": "{{count}} diapositiva",
       "slides_other": "{{count}} diapositivas",
-      "delete": "Eliminar la presentación"
+      "edited": "Editada {{date}}",
+      "delete": "Eliminar la presentación",
+      "view": {
+        "label": "Ordenar las presentaciones",
+        "recent": "Última edición",
+        "topic": "Por tema"
+      }
     },
     "read": {
       "missing": "Esta presentación no está publicada (o se retiró).",
       "byline": "{{author}} · {{topic}}",
-      "present": "Modo presentación",
       "progress": "Llevas el {{percent}} %",
       "resume": "Seguir donde lo dejaste",
       "emptyTitle": "Presentaciones de teoría",
       "emptyHint": "Elige una presentación en el menú Teoría de la barra lateral. Tu avance se guarda solo, tanto si lees la página como si usas el modo presentación.",
-      "complete": "Completada"
+      "complete": "Completada",
+      "resumeSlide": "Seguir en la diapositiva {{number}}"
     },
     "player": {
       "label": "Modo presentación: {{title}}",
-      "notes": "Notas",
       "close": "Salir del modo presentación",
       "noNotes": "Esta diapositiva no tiene notas.",
       "previous": "Anterior",
       "next": "Siguiente",
-      "hint": "← → para cambiar de diapositiva · N para las notas · Esc para salir"
+      "open": "Modo presentación",
+      "actions": "Acciones",
+      "soon": "Próximamente",
+      "slide": "Diapositiva {{number}}",
+      "action": {
+        "export": "Exportar",
+        "ask": "Preguntar",
+        "report": "Reportar",
+        "board": "Pizarra"
+      }
     },
     "review": {
       "title": "Revisión de presentaciones",
@@ -800,6 +848,34 @@
         "approvedBody": "«{{title}}» ya está en Teoría.",
         "reject": "Rechazar la presentación",
         "rejectedBody": "Se rechazó y el profesor verá el motivo."
+      },
+      "editBadge": "Edición",
+      "approveDialog": {
+        "title": "¿Dónde va en el menú de Teoría?",
+        "body": "«{{title}}» se publica por primera vez. Elige la sección del menú de Teoría donde la encontrarán los lectores, o crea una nueva.",
+        "section": "Sección",
+        "pick": "Elige una sección",
+        "newSection": "Nueva sección…",
+        "name": "Nombre de la sección",
+        "icon": "Icono",
+        "cancel": "Cancelar",
+        "confirm": "Aprobar y publicar"
+      }
+    },
+    "export": {
+      "themeHint": "Las diapositivas se adaptan al tema. Elige la paleta con la que exportarlas.",
+      "working": "Dibujando las diapositivas…",
+      "themes": {
+        "light": "Claro",
+        "dark": "Oscuro"
+      },
+      "png": {
+        "title": "Exportar diapositiva como PNG",
+        "action": "Exportar diapositiva como PNG"
+      },
+      "pdf": {
+        "title": "Exportar a PDF",
+        "action": "Exportar a PDF"
       }
     }
   },

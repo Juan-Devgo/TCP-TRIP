@@ -3,6 +3,7 @@ import type { Database } from "bun:sqlite";
 
 import { openDatabase } from "@/db/client";
 import { PresentationsRepository } from "@/db/domains/presentations";
+import { TheoryMenuRepository } from "@/db/domains/theory-menu";
 import {
   MAX_ASSETS_PER_PRESENTATION,
   PRESENTATION_SCHEMA_VERSION,
@@ -530,5 +531,129 @@ describe("what a publication does not carry", () => {
 
     expect(read?.document.notes).toBe("");
     expect(read?.document.slides[0]?.notes).toBeUndefined();
+  });
+});
+
+describe("speaker notes for the author", () => {
+  test("the author reads the notes frozen with the approved version", () => {
+    const { publication } = published();
+
+    expect(presentations.findSpeakerNotes(ANA, publication.slug)).toEqual({
+      s1: "Saludar y preguntar qué recuerdan de la capa de red.",
+    });
+  });
+
+  test("anybody else gets nothing, as for an unknown slug", () => {
+    const { publication } = published();
+
+    expect(presentations.findSpeakerNotes(BRUNO, publication.slug)).toBeNull();
+    expect(presentations.findSpeakerNotes(STUDENT, publication.slug)).toBeNull();
+    expect(presentations.findSpeakerNotes(ANA, "no-such-slug")).toBeNull();
+  });
+
+  test("editing the draft does not change the notes of the live version", () => {
+    const { saved, publication } = published();
+    presentations.save(
+      ANA,
+      document({ slides: [{ id: "s1", notes: "Nota nueva.", elements: [] }] }),
+      saved.id,
+    );
+
+    expect(presentations.findSpeakerNotes(ANA, publication.slug)).toEqual({
+      s1: "Saludar y preguntar qué recuerdan de la capa de red.",
+    });
+  });
+
+  test("withdrawing takes the notes out of reach with the publication", () => {
+    const { saved, publication } = published();
+    presentations.withdraw(ANA, saved.id);
+
+    expect(presentations.findSpeakerNotes(ANA, publication.slug)).toBeNull();
+  });
+});
+
+describe("approving into the Theory menu", () => {
+  function menu() {
+    return new TheoryMenuRepository(db);
+  }
+
+  function pending() {
+    const saved = draft();
+    presentations.submit(ANA, saved.id);
+    return saved;
+  }
+
+  test("a first approval without a place is refused and publishes nothing", () => {
+    const saved = pending();
+
+    const result = presentations.approveIntoMenu(ADMIN, saved.id, "Ana", null, null);
+
+    expect(result).toEqual({ ok: false, reason: "placement-required" });
+    expect(presentations.findForReview(saved.id)?.status).toBe("pending");
+    expect(presentations.listPublished()).toHaveLength(0);
+  });
+
+  test("files it under an existing section", () => {
+    const created = menu().createSection(ADMIN, "Transporte", "layers");
+    if (!created.ok) throw new Error("fixture");
+    const saved = pending();
+
+    const result = presentations.approveIntoMenu(ADMIN, saved.id, "Ana", null, {
+      sectionId: created.section.id,
+    });
+
+    expect(result.ok).toBe(true);
+    expect(menu().menu()[0]?.items.map((item) => item.label)).toEqual([
+      "Capa de transporte",
+    ]);
+  });
+
+  test("creates the section in the same decision", () => {
+    const saved = pending();
+
+    const result = presentations.approveIntoMenu(ADMIN, saved.id, "Ana", null, {
+      section: { label: "Nueva", icon: "layers" },
+    });
+
+    expect(result.ok).toBe(true);
+    expect(menu().menu().map((section) => section.label)).toEqual(["Nueva"]);
+    expect(menu().isListed(saved.id)).toBe(true);
+  });
+
+  test("an unknown section rolls the approval back", () => {
+    const saved = pending();
+
+    const result = presentations.approveIntoMenu(ADMIN, saved.id, "Ana", null, {
+      sectionId: "missing",
+    });
+
+    expect(result).toEqual({ ok: false, reason: "section-missing" });
+    expect(presentations.findForReview(saved.id)?.status).toBe("pending");
+    expect(presentations.listPublished()).toHaveLength(0);
+  });
+
+  test("a re-approved edit keeps its place and needs none", () => {
+    const saved = pending();
+    presentations.approveIntoMenu(ADMIN, saved.id, "Ana", null, {
+      section: { label: "Transporte", icon: "layers" },
+    });
+    presentations.submit(ANA, saved.id);
+
+    const result = presentations.approveIntoMenu(ADMIN, saved.id, "Ana", null, null);
+
+    expect(result.ok).toBe(true);
+    expect(menu().menu()).toHaveLength(1);
+    expect(menu().menu()[0]?.items).toHaveLength(1);
+  });
+
+  test("a submission that is not pending is refused", () => {
+    const saved = draft();
+
+    const result = presentations.approveIntoMenu(ADMIN, saved.id, "Ana", null, {
+      section: { label: "Transporte", icon: "layers" },
+    });
+
+    expect(result).toEqual({ ok: false, reason: "not-pending" });
+    expect(menu().menu()).toHaveLength(0);
   });
 });

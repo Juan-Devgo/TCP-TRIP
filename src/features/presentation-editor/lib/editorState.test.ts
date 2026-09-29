@@ -84,6 +84,25 @@ describe("slides", () => {
     expect(selectedSlide(state)).toBeDefined();
   });
 
+  test("undoing a deletion brings the slide back and selects it; redo deletes it again", () => {
+    const deleted = run(
+      withText(),
+      { type: "addSlide", id: "s2" },
+      { type: "selectSlide", id: "s1" },
+      { type: "deleteSlide", id: "s1", replacementId: "unused" },
+    );
+    expect(deleted.document.slides.map((slide) => slide.id)).toEqual(["s2"]);
+
+    const restored = run(deleted, { type: "undo" });
+    expect(restored.document.slides.map((slide) => slide.id)).toEqual(["s1", "s2"]);
+    expect(restored.selectedSlideId).toBe("s1");
+    expect(selectedSlide(restored)?.elements).toHaveLength(1);
+
+    const again = run(restored, { type: "redo" });
+    expect(again.document.slides.map((slide) => slide.id)).toEqual(["s2"]);
+    expect(again.selectedSlideId).toBe("s2");
+  });
+
   test("reordering moves a slide without touching the selection", () => {
     const state = run(
       start(),
@@ -95,22 +114,19 @@ describe("slides", () => {
     expect(state.selectedSlideId).toBe("s2");
   });
 
-  test("a slide's title, notes and background are dropped when cleared", () => {
+  test("a slide's notes and background are dropped when cleared", () => {
     const filled = run(
       start(),
-      { type: "slideTitle", value: "Portada" },
       { type: "slideNotes", value: "Saludar" },
       { type: "slideBackground", value: "card" },
     );
     expect(selectedSlide(filled)).toMatchObject({
-      title: "Portada",
       notes: "Saludar",
       background: "card",
     });
 
     const cleared = run(
       filled,
-      { type: "slideTitle", value: "" },
       { type: "slideNotes", value: "" },
       { type: "slideBackground", value: null },
     );
@@ -265,12 +281,20 @@ describe("the document as a whole", () => {
     const edited = run(start(), { type: "title", value: "Otro" });
     expect(edited.dirty).toBe(true);
 
-    expect(editorReducer(edited, { type: "saved" }).dirty).toBe(false);
+    expect(editorReducer(edited, { type: "saved", document: edited.document }).dirty).toBe(false);
+  });
+
+  test("an edit made while a save was in flight stays unsaved", () => {
+    const sent = run(start(), { type: "title", value: "Otro" });
+    const edited = run(sent, { type: "title", value: "Otro más" });
+
+    expect(editorReducer(edited, { type: "saved", document: sent.document }).dirty).toBe(true);
   });
 
   test("selecting is not an edit", () => {
+    const edited = withText();
     const state = run(
-      editorReducer(withText(), { type: "saved" }),
+      editorReducer(edited, { type: "saved", document: edited.document }),
       { type: "selectElement", id: null },
       { type: "selectSlide", id: "s1" },
     );
@@ -320,6 +344,17 @@ describe("tables and figures", () => {
     ]);
     expect(element.x).toBeGreaterThanOrEqual(0);
     expect(element.x + element.width).toBeLessThanOrEqual(state.document.canvas.width);
+  });
+
+  test("a table never rotates, whatever the transformer or the inspector ask", () => {
+    const state = run(
+      start(),
+      { type: "addTable", id: "t1", rows: 2, columns: 2 },
+      { type: "rotateElement", id: "t1", rotation: 45 },
+      { type: "transformElement", id: "t1", x: 10, y: 10, width: 400, height: 200, rotation: 90 },
+    );
+
+    expect(selectedElement(state)?.rotation).toBe(0);
   });
 
   test("typing in one cell leaves the grid rectangular", () => {
@@ -482,5 +517,71 @@ describe("undo and redo", () => {
     }
 
     expect(state.past.length).toBeLessThanOrEqual(50);
+  });
+});
+
+describe("clipboard, groups and clearing", () => {
+  function copyOf(state: EditorState, id: string): PresentationElement {
+    const element = selectedSlide(state)?.elements.find((candidate) => candidate.id === id);
+    if (!element) throw new Error(`no element ${id}`);
+    return element;
+  }
+
+  test("pasting adds offset copies and selects a single one", () => {
+    const state = withText();
+    const source = copyOf(state, "e1");
+    const next = run(state, { type: "pasteElements", elements: [{ ...source, id: "e2" }] });
+
+    const pasted = copyOf(next, "e2");
+    expect(pasted.x).toBe(source.x + 32);
+    expect(pasted.y).toBe(source.y + 32);
+    expect(next.selectedElementId).toBe("e2");
+  });
+
+  test("pasting several leaves the single selection empty", () => {
+    const state = run(withText(), { type: "addText", id: "e2", text: "Adiós" });
+    const next = run(state, {
+      type: "pasteElements",
+      elements: [
+        { ...copyOf(state, "e1"), id: "e3" },
+        { ...copyOf(state, "e2"), id: "e4" },
+      ],
+    });
+
+    expect(selectedSlide(next)?.elements).toHaveLength(4);
+    expect(next.selectedElementId).toBeNull();
+  });
+
+  test("moving a group is one undo step and skips locked elements", () => {
+    const state = run(
+      withText(),
+      { type: "addText", id: "e2", text: "Adiós" },
+      { type: "toggleLock", id: "e2" },
+    );
+    const locked = copyOf(state, "e2");
+
+    const moved = run(
+      state,
+      { type: "moveElements", moves: [{ id: "e1", x: 10, y: 10 }, { id: "e2", x: 5, y: 5 }] },
+      { type: "moveElements", moves: [{ id: "e1", x: 20.4, y: 30.6 }, { id: "e2", x: 5, y: 5 }] },
+    );
+
+    expect(copyOf(moved, "e1")).toMatchObject({ x: 20, y: 31 });
+    expect(copyOf(moved, "e2")).toMatchObject({ x: locked.x, y: locked.y });
+    expect(run(moved, { type: "undo" }).document).toEqual(state.document);
+  });
+
+  test("clearing the slide empties it, and undo brings it back", () => {
+    const state = withText();
+    const cleared = run(state, { type: "clearSlide" });
+
+    expect(selectedSlide(cleared)?.elements).toHaveLength(0);
+    expect(cleared.selectedElementId).toBeNull();
+    expect(selectedSlide(run(cleared, { type: "undo" }))?.elements).toHaveLength(1);
+  });
+
+  test("clearing an empty slide is not an edit", () => {
+    const state = start();
+    expect(run(state, { type: "clearSlide" })).toBe(state);
   });
 });

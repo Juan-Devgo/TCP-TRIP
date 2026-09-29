@@ -28,7 +28,9 @@ import {
   type PresentationStatus,
   type PresentationTopic,
   type ReadingProgress,
+  type SpeakerNotes,
 } from "@/lib/presentations/contract";
+import type { TheoryPlacement } from "@/lib/theory/contract";
 
 /** Re-exported so a component imports one module, not two. */
 export type {
@@ -150,14 +152,19 @@ export async function getPresentationForReview(
   }
 }
 
-/** Approves the submission: the reviewed document is frozen into Theory. */
+/**
+ * Approves the submission: the reviewed document is frozen into Theory. A
+ * presentation with no place in the Theory menu yet needs a `placement` — the
+ * server refuses the approval without one, so nothing is published unfindable.
+ */
 export async function approvePresentation(
   id: string,
   note?: string,
+  placement?: TheoryPlacement,
 ): Promise<PublishedPresentation> {
   return request<PublishedPresentation>(`/api/admin/presentations/${id}/approve`, {
     method: "POST",
-    body: JSON.stringify({ note: note ?? "" }),
+    body: JSON.stringify({ note: note ?? "", ...(placement ? { placement } : {}) }),
   });
 }
 
@@ -198,6 +205,25 @@ export async function getPublishedPresentation(
   }
 
   return (await response.json()) as PublishedPresentation;
+}
+
+/**
+ * The speaker notes of a published deck, or `null` unless the caller is its
+ * author. Signed out, not a teacher, or somebody else's deck all mean the same
+ * thing to the player — no notes — so none of them is an error here.
+ */
+export async function getSpeakerNotes(slug: string): Promise<SpeakerNotes | null> {
+  try {
+    return await request<SpeakerNotes>(`/api/theory/presentations/${slug}/notes`);
+  } catch (error) {
+    if (
+      error instanceof ApiError &&
+      (error.isNotFound || error.isForbidden || error.isUnauthenticated)
+    ) {
+      return null;
+    }
+    throw error;
+  }
 }
 
 /* --------------------------------------------------------- reading progress */

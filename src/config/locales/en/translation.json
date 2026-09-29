@@ -471,7 +471,7 @@
     },
     "presentations": {
       "mine": "My Presentations",
-      "new": "Create"
+      "new": "Make your Presentation"
     },
     "admin": {
       "presentations": "Review Presentations",
@@ -560,13 +560,11 @@
       "title": "Title",
       "topic": "Theory topic",
       "canvas": "Canvas",
-      "canvasLabel": "Slide canvas. Arrow keys move the selected element, Delete removes it.",
+      "canvasLabel": "Slide canvas. Arrow keys move the selected element, Delete removes it, Ctrl+C and Ctrl+V copy and paste it. Hold Ctrl and drag to select several elements.",
       "addSlide": "Add a slide",
       "duplicateSlide": "Duplicate the slide",
       "deleteSlide": "Delete the slide",
       "slideSection": "Slide",
-      "slideTitle": "Slide title",
-      "slideTitlePlaceholder": "For the outline and the thumbnail only",
       "background": "Background",
       "backgroundDefault": "Theme default",
       "notes": "Speaker notes",
@@ -627,12 +625,13 @@
       "markdown": "Markdown",
       "markdownPlaceholder": "# Title\n\nWrite the lecture notes here…",
       "preview": "Preview",
-      "untitledSlide": "Untitled",
+      "slideName": "Slide {{number}}",
       "deckSection": "Presentation",
       "menus": {
         "file": "File",
         "insert": "Insert",
-        "edit": "Edit"
+        "edit": "Edit",
+        "view": "View"
       },
       "undo": "Undo",
       "redo": "Redo",
@@ -670,12 +669,15 @@
       },
       "tips": {
         "slidePicker": "Slide {{position}} of {{count}}: pick which one to edit.",
+        "deleteSlide": "Delete this slide (Ctrl+Z brings it back).",
         "addSlide": "Add an empty slide at the end.",
         "undo": "Undo the last change (Ctrl+Z).",
         "redo": "Redo what was undone (Ctrl+Shift+Z).",
         "present": "Project the presentation full screen.",
         "preview": "Show or hide the markdown preview.",
-        "topic": "The Theory topic it will be published under."
+        "topic": "The Theory topic it will be published under.",
+        "downloadMarkdown": "Download what is written here as a .md file",
+        "importMarkdown": "Replace the text with a .md file (Ctrl+Z undoes it)"
       },
       "snippets": {
         "bold": "Bold",
@@ -704,6 +706,28 @@
         "table": "Inserts the skeleton of a two-column table.",
         "code": "Inserts `code`; a fenced ``` block for several lines.",
         "quote": "Marks the line as a quote with >."
+      },
+      "boardSize": "Board size",
+      "slideBackground": "Slide background",
+      "copy": "Copy",
+      "paste": "Paste",
+      "clearSlide": "Clear the slide",
+      "group_one": "{{count}} element selected",
+      "group_other": "{{count}} elements selected",
+      "groupHint": "Drag any of them to move them together. Hold Ctrl and drag across the board to select several.",
+      "newPresentation": "New presentation",
+      "downloadMarkdown": "Download markdown",
+      "importMarkdown": "Import markdown",
+      "namePrompt": {
+        "title": "Give your presentation a name",
+        "body": "Autosave turns on as soon as it has one. Until then, nothing you write here is stored.",
+        "dismiss": "Close"
+      },
+      "discard": {
+        "title": "Start a new presentation?",
+        "body": "The presentation open in this tab has changes that are not saved. Starting over discards them.",
+        "keep": "Keep editing",
+        "confirm": "Discard and start over"
       }
     },
     "actions": {
@@ -716,6 +740,7 @@
       "unpublish": "Take off Theory"
     },
     "status": {
+      "new": "Not saved yet",
       "unsaved": "Not saved yet. Save it to upload images and submit it for review.",
       "unsavedChanges": "unsaved changes",
       "draft": "Draft",
@@ -725,7 +750,12 @@
       "viewPublished": "View the published version",
       "publishedIsSnapshot": "students keep seeing the approved version until the new one is approved.",
       "reason": "Reason",
-      "pendingHint": "An administrator will review it. You can keep editing meanwhile, but what you submitted is what gets reviewed."
+      "pendingHint": "An administrator will review it. You can keep editing meanwhile, but what you submitted is what gets reviewed.",
+      "autosave": {
+        "on": "Autosave on",
+        "paused": "Autosave paused while under review",
+        "off": "Name it to turn on autosave"
+      }
     },
     "toast": {
       "save": "Save the presentation",
@@ -737,7 +767,10 @@
       "upload": "Upload the image",
       "deleteImage": "Delete the image",
       "delete": "Delete the presentation",
-      "deletedBody": "Deleted, along with its images and its published version."
+      "deletedBody": "Deleted, along with its images and its published version.",
+      "importMarkdown": "Import markdown",
+      "importTooLong": "The file is longer than {{max}} characters.",
+      "importedBody": "{{name}} replaced the text. Ctrl+Z brings back what was there."
     },
     "errors": {
       "signedOut": "Sign in again to continue.",
@@ -750,31 +783,46 @@
       "title": "My presentations",
       "intro": "Your theory presentations, and where each one stands in the review.",
       "new": "New presentation",
-      "empty": "You have not created any presentation yet.",
+      "emptyTitle": "No presentations yet",
+      "emptyHint": "Your theory presentations will show up here once you create and name one. Start with a blank deck or a markdown page.",
       "notFound": "That presentation does not exist, or is not yours.",
       "backToList": "Back to the list",
       "slides_one": "{{count}} slide",
       "slides_other": "{{count}} slides",
-      "delete": "Delete the presentation"
+      "edited": "Edited {{date}}",
+      "delete": "Delete the presentation",
+      "view": {
+        "label": "Arrange the presentations",
+        "recent": "Last edited",
+        "topic": "By topic"
+      }
     },
     "read": {
       "missing": "This presentation is not published (or was withdrawn).",
       "byline": "{{author}} · {{topic}}",
-      "present": "Presentation mode",
       "progress": "You are {{percent}}% through",
       "resume": "Pick up where you left off",
       "emptyTitle": "Theory presentations",
       "emptyHint": "Pick a presentation from the Theory menu in the sidebar. Your progress is saved on its own, whether you read the page or use presentation mode.",
-      "complete": "Complete"
+      "complete": "Complete",
+      "resumeSlide": "Continue at slide {{number}}"
     },
     "player": {
       "label": "Presentation mode: {{title}}",
-      "notes": "Notes",
       "close": "Leave presentation mode",
       "noNotes": "This slide has no notes.",
       "previous": "Previous",
       "next": "Next",
-      "hint": "← → to change slide · N for notes · Esc to leave"
+      "open": "Presentation mode",
+      "actions": "Actions",
+      "soon": "Coming soon",
+      "slide": "Slide {{number}}",
+      "action": {
+        "export": "Export",
+        "ask": "Ask",
+        "report": "Report",
+        "board": "Board"
+      }
     },
     "review": {
       "title": "Presentation review",
@@ -800,6 +848,34 @@
         "approvedBody": "“{{title}}” is now in Theory.",
         "reject": "Reject the presentation",
         "rejectedBody": "Rejected — the teacher will see the reason."
+      },
+      "editBadge": "Edit",
+      "approveDialog": {
+        "title": "Where does it go in the Theory menu?",
+        "body": "“{{title}}” is being published for the first time. Pick the Theory menu section where readers will find it, or create a new one.",
+        "section": "Section",
+        "pick": "Pick a section",
+        "newSection": "New section…",
+        "name": "Section name",
+        "icon": "Icon",
+        "cancel": "Cancel",
+        "confirm": "Approve and publish"
+      }
+    },
+    "export": {
+      "themeHint": "Slides adapt to the theme. Choose the palette to export them in.",
+      "working": "Drawing the slides…",
+      "themes": {
+        "light": "Light",
+        "dark": "Dark"
+      },
+      "png": {
+        "title": "Export slide as PNG",
+        "action": "Export slide as PNG"
+      },
+      "pdf": {
+        "title": "Export to PDF",
+        "action": "Export to PDF"
       }
     }
   },

@@ -5,6 +5,8 @@
 export { PresentationsRepository } from "@/db/domains/presentations/presentations.repository";
 export type {
   AddAssetResult,
+  ApproveRefusal,
+  ApproveResult,
   AssetRefusal,
   RemoveAssetResult,
 } from "@/db/domains/presentations/presentations.repository";

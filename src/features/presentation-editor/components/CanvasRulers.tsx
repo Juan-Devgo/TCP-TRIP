@@ -1,12 +1,17 @@
+import { GRID } from "@/features/presentation-editor/lib/geometry";
 import type { PresentationCanvas } from "@/lib/presentations/contract";
 import { cn } from "@/lib/utils";
 
 /** Ruler thickness in **screen** pixels: it does not zoom with the slide. */
 export const RULER_SIZE = 18;
 
-/** A tick every 100 canvas units, a number every 200 — 1920 stays readable. */
-const TICK = 100;
-const LABEL_EVERY = 200;
+/**
+ * A long tick on every grid line and a short one halfway, so the ruler reads
+ * the same lines the canvas draws; a number every other grid line keeps 1920
+ * readable.
+ */
+const TICK = GRID / 2;
+const LABEL_EVERY = GRID * 2;
 
 /**
  * The rulers around the canvas.
@@ -69,7 +74,10 @@ export function CanvasRulers({
       )}
 
       {ticks.map((at) => {
-        const labelled = at % LABEL_EVERY === 0;
+        const major = at % GRID === 0;
+        // No number on the far edge: it would have nowhere to go but off the
+        // ruler.
+        const labelled = at % LABEL_EVERY === 0 && at > 0 && at < length;
         const offset = at * scale;
 
         return (
@@ -78,24 +86,21 @@ export function CanvasRulers({
               className="bg-border absolute"
               style={
                 axis === "x"
-                  ? { left: offset, top: labelled ? 0 : RULER_SIZE / 2, bottom: 0, width: 1 }
-                  : { top: offset, left: labelled ? 0 : RULER_SIZE / 2, right: 0, height: 1 }
+                  ? { left: offset, top: major ? 0 : RULER_SIZE / 2, bottom: 0, width: 1 }
+                  : { top: offset, left: major ? 0 : RULER_SIZE / 2, right: 0, height: 1 }
               }
             />
-            {labelled && at > 0 && (
+            {labelled && (
               <span
                 className="absolute font-mono leading-none"
                 style={
                   axis === "x"
-                    ? { left: offset + 2, top: 1 }
+                    ? { left: offset + 3, top: 2 }
                     : // The vertical ruler is too narrow for a number lying
-                      // flat, so it reads along the ruler instead.
-                      {
-                        top: offset + 2,
-                        left: 1,
-                        transform: "rotate(90deg)",
-                        transformOrigin: "left top",
-                      }
+                      // flat, so it reads along the ruler instead. A vertical
+                      // writing mode keeps the text inside its own box, where a
+                      // rotation would swing it out past the left edge.
+                      { top: offset + 3, left: 2, writingMode: "vertical-rl" }
                 }
               >
                 {at}

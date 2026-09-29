@@ -325,3 +325,27 @@ export const SELECT_PRESENTATION_ID_BY_SLUG = `
   SELECT presentation_id FROM presentation_publications
    WHERE slug = $slug
 `;
+
+/** Replaces the notes frozen with a publication — written in the approval. */
+export const UPSERT_SPEAKER_NOTES = `
+  INSERT INTO presentation_speaker_notes (presentation_id, notes)
+  VALUES ($presentationId, $notes)
+  ON CONFLICT (presentation_id) DO UPDATE SET notes = excluded.notes
+`;
+
+/**
+ * The notes behind a slug, **for its author only**: the ownership check is the
+ * `user_id` in the `WHERE`, so anybody else matches zero rows and gets the same
+ * answer as for an unknown slug. The `LEFT JOIN` answers `{}` for a publication
+ * approved before its notes were frozen — the author is still the author.
+ */
+export const SELECT_SPEAKER_NOTES_FOR_AUTHOR = `
+  SELECT COALESCE(n.notes, '{}') AS notes
+    FROM presentation_publications pub
+    JOIN presentations p
+      ON p.id = pub.presentation_id
+    LEFT JOIN presentation_speaker_notes n
+      ON n.presentation_id = pub.presentation_id
+   WHERE pub.slug = $slug
+     AND p.user_id = $userId
+`;

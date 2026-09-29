@@ -1,7 +1,9 @@
+import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Bold,
   Code,
+  Download,
   Eye,
   EyeOff,
   Heading2,
@@ -14,6 +16,7 @@ import {
   Quote,
   Strikethrough,
   Table as TableIcon,
+  Upload,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -49,6 +52,9 @@ const ICONS: Record<MarkdownSnippet, React.ComponentType> = {
  * `lib/markdownSnippets.ts`; this component only reads the textarea's selection
  * and hands it over.
  *
+ * On the right, beside the preview switch, the file itself: download what is
+ * written as a `.md`, or import one written elsewhere.
+ *
  * The order is the order a teacher looks for them (emphasis, headings, lists,
  * links, blocks), and it is fixed by `MARKDOWN_SNIPPETS`, so adding a snippet
  * puts a button here with no layout decision to make.
@@ -57,12 +63,20 @@ export function MarkdownToolbar({
   preview,
   onInsert,
   onTogglePreview,
+  canDownload,
+  onDownload,
+  onImport,
 }: {
   preview: boolean;
   onInsert: (snippet: MarkdownSnippet) => void;
   onTogglePreview: () => void;
+  /** There is something written to download. */
+  canDownload: boolean;
+  onDownload: () => void;
+  onImport: (file: File) => void;
 }) {
   const { t } = useTranslation();
+  const picker = useRef<HTMLInputElement>(null);
 
   return (
     <div className="border-border flex w-full flex-wrap items-center gap-1 rounded-lg border px-2 py-1.5">
@@ -91,7 +105,44 @@ export function MarkdownToolbar({
         );
       })}
 
-      <div className="ml-auto">
+      <div className="ml-auto flex items-center gap-1">
+        <Tip label={t("presentations.editor.tips.downloadMarkdown")}>
+          <Button
+            size="icon"
+            variant="ghost"
+            className="size-8"
+            disabled={!canDownload}
+            aria-label={t("presentations.editor.downloadMarkdown")}
+            onClick={onDownload}
+          >
+            <Download />
+          </Button>
+        </Tip>
+
+        <Tip label={t("presentations.editor.tips.importMarkdown")}>
+          <Button
+            size="icon"
+            variant="ghost"
+            className="size-8"
+            aria-label={t("presentations.editor.importMarkdown")}
+            onClick={() => picker.current?.click()}
+          >
+            <Upload />
+          </Button>
+        </Tip>
+        <input
+          ref={picker}
+          type="file"
+          accept=".md,.markdown,text/markdown,text/plain"
+          hidden
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            // Cleared, so picking the same file again still fires a change.
+            event.target.value = "";
+            if (file) onImport(file);
+          }}
+        />
+
         <Tip label={t("presentations.editor.tips.preview")}>
           <Button
             size="sm"

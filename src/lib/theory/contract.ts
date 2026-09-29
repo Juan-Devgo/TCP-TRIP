@@ -121,6 +121,15 @@ export type TheoryMenuAdminView = {
   assignable: AssignablePresentation[];
 };
 
+/**
+ * Where an approval files a presentation that is not in the menu yet: under a
+ * section that exists, or under one created in the same request. Sent by the
+ * review queue with the approval, so approving and placing are one decision.
+ */
+export type TheoryPlacement =
+  | { sectionId: string }
+  | { section: { label: string; icon: TheoryIconName } };
+
 /* ---------------------------------------------------------------- validation */
 
 /**

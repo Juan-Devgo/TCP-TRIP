@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { findNavItem } from "@/config/navigation";
+import { useCrumbLabels } from "@/context/PageChromeProvider";
 import { cn } from "@/lib/utils";
 
 type Crumb = {
@@ -33,6 +34,7 @@ type Crumb = {
 export function AppBreadcrumb({ className }: { className?: string }) {
   const { t } = useTranslation();
   const { pathname } = useLocation();
+  const labels = useCrumbLabels();
 
   const segments = pathname.split("/").filter(Boolean);
 
@@ -41,11 +43,12 @@ export function AppBreadcrumb({ className }: { className?: string }) {
     ...segments.map((segment, index) => {
       const path = `/${segments.slice(0, index + 1).join("/")}`;
       // The nav tree labels every known segment, so a crumb and its sidebar
-      // entry can never drift. Unknown segments fall back to the raw text.
+      // entry can never drift. Past it, the page on screen may name the
+      // segment (a draft's title for its id); otherwise the raw text shows.
       const item = findNavItem(path);
       return {
         path,
-        label: item ? t(item.titleKey) : segment,
+        label: item ? t(item.titleKey) : (labels[path] ?? segment),
         // Grouping nodes (`/tools`) are not pages — nothing to navigate to.
         navigable: item?.page != null,
       };

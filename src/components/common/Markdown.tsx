@@ -1,18 +1,28 @@
+import MarkdownToJsx, { type MarkdownToJSX } from "markdown-to-jsx/react";
 import { useMemo } from "react";
 
-import {
-  parseMarkdown,
-  type BlockToken,
-  type InlineToken,
-} from "@/lib/markdown/markdown";
+import { highlightCode, type HighlightNode } from "@/lib/highlight";
 import { cn } from "@/lib/utils";
 
 /**
  * Renders the markdown half of a presentation.
  *
- * Every token becomes a React element — there is **no `dangerouslySetInnerHTML`
- * anywhere**, which is what makes it safe to show one teacher's text to a whole
- * class: a `<script>` in the source is characters on the page, not a script.
+ * `markdown-to-jsx` turns the source into React elements — there is **no
+ * `dangerouslySetInnerHTML` anywhere**, and raw HTML parsing is switched off,
+ * so a teacher writing `<script>` gets the characters `<script>` on the page
+ * and nothing else. Its built-in sanitizer drops `javascript:` and friends from
+ * links and images, which is the one other way a markdown document could run
+ * something.
+ *
+ * It speaks GitHub-flavoured markdown: tables, task lists, strikethrough and
+ * images render as what they are, and a backslash before a punctuation mark
+ * (`\*`) shows the mark instead of the markup — any other backslash stays.
+ *
+ * A fenced block tagged with a language (```` ```bash ````) is highlighted by
+ * highlight.js (`@/lib/highlight`). Its output is read back into a tree and
+ * rendered as React spans, so the no-`innerHTML` rule above still holds. The
+ * colours are the `.hljs-*` rules in `globals.css`, drawn from the theme's
+ * ink tokens, so a block reads in both themes.
  *
  * The typography comes from the app's typeset styles (`MainLayout` scopes
  * `.typeset .typeset-docs` over the content), so a heading here looks like a
@@ -25,107 +35,81 @@ export function Markdown({
   source: string;
   className?: string;
 }) {
-  const blocks = useMemo(() => parseMarkdown(source), [source]);
+  const options = useMemo<MarkdownToJSX.Options>(
+    () => ({
+      disableParsingRawHTML: true,
+      forceBlock: true,
+      wrapper: null,
+      overrides: {
+        a: {
+          // The new tab must not reach back into the app.
+          props: { target: "_blank", rel: "noopener noreferrer" },
+        },
+        img: { props: { loading: "lazy", className: "h-auto max-w-full" } },
+        // The horizontal scroll is the block's own, so a long line or a wide
+        // table never makes the page scroll sideways.
+        pre: { props: { className: "overflow-x-auto" } },
+        code: { component: Code },
+        table: { component: ScrollingTable },
+        // A task list is read, not ticked: the box shows the state it was
+        // written with.
+        input: { props: { disabled: true } },
+      },
+    }),
+    [],
+  );
 
   return (
-    <div className={cn("flex flex-col gap-4", className)}>
-      {blocks.map((block, index) => (
-        <Block key={index} block={block} />
-      ))}
+    <div
+      className={cn(
+        "flex flex-col gap-4",
+        // A task item carries its own checkbox; a bullet in front of it is noise.
+        "[&_li:has(>input[type=checkbox])]:list-none",
+        className,
+      )}
+    >
+      <MarkdownToJsx options={options}>{source}</MarkdownToJsx>
     </div>
   );
 }
 
-function Block({ block }: { block: BlockToken }) {
-  switch (block.kind) {
-    case "heading": {
-      const Heading = `h${block.level}` as "h1" | "h2" | "h3";
-      return (
-        <Heading>
-          <Inline tokens={block.content} />
-        </Heading>
-      );
-    }
-
-    case "paragraph":
-      return (
-        <p>
-          <Inline tokens={block.content} />
-        </p>
-      );
-
-    case "list":
-      return block.ordered ? (
-        <ol>
-          {block.items.map((item, index) => (
-            <li key={index}>
-              <Inline tokens={item} />
-            </li>
-          ))}
-        </ol>
-      ) : (
-        <ul>
-          {block.items.map((item, index) => (
-            <li key={index}>
-              <Inline tokens={item} />
-            </li>
-          ))}
-        </ul>
-      );
-
-    case "quote":
-      return (
-        <blockquote>
-          <Inline tokens={block.content} />
-        </blockquote>
-      );
-
-    case "code":
-      return (
-        // The horizontal scroll is the block's own, so a long line never makes
-        // the page scroll sideways.
-        <pre className="overflow-x-auto">
-          <code className="font-mono">{block.text}</code>
-        </pre>
-      );
-
-    case "rule":
-      return <hr />;
-  }
+function ScrollingTable(props: React.ComponentProps<"table">) {
+  return (
+    <div className="overflow-x-auto">
+      <table {...props} />
+    </div>
+  );
 }
 
-function Inline({ tokens }: { tokens: InlineToken[] }) {
+/**
+ * Inline code and code blocks alike. `markdown-to-jsx` tags a fenced block's
+ * `code` with `lang-<name>`; anything untagged, or tagged with a language
+ * that is not bundled, stays plain.
+ */
+function Code({ className, children, ...props }: React.ComponentProps<"code">) {
+  const language = /(?:^|\s)lang-(\S+)/.exec(className ?? "")?.[1];
+  const source = typeof children === "string" ? children : null;
+
+  const nodes = useMemo(
+    () => (language && source !== null ? highlightCode(source, language) : null),
+    [language, source],
+  );
+
   return (
-    <>
-      {tokens.map((token, index) => {
-        switch (token.kind) {
-          case "text":
-            return <span key={index}>{token.text}</span>;
-          case "strong":
-            return <strong key={index}>{token.text}</strong>;
-          case "em":
-            return <em key={index}>{token.text}</em>;
-          case "code":
-            return (
-              <code key={index} className="font-mono">
-                {token.text}
-              </code>
-            );
-          case "link":
-            return (
-              <a
-                key={index}
-                href={token.href}
-                // The parser already refused anything but http(s)/mailto;
-                // these keep the new tab from reaching back into the app.
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {token.text}
-              </a>
-            );
-        }
-      })}
-    </>
+    <code {...props} className={cn("font-mono", nodes && "hljs", className)}>
+      {nodes ? renderHighlight(nodes) : children}
+    </code>
+  );
+}
+
+function renderHighlight(nodes: HighlightNode[]): React.ReactNode[] {
+  return nodes.map((node, index) =>
+    typeof node === "string" ? (
+      node
+    ) : (
+      <span key={index} className={node.className}>
+        {renderHighlight(node.children)}
+      </span>
+    ),
   );
 }

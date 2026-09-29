@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
 import {
+  continueList,
   insertSnippet,
   type MarkdownSnippet,
 } from "@/features/presentation-editor/lib/markdownSnippets";
@@ -112,5 +113,43 @@ describe("a selection the browser could not produce", () => {
     const result = apply("TCP", [-5, 99], "bold");
 
     expect(result.value).toBe("**TCP**");
+  });
+});
+
+describe("Enter inside a list", () => {
+  function enter(value: string, caret = value.length) {
+    return continueList(value, { start: caret, end: caret });
+  }
+
+  test("an unordered item continues with the same bullet", () => {
+    expect(enter("- IP")).toEqual({ value: "- IP\n- ", selection: { start: 7, end: 7 } });
+    expect(enter("  * TCP")?.value).toBe("  * TCP\n  * ");
+  });
+
+  test("an ordered item continues with the next number", () => {
+    expect(enter("9. UDP")?.value).toBe("9. UDP\n10. ");
+    expect(enter("1) ARP")?.value).toBe("1) ARP\n2) ");
+  });
+
+  test("a task continues unticked, and a quote continues as a quote", () => {
+    expect(enter("- [x] Leer RFC 791")?.value).toBe("- [x] Leer RFC 791\n- [ ] ");
+    expect(enter("> Nota")?.value).toBe("> Nota\n> ");
+  });
+
+  test("Enter on an empty item removes the marker and ends the list", () => {
+    expect(enter("- IP\n- ")).toEqual({ value: "- IP\n", selection: { start: 5, end: 5 } });
+    expect(enter("1. a\n2. ")?.value).toBe("1. a\n");
+    expect(enter("- [ ] ")?.value).toBe("");
+  });
+
+  test("Enter in the middle of an item splits it into two items", () => {
+    expect(enter("- capa de red", 7)?.value).toBe("- capa \n- de red");
+  });
+
+  test("anything that is not a list line is left to the textarea", () => {
+    expect(enter("párrafo")).toBeNull();
+    expect(enter("---")).toBeNull();
+    expect(enter("- item", 1)).toBeNull();
+    expect(continueList("- a", { start: 0, end: 3 })).toBeNull();
   });
 });

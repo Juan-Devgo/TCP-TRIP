@@ -159,3 +159,63 @@ function block(value: string, selection: TextSelection, text: string): MarkdownE
     selection: { start, end: start + text.length },
   };
 }
+
+/** The markers Enter carries onto the next line, most specific first. */
+const CONTINUED: readonly { pattern: RegExp; next: (match: RegExpExecArray) => string }[] = [
+  // A ticked item continues as an unticked one: the new task is not done yet.
+  {
+    pattern: /^(\s*)([-*+])(\s+)\[[ xX]\](\s+)/,
+    next: ([, indent, bullet, gap, after]) => `${indent}${bullet}${gap}[ ]${after}`,
+  },
+  { pattern: /^(\s*)([-*+])(\s+)/, next: ([marker]) => marker },
+  {
+    pattern: /^(\s*)(\d+)([.)])(\s+)/,
+    next: ([, indent, number, dot, gap]) => `${indent}${Number(number) + 1}${dot}${gap}`,
+  },
+  { pattern: /^(\s*(?:>\s?)+)/, next: ([marker]) => marker },
+];
+
+/**
+ * What Enter does inside a list or a quote: the next line starts with the same
+ * marker (the next number, for an ordered list), the way every writing tool
+ * behaves. Enter on an item that is only its marker ends the list instead —
+ * the empty marker is removed and the line is left blank.
+ *
+ * `null` means "not a list line": the component lets the textarea insert its
+ * own newline.
+ */
+export function continueList(value: string, selection: TextSelection): MarkdownEdit | null {
+  const { start, end } = clampSelection(value, selection);
+  if (start !== end) return null;
+
+  const lineStart = value.lastIndexOf("\n", start - 1) + 1;
+  const newline = value.indexOf("\n", start);
+  const lineEnd = newline === -1 ? value.length : newline;
+  const line = value.slice(lineStart, lineEnd);
+
+  for (const rule of CONTINUED) {
+    const match = rule.pattern.exec(line);
+    if (!match) continue;
+
+    const marker = match[0];
+    // A caret inside the marker is editing the marker, not the item.
+    if (start - lineStart < marker.length) return null;
+
+    if (line.slice(marker.length).trim() === "") {
+      return {
+        value: value.slice(0, lineStart) + value.slice(lineEnd),
+        selection: { start: lineStart, end: lineStart },
+      };
+    }
+
+    const inserted = `\n${rule.next(match)}`;
+    const caret = start + inserted.length;
+
+    return {
+      value: value.slice(0, start) + inserted + value.slice(end),
+      selection: { start: caret, end: caret },
+    };
+  }
+
+  return null;
+}
