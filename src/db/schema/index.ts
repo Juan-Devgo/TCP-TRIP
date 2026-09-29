@@ -291,4 +291,97 @@ export const SCHEMA_STATEMENTS: readonly string[] = [
                       ON DELETE CASCADE,
     notes           TEXT NOT NULL CHECK (json_valid(notes))
   );`,
+
+  /**
+   * A teacher's saved exercise set (`Crear ejercicios`): the generated prompts
+   * and answers **frozen** as JSON in `blocks`, not the configuration that
+   * produced them — re-downloading must give the PDF the students received.
+   * `user_id` is the Clerk id, as everywhere else.
+   */
+  `CREATE TABLE IF NOT EXISTS exercise_sets (
+    id          TEXT PRIMARY KEY,
+    user_id     TEXT NOT NULL,
+    title       TEXT NOT NULL CHECK (title <> ''),
+    language    TEXT NOT NULL,
+    blocks      TEXT NOT NULL CHECK (json_valid(blocks)),
+    created_at  TEXT NOT NULL,
+    updated_at  TEXT NOT NULL
+  );`,
+
+  /** `Mis ejercicios`: one teacher's sets, newest first. */
+  `CREATE INDEX IF NOT EXISTS exercise_sets_user_created_idx
+    ON exercise_sets (user_id, created_at DESC);`,
+
+  /**
+   * Where a set was handed out: one row per Classroom assignment it was
+   * attached to. A set with any usage is frozen (the repository refuses the
+   * update). Course and assignment names are snapshots, kept in step when the
+   * assignment is edited from TCP-TRIP.
+   */
+  `CREATE TABLE IF NOT EXISTS exercise_set_usages (
+    id               TEXT PRIMARY KEY,
+    set_id           TEXT NOT NULL REFERENCES exercise_sets (id) ON DELETE CASCADE,
+    user_id          TEXT NOT NULL,
+    course_id        TEXT NOT NULL,
+    course_name      TEXT NOT NULL,
+    coursework_id    TEXT NOT NULL,
+    coursework_title TEXT NOT NULL,
+    link             TEXT NOT NULL,
+    assigned_at      TEXT NOT NULL,
+    due_at           TEXT
+  );`,
+
+  `CREATE INDEX IF NOT EXISTS exercise_set_usages_set_idx
+    ON exercise_set_usages (set_id, assigned_at DESC);`,
+
+  /**
+   * A Classroom assignment **TCP-TRIP created** — the only ones it may edit
+   * (API project lock). `request_id` is minted by the client per draft, so a
+   * retry after a network failure finds the task instead of duplicating it.
+   * `instructions_html` keeps the formatting Classroom itself cannot store.
+   */
+  `CREATE TABLE IF NOT EXISTS classroom_assignments (
+    id                TEXT PRIMARY KEY,
+    user_id           TEXT NOT NULL,
+    request_id        TEXT NOT NULL,
+    course_id         TEXT NOT NULL,
+    coursework_id     TEXT NOT NULL,
+    title             TEXT NOT NULL,
+    instructions_html TEXT NOT NULL,
+    max_points        REAL,
+    due_at            TEXT,
+    state             TEXT NOT NULL,
+    scheduled_at      TEXT,
+    link              TEXT NOT NULL,
+    student_ids       TEXT NOT NULL CHECK (json_valid(student_ids)),
+    exercise_set_ids  TEXT NOT NULL CHECK (json_valid(exercise_set_ids)),
+    presentation_slugs TEXT NOT NULL DEFAULT '[]' CHECK (json_valid(presentation_slugs)),
+    created_at        TEXT NOT NULL,
+    updated_at        TEXT NOT NULL,
+    UNIQUE (user_id, request_id)
+  );`,
+
+  `CREATE INDEX IF NOT EXISTS classroom_assignments_course_idx
+    ON classroom_assignments (user_id, course_id, created_at DESC);`,
+
+  /**
+   * Announcements have no local row beyond this: the request id → Classroom id
+   * mapping that makes a retried post idempotent.
+   */
+  `CREATE TABLE IF NOT EXISTS classroom_announcement_requests (
+    user_id         TEXT NOT NULL,
+    request_id      TEXT NOT NULL,
+    announcement_id TEXT NOT NULL,
+    PRIMARY KEY (user_id, request_id)
+  );`,
+
+  /**
+   * A revoked grant looks exactly like an expired one to Google. This row
+   * remembers the teacher chose to disconnect, so the UI says "not connected"
+   * instead of "your authorization expired".
+   */
+  `CREATE TABLE IF NOT EXISTS classroom_disconnects (
+    user_id TEXT PRIMARY KEY,
+    at      TEXT NOT NULL
+  );`,
 ];

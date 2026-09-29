@@ -1,3 +1,5 @@
+import { classroomRoutes } from "@/api/classroom";
+import { exerciseRoutes } from "@/api/exercises";
 import { fail, ok } from "@/api/http";
 import { presentationRoutes } from "@/api/presentations";
 import { protocolRoutes } from "@/api/protocols";
@@ -23,6 +25,8 @@ export const apiRoutes = {
   ...protocolRoutes,
   ...presentationRoutes,
   ...theoryRoutes,
+  ...exerciseRoutes,
+  ...classroomRoutes,
 
   /**
    * Everything under `/api/` that matched nothing above. Without it a typo'd

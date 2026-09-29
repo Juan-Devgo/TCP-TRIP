@@ -16,7 +16,7 @@ import { DEFAULT_ROLE, isAppRole, type AppRole } from "@/lib/auth/roles";
 
 let client: ReturnType<typeof createClerkClient> | null = null;
 
-function getClerk() {
+export function getClerk() {
   if (client) return client;
 
   const secretKey = process.env.CLERK_SECRET_KEY;

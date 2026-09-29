@@ -489,7 +489,8 @@
       "mine": "Mis Ejercicios"
     },
     "courses": {
-      "mine": "Mis Cursos"
+      "mine": "Mis Cursos",
+      "assign": "Asignar"
     }
   },
   "exercises": {
@@ -521,7 +522,10 @@
       "advisor": "Director de trabajo de grado",
       "studentName": "Nombre",
       "date": "Fecha",
-      "page": "Página {{page}} de {{total}}"
+      "page": "Página {{page}} de {{total}}",
+      "setSubtitle_one": "{{count}} ejercicio · {{sections}} secciones",
+      "setSubtitle_other": "{{count}} ejercicios · {{sections}} secciones",
+      "section": "{{tool}} — {{difficulty}}"
     }
   },
   "dataTable": {
@@ -534,6 +538,346 @@
     "rowsPerPage": "Filas",
     "expandRow": "Ver detalles",
     "collapseRow": "Ocultar detalles"
+  },
+  "teacher": {
+    "gate": {
+      "title": "Solo para docentes",
+      "notTeacher": "Esta sección es para docentes validados. Si eres docente, pide la validación de tu rol a un administrador.",
+      "signedOut": "Inicia sesión con una cuenta de docente para usar esta sección."
+    },
+    "common": {
+      "retry": "Reintentar",
+      "openInClassroom": "Abrir en Classroom"
+    },
+    "pdf": {
+      "withAnswersSuffix": "con-respuestas"
+    },
+    "states": {
+      "DRAFT": "Borrador",
+      "PUBLISHED": "Publicado",
+      "DELETED": "Eliminado"
+    },
+    "create": {
+      "title": "Crear ejercicios",
+      "description": "Combina ejercicios de varias herramientas en una sola hoja. Cada bloque usa el generador de su herramienta con su propia dificultad.",
+      "setTitle": "Título",
+      "setTitlePlaceholder": "Taller 1 — Conversión y subredes",
+      "blocks": "Bloques",
+      "block": "Bloque {{number}}",
+      "tool": "Herramienta",
+      "total_one": "{{count}} de {{max}} ejercicios",
+      "total_other": "{{count}} de {{max}} ejercicios",
+      "addBlock": "Agregar bloque",
+      "moveUp": "Subir bloque",
+      "moveDown": "Bajar bloque",
+      "removeBlock": "Quitar bloque",
+      "generate": "Generar",
+      "regenerateAll": "Regenerar todo",
+      "regenerateBlock": "Regenerar",
+      "preview": "Vista previa",
+      "previewHint": "Así quedará el PDF: numeración continua y una hoja de respuestas al final si la incluyes.",
+      "blockPending": "Cambiaste este bloque: genéralo de nuevo para verlo.",
+      "needsGeneration": "Genera todos los bloques para descargar o guardar.",
+      "download": "Descargar PDF",
+      "save": "Guardar",
+      "saveChanges": "Guardar cambios",
+      "saved": "Ejercicio guardado.",
+      "openSaved": "Ver en Mis ejercicios",
+      "assignSaved": "Asignar en Classroom",
+      "startOver": "Empezar uno nuevo",
+      "editing": "Estás editando un ejercicio guardado.",
+      "errors": {
+        "title": "Escribe un título.",
+        "noBlocks": "Agrega al menos un bloque.",
+        "tooMany": "Un ejercicio admite como máximo {{max}} ejercicios en total.",
+        "save": "No se pudo guardar. Inténtalo de nuevo.",
+        "used": "Este ejercicio ya fue asignado y no se puede modificar. Duplícalo desde Mis ejercicios para crear una nueva versión."
+      }
+    },
+    "mine": {
+      "title": "Mis ejercicios",
+      "description": "Todo lo que has creado, con dónde y cuándo lo asignaste.",
+      "byDate": "Por fecha",
+      "byCourse": "Por curso",
+      "unassigned": "Sin asignar",
+      "dates": "Creado el {{created}} · actualizado el {{updated}}",
+      "exerciseCount_one": "{{count}} ejercicio",
+      "exerciseCount_other": "{{count}} ejercicios",
+      "usageCount_one": "Asignado {{count}} vez",
+      "usageCount_other": "Asignado {{count}} veces",
+      "usages": "Usos",
+      "noUsages": "Todavía no se ha asignado.",
+      "assignedOn": "asignado el {{date}}",
+      "dueOn": "entrega el {{date}}",
+      "notFound": "Este ejercicio ya no existe.",
+      "backToList": "Volver a Mis ejercicios",
+      "copyTitle": "{{title}} (copia)",
+      "empty": {
+        "title": "Aún no has creado ejercicios",
+        "description": "Crea tu primer ejercicio combinando las herramientas que necesites."
+      },
+      "actions": {
+        "menu": "Acciones",
+        "download": "Descargar PDF",
+        "downloadAnswers": "Descargar con respuestas",
+        "assign": "Asignar",
+        "edit": "Editar",
+        "editLocked": "Editar (ya asignado)",
+        "duplicate": "Duplicar como nueva versión",
+        "delete": "Eliminar"
+      },
+      "delete": {
+        "title": "¿Eliminar «{{title}}»?",
+        "description": "Se borrará de TCP-TRIP. Esta acción no se puede deshacer.",
+        "used_one": "Se borrará de TCP-TRIP. La tarea en la que lo asignaste seguirá en Classroom con su PDF.",
+        "used_other": "Se borrará de TCP-TRIP. Las {{count}} tareas en las que lo asignaste seguirán en Classroom con su PDF."
+      },
+      "errors": {
+        "load": "No se pudieron cargar tus ejercicios.",
+        "delete": "No se pudo eliminar. Inténtalo de nuevo."
+      }
+    },
+    "connection": {
+      "title": "Conecta Google Classroom",
+      "description": "TCP-TRIP usará tu cuenta de Google para:",
+      "will": {
+        "courses": "Ver tus cursos y sus estudiantes.",
+        "assign": "Crear tareas y anuncios en tus cursos.",
+        "drive": "Subir a tu Google Drive los archivos y PDF que adjuntes.",
+        "never": "Nunca modificará lo que creaste directamente en Classroom."
+      },
+      "connect": "Conectar Google Classroom",
+      "retry": "Volver a conectar",
+      "connectFailed": "No se pudo abrir la conexión con Google. Inténtalo de nuevo.",
+      "reconnectTitle": "Tu autorización de Google expiró",
+      "reconnectDescription": "Vuelve a conectar tu cuenta para seguir usando Classroom desde TCP-TRIP.",
+      "reconnectAction": "Vuelve a conectar tu cuenta y repite la acción: lo que escribiste se conserva.",
+      "partialTitle": "Faltan permisos de Google",
+      "partialDescription": "No aceptaste todos los permisos, así que estas funciones quedan deshabilitadas:",
+      "features": {
+        "courses": "Ver tus cursos",
+        "students": "Ver el nombre, correo y foto de tus estudiantes",
+        "assign": "Asignar tareas",
+        "announcements": "Publicar anuncios",
+        "progress": "Ver el avance de las entregas"
+      },
+      "statusError": "No se pudo comprobar la conexión con Classroom.",
+      "connected": "Classroom conectado",
+      "connectedAs": "Conectado como {{email}}",
+      "disconnect": "Desconectar",
+      "disconnectTitle": "¿Desconectar Google Classroom?",
+      "disconnectDescription": "TCP-TRIP dejará de acceder a Classroom y a los archivos que subió a tu Drive. Tus ejercicios guardados se conservan y puedes volver a conectar cuando quieras.",
+      "disconnectFailed": "No se pudo desconectar. Inténtalo de nuevo."
+    },
+    "editor": {
+      "toolbar": "Formato",
+      "bold": "Negrita",
+      "italic": "Cursiva",
+      "underline": "Subrayado",
+      "bullets": "Lista con viñetas",
+      "numbers": "Lista numerada"
+    },
+    "attachments": {
+      "title": "Adjuntos",
+      "description": "Los archivos y ejercicios se suben a tu Google Drive al enviar; las presentaciones se adjuntan como enlace.",
+      "empty": "Sin adjuntos.",
+      "addFile": "Subir archivo",
+      "addYoutube": "YouTube",
+      "addLink": "Enlace",
+      "addExercise": "Mis ejercicios",
+      "add": "Agregar",
+      "remove": "Quitar {{name}}",
+      "attached": "Adjuntado",
+      "withAnswers": "Con respuestas",
+      "url": "URL",
+      "linkTitle": "Título (opcional)",
+      "linkTitleHint": "Si lo dejas vacío, Classroom usa el título de la página.",
+      "limit_one": "{{count}} de {{max}} adjuntos",
+      "limit_other": "{{count}} de {{max}} adjuntos",
+      "tooLarge": "Superan {{max}} MB y no se agregaron: {{names}}",
+      "kinds": {
+        "link": "Enlace",
+        "youtube": "YouTube",
+        "file": "Archivo",
+        "exercise": "Ejercicio",
+        "presentation": "Presentación"
+      },
+      "youtubeDialog": {
+        "title": "Agregar video de YouTube",
+        "description": "Pega el enlace del video.",
+        "invalid": "No es un enlace de video de YouTube."
+      },
+      "linkDialog": {
+        "title": "Agregar enlace",
+        "description": "Un RFC, una documentación o cualquier página web.",
+        "invalid": "Escribe una URL que empiece por http:// o https://."
+      },
+      "exerciseDialog": {
+        "title": "Adjuntar un ejercicio",
+        "description": "Se adjunta el PDF del ejercicio tal como lo guardaste.",
+        "answersHint": "Normalmente no: la hoja de respuestas es para ti."
+      },
+      "addPresentation": "Presentación",
+      "presentationDialog": {
+        "title": "Adjuntar una presentación",
+        "description": "Una presentación de teoría publicada, adjunta como enlace: los estudiantes la leen en TCP-TRIP, con su progreso de lectura, tal como fue aprobada.",
+        "search": "Buscar por título o autor",
+        "empty": "Aún no hay presentaciones publicadas.",
+        "noMatch": "Ninguna presentación coincide con la búsqueda.",
+        "error": "No se pudieron cargar las presentaciones publicadas.",
+        "byline_one": "{{author}} · {{count}} diapositiva",
+        "byline_other": "{{author}} · {{count}} diapositivas"
+      }
+    },
+    "students": {
+      "all": "Todos los estudiantes",
+      "search": "Buscar por nombre o correo",
+      "pickCourseFirst": "Elige un curso primero.",
+      "noneSelected": "Selecciona al menos un estudiante.",
+      "selected_one": "{{count}} estudiante seleccionado",
+      "selected_other": "{{count}} estudiantes seleccionados",
+      "loadError": "No se pudo cargar la lista de estudiantes.",
+      "empty": "Este curso no tiene estudiantes.",
+      "noMatch": "Ningún estudiante coincide con la búsqueda."
+    },
+    "assign": {
+      "title": "Asignar",
+      "editTitle": "Editar tarea",
+      "description": "Crea una tarea en Google Classroom con tus ejercicios y materiales.",
+      "settings": "Configuración",
+      "fields": {
+        "title": "Título",
+        "instructions": "Instrucciones (opcional)",
+        "instructionsPlaceholder": "Indica cómo resolver y entregar la tarea…",
+        "course": "Curso",
+        "coursePlaceholder": "Elige un curso",
+        "students": "Para",
+        "points": "Puntos",
+        "ungraded": "Sin calificación",
+        "pointsHint": "Déjalo vacío o en 0 para una tarea sin calificación.",
+        "due": "Fecha de entrega",
+        "dueHint": "Opcional. Déjala vacía si la tarea no tiene fecha límite.",
+        "mode": "Publicación",
+        "scheduled": "Publicar el"
+      },
+      "modes": {
+        "publish": "Asignar ahora",
+        "schedule": "Programar",
+        "draft": "Guardar como borrador"
+      },
+      "submit": {
+        "publish": "Asignar",
+        "schedule": "Programar",
+        "draft": "Guardar borrador"
+      },
+      "saveChanges": "Guardar cambios",
+      "preparing": "Preparando adjuntos…",
+      "sending": "Enviando a Classroom…",
+      "plainTextNote": "Classroom recibe las instrucciones como texto plano: se quitan negrita, cursiva y subrayado, y las listas pasan a líneas con viñeta.",
+      "plainPreview": "Ver cómo llegará a Classroom",
+      "attachmentsLocked": "Classroom no permite cambiar los adjuntos de una tarea ya creada. Edítalos directamente en Classroom.",
+      "publishedLocked": "Una tarea publicada no puede volver a borrador.",
+      "editingNotice": "Editando «{{title}}»",
+      "editingLimits": "Puedes cambiar título, instrucciones, puntos, fecha de entrega y publicación. El curso, los estudiantes y los adjuntos quedan como se crearon.",
+      "cancelEdit": "Cancelar edición",
+      "updated": "Tarea actualizada en Classroom.",
+      "created": {
+        "published": "Tarea asignada en Classroom.",
+        "draft": "Tarea guardada en Classroom como borrador."
+      },
+      "errors": {
+        "title": "Escribe un título.",
+        "course": "Elige un curso.",
+        "points": "Los puntos deben ser un número mayor o igual que 0.",
+        "duePast": "La fecha de entrega ya pasó.",
+        "scheduledRequired": "Elige cuándo publicarla.",
+        "scheduledPast": "La fecha de publicación ya pasó.",
+        "dueBeforeScheduled": "La fecha de entrega debe ser posterior a la publicación.",
+        "prepare": "No se pudieron preparar los adjuntos. Revisa que los ejercicios sigan existiendo.",
+        "upload": "No se pudo subir «{{name}}» a Google Drive. Reintenta o quítalo.",
+        "tooLarge": "«{{name}}» supera el tamaño permitido.",
+        "google": "Classroom rechazó la operación: {{message}}",
+        "invalid": "Revisa los datos de la tarea.",
+        "generic": "No se pudo completar. Tu borrador se conserva: inténtalo de nuevo.",
+        "unpublished": "“{{name}}” ya no está publicada. Quítala e inténtalo de nuevo."
+      }
+    },
+    "courses": {
+      "title": "Mis cursos",
+      "description": "Tus cursos de Google Classroom: estudiantes, anuncios y avance de las tareas.",
+      "showArchived": "Mostrar archivados",
+      "open": "Abrir",
+      "studentCount_one": "{{count}} estudiante",
+      "studentCount_other": "{{count}} estudiantes",
+      "studentsUnknown": "Estudiantes no disponibles",
+      "emptyTitle": "No hay cursos",
+      "empty": "No eres docente de ningún curso activo en Classroom.",
+      "states": {
+        "ACTIVE": "Activo",
+        "ARCHIVED": "Archivado",
+        "PROVISIONED": "Pendiente",
+        "DECLINED": "Rechazado",
+        "SUSPENDED": "Suspendido"
+      },
+      "tabs": {
+        "students": "Estudiantes",
+        "announcements": "Anuncios",
+        "work": "Tareas"
+      },
+      "errors": {
+        "load": "No se pudieron cargar tus cursos.",
+        "course": "No se pudo cargar este curso."
+      }
+    },
+    "announcements": {
+      "new": "Nuevo anuncio",
+      "text": "Anuncio",
+      "schedule": "Programar publicación",
+      "submit": "Publicar",
+      "submitScheduled": "Programar",
+      "sent": "Anuncio enviado a Classroom.",
+      "list": "Anuncios del curso",
+      "empty": "Este curso aún no tiene anuncios.",
+      "scheduledFor": "Programado para el {{date}}",
+      "errors": {
+        "text": "Escribe el anuncio.",
+        "load": "No se pudieron cargar los anuncios.",
+        "create": "No se pudo publicar el anuncio. Tu texto se conserva: inténtalo de nuevo."
+      }
+    },
+    "work": {
+      "hint": "Solo las tareas creadas desde TCP-TRIP se pueden editar y consultar aquí; las demás son de solo lectura.",
+      "empty": "Este curso no tiene tareas.",
+      "noDue": "Sin fecha de entrega",
+      "points_one": "{{count}} punto",
+      "points_other": "{{count}} puntos",
+      "ownedByApp": "Creada en TCP-TRIP",
+      "readOnly": "Solo lectura",
+      "readOnlyHint": "Creada directamente en Classroom: TCP-TRIP no puede editarla ni ver su avance.",
+      "edit": "Editar",
+      "progress": "Ver avance",
+      "summary": "{{done}} de {{total}} entregadas",
+      "lateCount_one": "{{count}} con retraso",
+      "lateCount_other": "{{count}} con retraso",
+      "late": "Atrasado",
+      "gradingOutOfScope": "Para calificar y devolver entregas, usa Classroom.",
+      "columns": {
+        "student": "Estudiante",
+        "state": "Estado",
+        "grade": "Nota"
+      },
+      "states": {
+        "NEW": "Asignado",
+        "CREATED": "Asignado",
+        "TURNED_IN": "Entregado",
+        "RETURNED": "Devuelto",
+        "RECLAIMED_BY_STUDENT": "Recuperado"
+      },
+      "errors": {
+        "load": "No se pudieron cargar las tareas.",
+        "submissions": "No se pudo cargar el avance de esta tarea."
+      }
+    }
   },
   "presentations": {
     "topics": {

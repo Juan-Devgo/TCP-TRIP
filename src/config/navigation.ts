@@ -166,6 +166,9 @@ export const NAVIGATION = [
         icon: GraduationCap,
         children: [
           { segment: "mine", titleKey: "sidebar.courses.mine", page: true },
+          // Title, instructions, attachments on the left and the course
+          // settings on the right: wider than a reading column.
+          { segment: "assign", titleKey: "sidebar.courses.assign", page: { wide: true } },
         ],
       },
     ],

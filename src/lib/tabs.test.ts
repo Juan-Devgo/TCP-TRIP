@@ -316,4 +316,24 @@ describe("deep links", () => {
     expect(titles(session)).toEqual(["/tools/converters/unknown"]);
     expect(session.state.activeTabId).not.toBeNull();
   });
+
+  test("a path inside a page opens that page's tab one step in", () => {
+    const session = go(HOME, "/teacher/courses/mine/123");
+
+    expect(titles(session)).toEqual(["/teacher/courses/mine"]);
+    const tab = session.state.tabs[0];
+    expect(tab?.history.current).toBe("/teacher/courses/mine/123");
+    expect(tab?.history.back).toEqual(["/teacher/courses/mine"]);
+  });
+
+  test("a path inside a page reuses that page's tab, not the one on screen", () => {
+    let session = go(HOME, "/teacher/courses/mine");
+    session = go(session, "/tools/converters/ascii");
+    session = go(session, "/teacher/courses/mine/123");
+
+    expect(titles(session)).toEqual(["/teacher/courses/mine", "/tools/converters/ascii"]);
+    expect(session.state.tabs.find((tab) => tab.id === session.state.activeTabId)?.history.current).toBe(
+      "/teacher/courses/mine/123",
+    );
+  });
 });

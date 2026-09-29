@@ -489,7 +489,8 @@
       "mine": "My Exercises"
     },
     "courses": {
-      "mine": "My Courses"
+      "mine": "My Courses",
+      "assign": "Assign"
     }
   },
   "exercises": {
@@ -521,7 +522,10 @@
       "advisor": "Thesis advisor",
       "studentName": "Name",
       "date": "Date",
-      "page": "Page {{page}} of {{total}}"
+      "page": "Page {{page}} of {{total}}",
+      "setSubtitle_one": "{{count}} exercise · {{sections}} sections",
+      "setSubtitle_other": "{{count}} exercises · {{sections}} sections",
+      "section": "{{tool}} — {{difficulty}}"
     }
   },
   "dataTable": {
@@ -534,6 +538,346 @@
     "rowsPerPage": "Rows",
     "expandRow": "Show details",
     "collapseRow": "Hide details"
+  },
+  "teacher": {
+    "gate": {
+      "title": "Teachers only",
+      "notTeacher": "This section is for validated teachers. If you are a teacher, ask an administrator to validate your role.",
+      "signedOut": "Sign in with a teacher account to use this section."
+    },
+    "common": {
+      "retry": "Retry",
+      "openInClassroom": "Open in Classroom"
+    },
+    "pdf": {
+      "withAnswersSuffix": "with-answers"
+    },
+    "states": {
+      "DRAFT": "Draft",
+      "PUBLISHED": "Published",
+      "DELETED": "Deleted"
+    },
+    "create": {
+      "title": "Create exercises",
+      "description": "Combine exercises from several tools into one sheet. Each block uses its tool's generator with its own difficulty.",
+      "setTitle": "Title",
+      "setTitlePlaceholder": "Worksheet 1 — Conversion and subnets",
+      "blocks": "Blocks",
+      "block": "Block {{number}}",
+      "tool": "Tool",
+      "total_one": "{{count}} of {{max}} exercises",
+      "total_other": "{{count}} of {{max}} exercises",
+      "addBlock": "Add block",
+      "moveUp": "Move block up",
+      "moveDown": "Move block down",
+      "removeBlock": "Remove block",
+      "generate": "Generate",
+      "regenerateAll": "Regenerate all",
+      "regenerateBlock": "Regenerate",
+      "preview": "Preview",
+      "previewHint": "This is how the PDF will look: continuous numbering, and an answer sheet at the end if you include it.",
+      "blockPending": "You changed this block: generate it again to see it.",
+      "needsGeneration": "Generate every block to download or save.",
+      "download": "Download PDF",
+      "save": "Save",
+      "saveChanges": "Save changes",
+      "saved": "Exercise saved.",
+      "openSaved": "View in My exercises",
+      "assignSaved": "Assign in Classroom",
+      "startOver": "Start a new one",
+      "editing": "You are editing a saved exercise.",
+      "errors": {
+        "title": "Enter a title.",
+        "noBlocks": "Add at least one block.",
+        "tooMany": "An exercise holds at most {{max}} exercises in total.",
+        "save": "Could not save. Please try again.",
+        "used": "This exercise was already assigned and can't be changed. Duplicate it from My exercises to create a new version."
+      }
+    },
+    "mine": {
+      "title": "My exercises",
+      "description": "Everything you have created, with where and when you assigned it.",
+      "byDate": "By date",
+      "byCourse": "By course",
+      "unassigned": "Not assigned",
+      "dates": "Created {{created}} · updated {{updated}}",
+      "exerciseCount_one": "{{count}} exercise",
+      "exerciseCount_other": "{{count}} exercises",
+      "usageCount_one": "Assigned once",
+      "usageCount_other": "Assigned {{count}} times",
+      "usages": "Uses",
+      "noUsages": "Not assigned yet.",
+      "assignedOn": "assigned {{date}}",
+      "dueOn": "due {{date}}",
+      "notFound": "This exercise no longer exists.",
+      "backToList": "Back to My exercises",
+      "copyTitle": "{{title}} (copy)",
+      "empty": {
+        "title": "You haven't created any exercises yet",
+        "description": "Create your first exercise by combining the tools you need."
+      },
+      "actions": {
+        "menu": "Actions",
+        "download": "Download PDF",
+        "downloadAnswers": "Download with answers",
+        "assign": "Assign",
+        "edit": "Edit",
+        "editLocked": "Edit (already assigned)",
+        "duplicate": "Duplicate as a new version",
+        "delete": "Delete"
+      },
+      "delete": {
+        "title": "Delete “{{title}}”?",
+        "description": "It will be removed from TCP-TRIP. This can't be undone.",
+        "used_one": "It will be removed from TCP-TRIP. The assignment you used it in stays in Classroom with its PDF.",
+        "used_other": "It will be removed from TCP-TRIP. The {{count}} assignments you used it in stay in Classroom with their PDF."
+      },
+      "errors": {
+        "load": "Could not load your exercises.",
+        "delete": "Could not delete. Please try again."
+      }
+    },
+    "connection": {
+      "title": "Connect Google Classroom",
+      "description": "TCP-TRIP will use your Google account to:",
+      "will": {
+        "courses": "See your courses and their students.",
+        "assign": "Create assignments and announcements in your courses.",
+        "drive": "Upload the files and PDFs you attach to your Google Drive.",
+        "never": "Never change anything you created directly in Classroom."
+      },
+      "connect": "Connect Google Classroom",
+      "retry": "Connect again",
+      "connectFailed": "Could not open the Google connection. Please try again.",
+      "reconnectTitle": "Your Google authorization expired",
+      "reconnectDescription": "Connect your account again to keep using Classroom from TCP-TRIP.",
+      "reconnectAction": "Connect your account again and repeat the action: what you wrote is kept.",
+      "partialTitle": "Google permissions missing",
+      "partialDescription": "You didn't accept every permission, so these features are disabled:",
+      "features": {
+        "courses": "See your courses",
+        "students": "See your students' name, email and photo",
+        "assign": "Assign work",
+        "announcements": "Post announcements",
+        "progress": "See submission progress"
+      },
+      "statusError": "Could not check the Classroom connection.",
+      "connected": "Classroom connected",
+      "connectedAs": "Connected as {{email}}",
+      "disconnect": "Disconnect",
+      "disconnectTitle": "Disconnect Google Classroom?",
+      "disconnectDescription": "TCP-TRIP will stop accessing Classroom and the files it uploaded to your Drive. Your saved exercises are kept and you can reconnect at any time.",
+      "disconnectFailed": "Could not disconnect. Please try again."
+    },
+    "editor": {
+      "toolbar": "Formatting",
+      "bold": "Bold",
+      "italic": "Italic",
+      "underline": "Underline",
+      "bullets": "Bulleted list",
+      "numbers": "Numbered list"
+    },
+    "attachments": {
+      "title": "Attachments",
+      "description": "Files and exercises are uploaded to your Google Drive when you send; presentations are attached as a link.",
+      "empty": "No attachments.",
+      "addFile": "Upload file",
+      "addYoutube": "YouTube",
+      "addLink": "Link",
+      "addExercise": "My exercises",
+      "add": "Add",
+      "remove": "Remove {{name}}",
+      "attached": "Attached",
+      "withAnswers": "With answers",
+      "url": "URL",
+      "linkTitle": "Title (optional)",
+      "linkTitleHint": "Leave it empty and Classroom uses the page title.",
+      "limit_one": "{{count}} of {{max}} attachments",
+      "limit_other": "{{count}} of {{max}} attachments",
+      "tooLarge": "Larger than {{max}} MB, not added: {{names}}",
+      "kinds": {
+        "link": "Link",
+        "youtube": "YouTube",
+        "file": "File",
+        "exercise": "Exercise",
+        "presentation": "Presentation"
+      },
+      "youtubeDialog": {
+        "title": "Add a YouTube video",
+        "description": "Paste the video link.",
+        "invalid": "That is not a YouTube video link."
+      },
+      "linkDialog": {
+        "title": "Add a link",
+        "description": "An RFC, some documentation or any web page.",
+        "invalid": "Enter a URL starting with http:// or https://."
+      },
+      "exerciseDialog": {
+        "title": "Attach an exercise",
+        "description": "The exercise's PDF is attached exactly as you saved it.",
+        "answersHint": "Usually not: the answer sheet is for you."
+      },
+      "addPresentation": "Presentation",
+      "presentationDialog": {
+        "title": "Attach a presentation",
+        "description": "A published theory presentation, attached as a link: students read it in TCP-TRIP, with their reading progress, exactly as it was approved.",
+        "search": "Search by title or author",
+        "empty": "There are no published presentations yet.",
+        "noMatch": "No presentation matches the search.",
+        "error": "Could not load the published presentations.",
+        "byline_one": "{{author}} · {{count}} slide",
+        "byline_other": "{{author}} · {{count}} slides"
+      }
+    },
+    "students": {
+      "all": "All students",
+      "search": "Search by name or email",
+      "pickCourseFirst": "Choose a course first.",
+      "noneSelected": "Select at least one student.",
+      "selected_one": "{{count}} student selected",
+      "selected_other": "{{count}} students selected",
+      "loadError": "Could not load the student list.",
+      "empty": "This course has no students.",
+      "noMatch": "No student matches the search."
+    },
+    "assign": {
+      "title": "Assign",
+      "editTitle": "Edit assignment",
+      "description": "Create a Google Classroom assignment with your exercises and materials.",
+      "settings": "Settings",
+      "fields": {
+        "title": "Title",
+        "instructions": "Instructions (optional)",
+        "instructionsPlaceholder": "Explain how to solve and hand in the work…",
+        "course": "Course",
+        "coursePlaceholder": "Choose a course",
+        "students": "For",
+        "points": "Points",
+        "ungraded": "Ungraded",
+        "pointsHint": "Leave it empty or at 0 for ungraded work.",
+        "due": "Due date",
+        "dueHint": "Optional. Leave it empty for no deadline.",
+        "mode": "Publishing",
+        "scheduled": "Publish on"
+      },
+      "modes": {
+        "publish": "Assign now",
+        "schedule": "Schedule",
+        "draft": "Save as draft"
+      },
+      "submit": {
+        "publish": "Assign",
+        "schedule": "Schedule",
+        "draft": "Save draft"
+      },
+      "saveChanges": "Save changes",
+      "preparing": "Preparing attachments…",
+      "sending": "Sending to Classroom…",
+      "plainTextNote": "Classroom receives the instructions as plain text: bold, italic and underline are dropped, and lists become bulleted lines.",
+      "plainPreview": "See how it will reach Classroom",
+      "attachmentsLocked": "Classroom does not allow changing the attachments of an existing assignment. Edit them in Classroom directly.",
+      "publishedLocked": "A published assignment can't go back to draft.",
+      "editingNotice": "Editing “{{title}}”",
+      "editingLimits": "You can change the title, instructions, points, due date and publishing. The course, students and attachments stay as created.",
+      "cancelEdit": "Cancel editing",
+      "updated": "Assignment updated in Classroom.",
+      "created": {
+        "published": "Assignment posted to Classroom.",
+        "draft": "Assignment saved in Classroom as a draft."
+      },
+      "errors": {
+        "title": "Enter a title.",
+        "course": "Choose a course.",
+        "points": "Points must be a number greater than or equal to 0.",
+        "duePast": "The due date has passed.",
+        "scheduledRequired": "Choose when to publish it.",
+        "scheduledPast": "The publishing date has passed.",
+        "dueBeforeScheduled": "The due date must come after publishing.",
+        "prepare": "Could not prepare the attachments. Check that the exercises still exist.",
+        "upload": "Could not upload “{{name}}” to Google Drive. Retry or remove it.",
+        "tooLarge": "“{{name}}” is larger than allowed.",
+        "google": "Classroom refused the operation: {{message}}",
+        "invalid": "Check the assignment details.",
+        "generic": "Could not complete. Your draft is kept: please try again.",
+        "unpublished": "“{{name}}” is no longer published. Remove it and try again."
+      }
+    },
+    "courses": {
+      "title": "My courses",
+      "description": "Your Google Classroom courses: students, announcements and assignment progress.",
+      "showArchived": "Show archived",
+      "open": "Open",
+      "studentCount_one": "{{count}} student",
+      "studentCount_other": "{{count}} students",
+      "studentsUnknown": "Students unavailable",
+      "emptyTitle": "No courses",
+      "empty": "You don't teach any active course in Classroom.",
+      "states": {
+        "ACTIVE": "Active",
+        "ARCHIVED": "Archived",
+        "PROVISIONED": "Pending",
+        "DECLINED": "Declined",
+        "SUSPENDED": "Suspended"
+      },
+      "tabs": {
+        "students": "Students",
+        "announcements": "Announcements",
+        "work": "Assignments"
+      },
+      "errors": {
+        "load": "Could not load your courses.",
+        "course": "Could not load this course."
+      }
+    },
+    "announcements": {
+      "new": "New announcement",
+      "text": "Announcement",
+      "schedule": "Schedule publishing",
+      "submit": "Post",
+      "submitScheduled": "Schedule",
+      "sent": "Announcement sent to Classroom.",
+      "list": "Course announcements",
+      "empty": "This course has no announcements yet.",
+      "scheduledFor": "Scheduled for {{date}}",
+      "errors": {
+        "text": "Write the announcement.",
+        "load": "Could not load the announcements.",
+        "create": "Could not post the announcement. Your text is kept: please try again."
+      }
+    },
+    "work": {
+      "hint": "Only assignments created from TCP-TRIP can be edited and tracked here; the rest are read-only.",
+      "empty": "This course has no assignments.",
+      "noDue": "No due date",
+      "points_one": "{{count}} point",
+      "points_other": "{{count}} points",
+      "ownedByApp": "Created in TCP-TRIP",
+      "readOnly": "Read-only",
+      "readOnlyHint": "Created directly in Classroom: TCP-TRIP can't edit it or see its progress.",
+      "edit": "Edit",
+      "progress": "See progress",
+      "summary": "{{done}} of {{total}} turned in",
+      "lateCount_one": "{{count}} late",
+      "lateCount_other": "{{count}} late",
+      "late": "Late",
+      "gradingOutOfScope": "To grade and return work, use Classroom.",
+      "columns": {
+        "student": "Student",
+        "state": "Status",
+        "grade": "Grade"
+      },
+      "states": {
+        "NEW": "Assigned",
+        "CREATED": "Assigned",
+        "TURNED_IN": "Turned in",
+        "RETURNED": "Returned",
+        "RECLAIMED_BY_STUDENT": "Unsubmitted"
+      },
+      "errors": {
+        "load": "Could not load the assignments.",
+        "submissions": "Could not load this assignment's progress."
+      }
+    }
   },
   "presentations": {
     "topics": {

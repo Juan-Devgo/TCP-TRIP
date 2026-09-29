@@ -19,9 +19,22 @@ export class ApiError extends Error {
   constructor(
     readonly status: number,
     message: string,
+    /** `error.details` as the server sent it, when it sent any. */
+    readonly details: unknown = undefined,
   ) {
     super(message);
     this.name = "ApiError";
+  }
+
+  /**
+   * `error.details.code` — the machine-readable reason some routes add on top
+   * of the status (`google_reauth`, `exercise_set_used`), or `null`.
+   */
+  get code(): string | null {
+    const details = this.details;
+    return typeof details === "object" && details !== null && "code" in details
+      ? String((details as { code: unknown }).code)
+      : null;
   }
 
   /** The user is signed out (or the session expired mid-session). */
@@ -70,13 +83,23 @@ export async function request<T>(path: string, init: RequestInit = {}): Promise<
 
   if (!response.ok) {
     const body = (await response.json().catch(() => null)) as {
-      error?: { message?: string };
+      error?: { message?: string; details?: unknown };
     } | null;
     throw new ApiError(
       response.status,
       body?.error?.message ?? `Request failed with ${response.status}`,
+      body?.error?.details,
     );
   }
 
   return (await response.json()) as T;
+}
+
+/**
+ * The query cache's retry policy: a 4xx will be answered the same way again,
+ * so only a server or network failure is worth a second try.
+ */
+export function shouldRetry(failureCount: number, error: unknown): boolean {
+  if (error instanceof ApiError && error.status < 500) return false;
+  return failureCount < 2;
 }

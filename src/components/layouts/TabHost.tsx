@@ -3,11 +3,13 @@ import type { ComponentType } from "react";
 import { tabButtonId, tabPanelId } from "@/components/layouts/TabBar";
 import { TabScopeProvider, useTabs } from "@/context/TabsProvider";
 import { AsciiConverter } from "@/features/ascii-converter";
+import { AssignExercise, MyCourses } from "@/features/classroom";
 import { IPv4Calculator } from "@/features/ipv4-calculator";
 import { NumberBaseConverter } from "@/features/number-base-converter";
 import { MyPresentations, PresentationEditor } from "@/features/presentation-editor";
 import { PresentationReview } from "@/features/presentation-review";
 import { ProtocolBuilder } from "@/features/protocol-builder";
+import { CreateExercises, MyExercises } from "@/features/teacher-exercises";
 import { TheoryMenuManager } from "@/features/admin-theory";
 import { TheoryPresentationPage } from "@/features/theory-presentations";
 import { findPage, type PagePath } from "@/config/navigation";
@@ -33,6 +35,10 @@ const PAGE_COMPONENTS: Partial<Record<PagePath, ComponentType>> = {
   "/teacher/presentations/mine": MyPresentations,
   "/admin/presentations": PresentationReview,
   "/admin/theory": TheoryMenuManager,
+  "/teacher/exercises/new": CreateExercises,
+  "/teacher/exercises/mine": MyExercises,
+  "/teacher/courses/mine": MyCourses,
+  "/teacher/courses/assign": AssignExercise,
 };
 
 export function TabHost() {

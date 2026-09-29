@@ -96,6 +96,109 @@ export async function buildExercisePdf({
   return blob;
 }
 
+export type ExerciseSection = {
+  /** Already translated tool name. */
+  toolTitle: string;
+  difficulty: Difficulty;
+  exercises: Exercise[];
+};
+
+export type ExerciseSetPdfOptions = {
+  title: string;
+  sections: ExerciseSection[];
+  includeAnswers: boolean;
+  t: TFunction;
+};
+
+/**
+ * A teacher's mixed sheet: one section per tool block, numbered 1..N across
+ * sections, with a single answer sheet at the end. Same template as the
+ * single-tool sheet, so the two cannot drift apart.
+ */
+export async function buildExerciseSetPdf({
+  title,
+  sections,
+  includeAnswers,
+  t,
+}: ExerciseSetPdfOptions): Promise<Blob> {
+  const PDFDocument = await loadPdfKit();
+  const doc = new PDFDocument({
+    size: PAGE.size,
+    margin: PAGE.margin,
+    bufferPages: true,
+    info: { Title: title, Author: DOCUMENT_IDENTITY.author },
+  });
+
+  const blob = collectBlob(doc);
+  const width = contentWidth(doc);
+  const total = sections.reduce((sum, section) => sum + section.exercises.length, 0);
+  const subtitle = t("exercises.pdf.setSubtitle", { count: total, sections: sections.length });
+
+  const sectionHeading = (section: ExerciseSection) =>
+    t("exercises.pdf.section", {
+      tool: section.toolTitle,
+      difficulty: t(`exercises.difficulty.${section.difficulty}`),
+    });
+
+  drawHeader(doc, { title, subtitle });
+  doc.moveDown(1);
+  drawStudentFields(doc, t);
+  doc.moveDown(1.5);
+
+  let number = 0;
+  for (const section of sections) {
+    doc.font(FONT.bold).fontSize(12).fillColor(COLOR.text).text(sectionHeading(section), { width });
+    doc.moveDown(0.6);
+    for (const exercise of section.exercises) {
+      number += 1;
+      doc
+        .font(FONT.mono)
+        .fontSize(11)
+        .fillColor(COLOR.text)
+        .text(`${number}.  ${exercise.prompt}`, { width });
+      doc.y += WORK_SPACE;
+    }
+    doc.moveDown(0.5);
+  }
+
+  if (includeAnswers) {
+    doc.addPage();
+    drawHeader(doc, { title: t("exercises.pdf.answersTitle"), subtitle: title });
+
+    number = 0;
+    for (const section of sections) {
+      doc.font(FONT.bold).fontSize(11).fillColor(COLOR.text).text(sectionHeading(section), { width });
+      doc.moveDown(0.3);
+      for (const exercise of section.exercises) {
+        number += 1;
+        doc
+          .font(FONT.mono)
+          .fontSize(10)
+          .fillColor(COLOR.text)
+          .text(`${number}.  ${exercise.answer}`, { width });
+        doc.moveDown(0.35);
+      }
+      doc.moveDown(0.5);
+    }
+  }
+
+  drawFooters(doc, t);
+  doc.end();
+
+  return blob;
+}
+
+/** Kebab-cased, accent-free file name for any title: `taller-1.pdf`. */
+export function pdfFilename(title: string, suffix?: string): string {
+  const slug = title
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+  return `${slug || "ejercicios"}${suffix ? `-${suffix}` : ""}.pdf`;
+}
+
 /** "Nombre: ____  Fecha: ____" line, so the sheet works printed. */
 function drawStudentFields(doc: PDFKit.PDFDocument, t: TFunction): void {
   const width = contentWidth(doc);
@@ -133,14 +236,7 @@ export function exercisePdfFilename(
   toolTitle: string,
   difficulty: Difficulty,
 ): string {
-  const slug = toolTitle
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-
-  return `${slug || "ejercicios"}-${difficulty}.pdf`;
+  return pdfFilename(toolTitle, difficulty);
 }
 
 /** Hand the finished document to the browser as a download. */
