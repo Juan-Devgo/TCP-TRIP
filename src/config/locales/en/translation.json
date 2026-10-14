@@ -485,12 +485,12 @@
       "courses": "Courses"
     },
     "exercises": {
-      "new": "Create",
+      "new": "Create Exercises",
       "mine": "My Exercises"
     },
     "courses": {
       "mine": "My Courses",
-      "assign": "Assign"
+      "assign": "Assign Homeworks"
     }
   },
   "exercises": {
