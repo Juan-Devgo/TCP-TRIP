@@ -90,6 +90,13 @@ export const NAVIGATION = [
             titleKey: "sidebar.calculators.ipv4",
             page: true,
           },
+          {
+            segment: "fragmentation",
+            titleKey: "sidebar.calculators.fragmentation",
+            // The 32-bit header grid needs more than the reading column to
+            // keep its one-bit flags legible.
+            page: { wide: true },
+          },
         ],
       },
     ],

@@ -136,6 +136,87 @@
         "noHosts": "Ninguno: el prefijo no deja hosts asignables."
       }
     },
+    "ipv4Fragmentation": {
+      "title": "Fragmentación IPv4",
+      "subtitle": "Longitud total · MTU · Desplazamiento · MF",
+      "intro": "Escribe la longitud total de un datagrama y el MTU del enlace por el que sale. Si no cabe, se parte en fragmentos: cada uno copia la cabecera de 20 bytes y lleva como máximo MTU − 20 bytes de datos. Solo cambian la longitud total, la bandera MF y el desplazamiento del fragmento, que se mide en bloques de 8 bytes.",
+      "totalLength": "Longitud total (bytes)",
+      "mtu": "MTU (bytes)",
+      "optional": "Otros campos",
+      "identification": "Identificación",
+      "sourceIp": "IP origen",
+      "destinationIp": "IP destino",
+      "results": "Resultados",
+      "noData": "Escribe la longitud total y el MTU para ver los fragmentos.",
+      "views": {
+        "label": "Vista de resultados",
+        "full": "Simulación completa",
+        "table": "Tabla"
+      },
+      "table": {
+        "fragment": "Fragmento",
+        "original": "Original",
+        "data": "Datos (LT − 20)"
+      },
+      "verification": {
+        "title": "Verificación",
+        "sum": "Σ datos = {{expression}} = {{sum}} B",
+        "total": "{{sum}} B + 20 B de cabecera = {{total}} B",
+        "matches": "Coincide con la longitud total original ({{original}} B): ningún byte se perdió ni se repitió.",
+        "mismatch": "No coincide con la longitud total original ({{original}} B)."
+      },
+      "outdated": "Resultado anterior: corrige o completa los campos para actualizarlo.",
+      "showMore": "Mostrar más ({{shown}} de {{total}})",
+      "quickEdit": "Edición rápida de longitud total y MTU",
+      "backToTop": "Volver arriba",
+      "noFragmentation": "El datagrama de {{totalLength}} bytes cabe en el MTU de {{mtu}} bytes: no requiere fragmentación.",
+      "fragmentedInto_one": "Se divide en {{count}} fragmento: MTU {{mtu}} deja {{data}} bytes de datos por fragmento.",
+      "fragmentedInto_other": "Se divide en {{count}} fragmentos: MTU {{mtu}} deja {{data}} bytes de datos por fragmento.",
+      "originalTitle": "Datagrama original",
+      "originalDescription": "20 bytes de cabecera + {{data}} bytes de datos",
+      "fragmentTitle": "Fragmento {{index}} de {{total}}",
+      "fragmentDescription": "{{data}} bytes de datos (bytes {{from}}–{{to}} del original)",
+      "offsetValue": "{{blocks}} ({{bytes}} B)",
+      "bytesValue": "{{bytes}} B",
+      "fields": {
+        "version": "Versión",
+        "ihl": "IHL",
+        "tos": "ToS",
+        "totalLength": "Longitud total",
+        "identification": "Identificación",
+        "reserved": "R",
+        "df": "DF",
+        "mf": "MF",
+        "fragmentOffset": "Desplazamiento del fragmento",
+        "ttl": "TTL",
+        "protocol": "Protocolo",
+        "checksum": "Suma de verificación",
+        "sourceIp": "IP origen",
+        "destinationIp": "IP destino"
+      },
+      "actions": {
+        "example": "Cargar ejemplo",
+        "generateExercises": "Generar ejercicios",
+        "clear": "Limpiar"
+      },
+      "errors": {
+        "totalLengthOutOfRange": "La longitud total debe estar entre {{min}} y {{max}} bytes: 20 de cabecera más al menos 1 de datos, en un campo de 16 bits (RFC 791, §3.1).",
+        "mtuOutOfRange": "El MTU debe estar entre {{min}} y {{max}} bytes: todo enlace debe transportar 68 bytes sin fragmentar (RFC 791, §3.2) y la longitud total es un campo de 16 bits (RFC 791, §3.1).",
+        "mtuNotMultipleOf8": "Con MTU {{mtu}} cada fragmento llevaría {{data}} bytes de datos, que no es múltiplo de 8: el desplazamiento del fragmento se mide en bloques de 8 bytes (RFC 791, §3.1).",
+        "invalidIdentification": "La identificación debe ser un entero entre 0 y {{max}}: es un campo de 16 bits (RFC 791, §3.1).",
+        "invalidTtl": "TTL debe ser un entero entre 0 y {{max}}: es un campo de 8 bits (RFC 791, §3.1).",
+        "invalidProtocol": "Protocolo debe ser un entero entre 0 y {{max}}: es un campo de 8 bits (RFC 791, §3.1).",
+        "invalidIp": "{{field}} debe tener cuatro octetos entre 0 y 255 (RFC 791, §3.1)."
+      },
+      "exercises": {
+        "count": "Un datagrama IPv4 de {{totalLength}} bytes (cabecera de 20 bytes, sin opciones) sale por un enlace con MTU de {{mtu}} bytes. ¿En cuántos fragmentos se divide?",
+        "offset": "Un datagrama IPv4 de {{totalLength}} bytes (cabecera de 20 bytes, sin opciones) sale por un enlace con MTU de {{mtu}} bytes. ¿Qué valor lleva el campo Desplazamiento del fragmento (Fragment Offset) del fragmento {{index}}?",
+        "totalLength": "Un datagrama IPv4 de {{totalLength}} bytes (cabecera de 20 bytes, sin opciones) sale por un enlace con MTU de {{mtu}} bytes. ¿Cuál es la longitud total del fragmento {{index}}?",
+        "data": "Un datagrama IPv4 de {{totalLength}} bytes (cabecera de 20 bytes, sin opciones) sale por un enlace con MTU de {{mtu}} bytes. ¿Cuántos bytes de datos lleva el fragmento {{index}}?",
+        "table": "Un datagrama IPv4 de {{totalLength}} bytes (cabecera de 20 bytes, sin opciones) sale por un enlace con MTU de {{mtu}} bytes. Completa la tabla de fragmentos: datos, longitud total, MF y desplazamiento de cada uno.",
+        "tableRow": "Fragmento {{index}}: datos {{data}} B, longitud total {{totalLength}} B, MF {{mf}}, desplazamiento {{offset}}"
+      }
+    },
     "protocolBuilder": {
       "title": "Crea tu Protocolo",
       "subtitle": "Diagrama de encabezado de protocolo genérico · esquema editable",
@@ -467,7 +548,8 @@
       "user": "Usuario"
     },
     "calculators": {
-      "ipv4": "Calculadora IPv4"
+      "ipv4": "Calculadora IPv4",
+      "fragmentation": "Fragmentación IPv4"
     },
     "presentations": {
       "mine": "Mis Presentaciones",

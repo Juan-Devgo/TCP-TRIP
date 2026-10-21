@@ -136,6 +136,87 @@
         "noHosts": "None: the prefix leaves no assignable hosts."
       }
     },
+    "ipv4Fragmentation": {
+      "title": "IPv4 Fragmentation",
+      "subtitle": "Total Length · MTU · Offset · MF",
+      "intro": "Type a datagram's total length and the MTU of the link it leaves on. If it does not fit, it is split into fragments: each one copies the 20-byte header and carries at most MTU − 20 bytes of data. Only Total Length, the MF flag and Fragment Offset change, and the offset counts in blocks of 8 bytes.",
+      "totalLength": "Total Length (bytes)",
+      "mtu": "MTU (bytes)",
+      "optional": "Other fields",
+      "identification": "Identification",
+      "sourceIp": "Source IP",
+      "destinationIp": "Destination IP",
+      "results": "Results",
+      "noData": "Type the total length and the MTU to see the fragments.",
+      "views": {
+        "label": "Results view",
+        "full": "Full simulation",
+        "table": "Table"
+      },
+      "table": {
+        "fragment": "Fragment",
+        "original": "Original",
+        "data": "Data (TL − 20)"
+      },
+      "verification": {
+        "title": "Verification",
+        "sum": "Σ data = {{expression}} = {{sum}} B",
+        "total": "{{sum}} B + 20 B header = {{total}} B",
+        "matches": "Matches the original Total Length ({{original}} B): no byte was lost or repeated.",
+        "mismatch": "Does not match the original Total Length ({{original}} B)."
+      },
+      "outdated": "Previous result: fix or complete the fields to update it.",
+      "showMore": "Show more ({{shown}} of {{total}})",
+      "quickEdit": "Quick edit of Total Length and MTU",
+      "backToTop": "Back to top",
+      "noFragmentation": "The {{totalLength}}-byte datagram fits the {{mtu}}-byte MTU: no fragmentation needed.",
+      "fragmentedInto_one": "Split into {{count}} fragment: an MTU of {{mtu}} leaves {{data}} data bytes per fragment.",
+      "fragmentedInto_other": "Split into {{count}} fragments: an MTU of {{mtu}} leaves {{data}} data bytes per fragment.",
+      "originalTitle": "Original datagram",
+      "originalDescription": "20 header bytes + {{data}} data bytes",
+      "fragmentTitle": "Fragment {{index}} of {{total}}",
+      "fragmentDescription": "{{data}} data bytes (bytes {{from}}–{{to}} of the original)",
+      "offsetValue": "{{blocks}} ({{bytes}} B)",
+      "bytesValue": "{{bytes}} B",
+      "fields": {
+        "version": "Version",
+        "ihl": "IHL",
+        "tos": "ToS",
+        "totalLength": "Total Length",
+        "identification": "Identification",
+        "reserved": "R",
+        "df": "DF",
+        "mf": "MF",
+        "fragmentOffset": "Fragment Offset",
+        "ttl": "TTL",
+        "protocol": "Protocol",
+        "checksum": "Checksum",
+        "sourceIp": "Source IP",
+        "destinationIp": "Destination IP"
+      },
+      "actions": {
+        "example": "Load example",
+        "generateExercises": "Generate exercises",
+        "clear": "Clear"
+      },
+      "errors": {
+        "totalLengthOutOfRange": "Total Length must be between {{min}} and {{max}} bytes: 20 header bytes plus at least 1 data byte, in a 16-bit field (RFC 791, §3.1).",
+        "mtuOutOfRange": "The MTU must be between {{min}} and {{max}} bytes: every link must carry 68 bytes without fragmenting (RFC 791, §3.2), and Total Length is a 16-bit field (RFC 791, §3.1).",
+        "mtuNotMultipleOf8": "With an MTU of {{mtu}} each fragment would carry {{data}} data bytes, which is not a multiple of 8: Fragment Offset counts in blocks of 8 bytes (RFC 791, §3.1).",
+        "invalidIdentification": "The identification must be an integer between 0 and {{max}}: it is a 16-bit field (RFC 791, §3.1).",
+        "invalidTtl": "TTL must be an integer between 0 and {{max}}: it is an 8-bit field (RFC 791, §3.1).",
+        "invalidProtocol": "Protocol must be an integer between 0 and {{max}}: it is an 8-bit field (RFC 791, §3.1).",
+        "invalidIp": "{{field}} must have four octets between 0 and 255 (RFC 791, §3.1)."
+      },
+      "exercises": {
+        "count": "A {{totalLength}}-byte IPv4 datagram (20-byte header, no options) leaves on a link with a {{mtu}}-byte MTU. How many fragments is it split into?",
+        "offset": "A {{totalLength}}-byte IPv4 datagram (20-byte header, no options) leaves on a link with a {{mtu}}-byte MTU. What value does the Fragment Offset field of fragment {{index}} carry?",
+        "totalLength": "A {{totalLength}}-byte IPv4 datagram (20-byte header, no options) leaves on a link with a {{mtu}}-byte MTU. What is the Total Length of fragment {{index}}?",
+        "data": "A {{totalLength}}-byte IPv4 datagram (20-byte header, no options) leaves on a link with a {{mtu}}-byte MTU. How many data bytes does fragment {{index}} carry?",
+        "table": "A {{totalLength}}-byte IPv4 datagram (20-byte header, no options) leaves on a link with a {{mtu}}-byte MTU. Fill in the fragment table: data, Total Length, MF and Fragment Offset of each one.",
+        "tableRow": "Fragment {{index}}: data {{data}} B, Total Length {{totalLength}} B, MF {{mf}}, offset {{offset}}"
+      }
+    },
     "protocolBuilder": {
       "title": "Build your Protocol",
       "subtitle": "Generic protocol header diagram · editable schema",
@@ -467,7 +548,8 @@
       "user": "User"
     },
     "calculators": {
-      "ipv4": "IPv4 Calculator"
+      "ipv4": "IPv4 Calculator",
+      "fragmentation": "IPv4 Fragmentation"
     },
     "presentations": {
       "mine": "My Presentations",
