@@ -1,5 +1,6 @@
 import { generateAsciiExercises } from "@/features/ascii-converter";
 import { generateIpv4Exercises } from "@/features/ipv4-calculator";
+import { generateChecksumExercises } from "@/features/ipv4-checksum";
 import { generateFragmentationExercises } from "@/features/ipv4-fragmentation";
 import { generateNumberBaseExercises } from "@/features/number-base-converter";
 import type { TFunction } from "i18next";
@@ -44,6 +45,11 @@ export const EXERCISE_TOOLS: readonly ExerciseTool[] = [
     id: "ipv4-fragmentation",
     titleKey: "tools.ipv4Fragmentation.title",
     generator: generateFragmentationExercises,
+  },
+  {
+    id: "ipv4-checksum",
+    titleKey: "tools.ipv4Checksum.title",
+    generator: generateChecksumExercises,
   },
 ];
 

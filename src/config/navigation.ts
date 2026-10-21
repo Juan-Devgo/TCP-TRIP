@@ -97,6 +97,12 @@ export const NAVIGATION = [
             // keep its one-bit flags legible.
             page: { wide: true },
           },
+          {
+            segment: "checksum",
+            titleKey: "sidebar.calculators.checksum",
+            // Same 32-bit grid, here with an input in every field.
+            page: { wide: true },
+          },
         ],
       },
     ],

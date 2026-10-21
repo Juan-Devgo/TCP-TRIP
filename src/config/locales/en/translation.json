@@ -218,6 +218,132 @@
         "tableRow": "Fragment {{index}}: data {{data}} B, Total Length {{totalLength}} B, MF {{mf}}, offset {{offset}}"
       }
     },
+    "ipv4Checksum": {
+      "title": "IPv4 Checksum",
+      "subtitle": "RFC 791 · RFC 1071 · One's complement sum",
+      "intro": "The IPv4 header checksum is the one's complement of the one's complement sum of its 10 16-bit words (RFC 791, §3.1; RFC 1071 details the procedure). The sender computes it with the Checksum field at 0000; the receiver sums the header as it arrived and, if nothing changed, gets 0000.",
+      "modes": {
+        "label": "Mode",
+        "calculate": "Calculate",
+        "verify": "Verify",
+        "calculateHint": "Calculate: you are the sender. With the Checksum field at 0000 the header's words are summed, and the complement of the result is the checksum that is sent.",
+        "verifyHint": "Verify: you are the receiver. The header is summed as it arrived, received checksum included; if it gives 0000 the header is intact, otherwise it is discarded."
+      },
+      "bytes": {
+        "toggle": "Show byte sequence",
+        "toggleHint": "See the header as the 20 bytes that travel, or paste them to fill in every field.",
+        "label": "Byte sequence",
+        "placeholder": "45 00 00 3c 1c 46 40 00 40 06 00 00 ac 10 0a 63 ac 10 0a 0c",
+        "hint": "Spaces, line breaks, “:” and the 0x prefix are ignored."
+      },
+      "fixed": "Fixed",
+      "checksumHint": "4 hex digits",
+      "flags": {
+        "df": "Don't Fragment (DF)",
+        "mf": "More Fragments (MF)"
+      },
+      "fields": {
+        "version": "Version",
+        "ihl": "IHL",
+        "tos": "ToS",
+        "totalLength": "Total Length",
+        "identification": "Identification",
+        "reserved": "R",
+        "df": "DF",
+        "mf": "MF",
+        "fragmentOffset": "Fragment Offset",
+        "ttl": "TTL",
+        "protocol": "Protocol",
+        "checksum": "Checksum",
+        "sourceIp": "Source IP",
+        "destinationIp": "Destination IP"
+      },
+      "results": "Procedure",
+      "noData": "Fill in Total Length, Identification, source IP and destination IP (or paste a header) to see the procedure.",
+      "outdated": "Previous result: fix or complete the fields to update it.",
+      "steps": {
+        "label": "Step {{step}}",
+        "words": {
+          "title": "16-bit words",
+          "description": "The header's hex is taken 4 digits at a time, in the order it travels: each hex digit is 4 bits, so 4 digits make a 16-bit word, 10 words in all. Under each one, the fields its bits come from.",
+          "word": "Word {{index}}",
+          "checksumCalculate": "Word 6 is the Checksum field itself. When calculating it is 0000: the checksum cannot add itself before it exists.",
+          "checksumNotZero": "Word 6 is the Checksum field and it is now {{value}}. To calculate it must be 0000; otherwise the result mixes an old checksum into the sum.",
+          "checksumVerify": "Word 6 is the received checksum ({{value}}). When verifying it is summed with the rest: if the header arrived intact, the folded sum is 0xffff."
+        },
+        "sum": {
+          "title": "Sum of the words",
+          "description": "The 10 words are added as hexadecimal numbers. The total can go past 16 bits: what overflows is the carry.",
+          "carry": "The sum is {{sum}}. The highlighted digits ({{carry}}) do not fit in 16 bits: they are the carry folded in step 3.",
+          "noCarry": "The sum is {{sum}} and fits in 16 bits: there is no carry to fold."
+        },
+        "fold": {
+          "title": "Folding the carry",
+          "why": "In one's complement the carry is not dropped: it is added back into the low 16 bits (end-around carry). That keeps the result independent of byte order and of the machine doing the sum (RFC 1071, §2).",
+          "none": "There was no carry: the sum is already 16 bits ({{value}}).",
+          "first": "First fold",
+          "again": "Second fold: the first one went past 16 bits again, so its carry is folded once more."
+        },
+        "complement": {
+          "title": "One's complement",
+          "calculate": "Every bit of the folded sum is flipped (0 → 1, 1 → 0). The result is the checksum the sender writes into the header.",
+          "verify": "Every bit of the folded sum is flipped. An intact header sums to 0xffff, whose complement is 0x0000."
+        }
+      },
+      "verdict": {
+        "calculated": {
+          "title": "This is the header's checksum",
+          "description": "It is the value the sender writes into the Checksum field before sending the datagram."
+        },
+        "checksumNotZero": {
+          "title": "To calculate, the Checksum field must be 0000",
+          "description": "It is now {{checksum}}, so the sum gives {{result}}, which is not this header's checksum. The sender calculates with the field at zero (RFC 791, §3.1)."
+        },
+        "alreadyCalculated": {
+          "title": "It looks like this header's checksum was already calculated",
+          "description": "With the Checksum field at {{checksum}} the sum gives 0x0000, which is what a correct header gives when verified. To calculate it again, the field must be 0000."
+        },
+        "accepted": {
+          "title": "The header is correct",
+          "description": "With the received checksum the folded sum is 0xffff and its complement 0x0000: the receiver accepts the header."
+        },
+        "rejected": {
+          "title": "It looks like the header got corrupted along the way (rejected)",
+          "description": "Verification gives {{result}} instead of 0x0000: some bit changed on the way. The receiver discards the datagram."
+        }
+      },
+      "actions": {
+        "example": "Load example",
+        "generateExercises": "Generate exercises",
+        "clear": "Clear",
+        "useChecksum": "Use this checksum",
+        "setZero": "Set to 0000"
+      },
+      "errors": {
+        "tosOutOfRange": "ToS must be between {{min}} and {{max}}: it is an 8-bit field (RFC 791, §3.1).",
+        "ttlOutOfRange": "TTL must be between {{min}} and {{max}}: it is an 8-bit field (RFC 791, §3.1).",
+        "protocolOutOfRange": "Protocol must be between {{min}} and {{max}}: it is an 8-bit field (RFC 791, §3.1).",
+        "totalLengthOutOfRange": "Total Length must be between {{min}} and {{max}} bytes: it includes the 20 header bytes and is a 16-bit field (RFC 791, §3.1).",
+        "identificationOutOfRange": "The identification must be between {{min}} and {{max}}: it is a 16-bit field (RFC 791, §3.1).",
+        "fragmentOffsetOutOfRange": "Fragment Offset must be between {{min}} and {{max}}: it is a 13-bit field (RFC 791, §3.1).",
+        "checksumNotHex": "Checksum must be exactly 4 hexadecimal digits: it is a 16-bit field (RFC 791, §3.1).",
+        "invalidIp": "{{field}} must have four octets between 0 and 255: an IPv4 address is 32 bits (RFC 791, §3.1).",
+        "pasteNotHex": "The pasted header has characters that are not hexadecimal (0–9, a–f): each header byte is written as two hex digits (RFC 791, §3.1).",
+        "pasteLength": "{{digits}} hex digits were read; a header without options is 20 bytes, that is 40 digits (RFC 791, §3.1).",
+        "pasteVersion": "The pasted header has Version {{value}}; only IPv4 headers, Version 4, are calculated (RFC 791, §3.1).",
+        "pasteIhl": "The pasted header has IHL {{value}} ({{bytes}} bytes); only headers without options are accepted, IHL 5 = 20 bytes (RFC 791, §3.1).",
+        "pasteReserved": "The pasted header has the reserved Flags bit set, and it must be 0 (RFC 791, §3.1)."
+      },
+      "exercises": {
+        "fold": "The sum of the 16-bit words of an IPv4 header is {{sum}}. Fold the carry in one's complement and complement the result: what is the checksum?",
+        "foldAnswer": "Fold: {{folds}} → {{folded}}; checksum: ~{{folded}} = {{checksum}}",
+        "calculate": "Calculate the checksum of this IPv4 header, whose Checksum field is 0000: {{header}}",
+        "calculateAnswer": "Checksum: {{checksum}}",
+        "verify": "A router receives this IPv4 header: {{header}}. Verify its checksum: does it accept or reject it?",
+        "verifyAccepted": "Accepted: verification gives {{result}}.",
+        "verifyRejected": "Rejected: verification gives {{result}} instead of 0x0000."
+      }
+    },
     "protocolBuilder": {
       "title": "Build your Protocol",
       "subtitle": "Generic protocol header diagram · editable schema",
@@ -550,7 +676,8 @@
     },
     "calculators": {
       "ipv4": "IPv4 Calculator",
-      "fragmentation": "IPv4 Fragmentation"
+      "fragmentation": "IPv4 Fragmentation",
+      "checksum": "IPv4 Checksum"
     },
     "presentations": {
       "mine": "My Presentations",

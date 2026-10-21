@@ -218,6 +218,132 @@
         "tableRow": "Fragmento {{index}}: datos {{data}} B, longitud total {{totalLength}} B, MF {{mf}}, desplazamiento {{offset}}"
       }
     },
+    "ipv4Checksum": {
+      "title": "Checksum IPv4",
+      "subtitle": "RFC 791 · RFC 1071 · Suma en complemento a uno",
+      "intro": "El checksum de la cabecera IPv4 es el complemento a uno de la suma en complemento a uno de sus 10 palabras de 16 bits (RFC 791, §3.1; el procedimiento lo detalla el RFC 1071). El emisor lo calcula con el campo Checksum en 0000; el receptor suma la cabecera tal como llegó y, si nada cambió, obtiene 0000.",
+      "modes": {
+        "label": "Modo",
+        "calculate": "Calcular",
+        "verify": "Verificar",
+        "calculateHint": "Calcular: eres el emisor. Con el campo Checksum en 0000 se suman las palabras de la cabecera y el complemento del resultado es el checksum que se envía.",
+        "verifyHint": "Verificar: eres el receptor. Se suma la cabecera tal como llegó, con el checksum recibido incluido; si da 0000 la cabecera está íntegra, si no, se descarta."
+      },
+      "bytes": {
+        "toggle": "Mostrar secuencia de bytes",
+        "toggleHint": "Mira la cabecera como los 20 bytes que viajan, o pégalos para llenar todos los campos.",
+        "label": "Secuencia de bytes",
+        "placeholder": "45 00 00 3c 1c 46 40 00 40 06 00 00 ac 10 0a 63 ac 10 0a 0c",
+        "hint": "Se ignoran espacios, saltos de línea, «:» y el prefijo 0x."
+      },
+      "fixed": "Fijo",
+      "checksumHint": "4 dígitos hex",
+      "flags": {
+        "df": "Don't Fragment (DF)",
+        "mf": "More Fragments (MF)"
+      },
+      "fields": {
+        "version": "Version",
+        "ihl": "IHL",
+        "tos": "ToS",
+        "totalLength": "Total Length",
+        "identification": "Identificación",
+        "reserved": "R",
+        "df": "DF",
+        "mf": "MF",
+        "fragmentOffset": "Fragment Offset",
+        "ttl": "TTL",
+        "protocol": "Protocolo",
+        "checksum": "Checksum",
+        "sourceIp": "IP origen",
+        "destinationIp": "IP destino"
+      },
+      "results": "Procedimiento",
+      "noData": "Completa Total Length, Identificación, IP origen e IP destino (o pega una cabecera) para ver el procedimiento.",
+      "outdated": "Resultado anterior: corrige o completa los campos para actualizarlo.",
+      "steps": {
+        "label": "Paso {{step}}",
+        "words": {
+          "title": "Palabras de 16 bits",
+          "description": "El hexadecimal de la cabecera se toma de 4 en 4 dígitos, en el orden en que viaja: cada dígito hexadecimal son 4 bits, así que 4 dígitos forman una palabra de 16 bits, 10 palabras en total. Debajo de cada una, los campos de donde salen sus bits.",
+          "word": "Palabra {{index}}",
+          "checksumCalculate": "La palabra 6 es el propio campo Checksum. Al calcular vale 0000: el checksum no puede sumarse a sí mismo antes de existir.",
+          "checksumNotZero": "La palabra 6 es el campo Checksum y ahora vale {{value}}. Para calcular debe valer 0000: si no, el resultado mezcla un checksum viejo con la suma.",
+          "checksumVerify": "La palabra 6 es el checksum recibido ({{value}}). Al verificar se suma junto con el resto: si la cabecera llegó intacta, la suma plegada da 0xffff."
+        },
+        "sum": {
+          "title": "Suma de las palabras",
+          "description": "Se suman las 10 palabras como números hexadecimales. El total puede pasar de 16 bits: eso que sobra es el acarreo.",
+          "carry": "La suma es {{sum}}. Los dígitos resaltados ({{carry}}) no caben en 16 bits: son el acarreo que se pliega en el paso 3.",
+          "noCarry": "La suma es {{sum}} y cabe en 16 bits: no hay acarreo que plegar."
+        },
+        "fold": {
+          "title": "Plegado del acarreo",
+          "why": "En complemento a uno el acarreo no se descarta: se suma de vuelta a los 16 bits inferiores (end-around carry). Así el resultado no depende del orden de los bytes ni de la máquina que suma (RFC 1071, §2).",
+          "none": "No hubo acarreo: la suma ya es de 16 bits ({{value}}).",
+          "first": "Primer plegado",
+          "again": "Segundo plegado: el primero volvió a pasar de 16 bits, así que su acarreo se pliega otra vez."
+        },
+        "complement": {
+          "title": "Complemento a uno",
+          "calculate": "Se invierte cada bit de la suma plegada (0 → 1, 1 → 0). El resultado es el checksum que el emisor escribe en la cabecera.",
+          "verify": "Se invierte cada bit de la suma plegada. Una cabecera intacta suma 0xffff, cuyo complemento es 0x0000."
+        }
+      },
+      "verdict": {
+        "calculated": {
+          "title": "Este es el checksum de la cabecera",
+          "description": "Es el valor que el emisor escribe en el campo Checksum antes de enviar el datagrama."
+        },
+        "checksumNotZero": {
+          "title": "Para calcular, el campo Checksum debe valer 0000",
+          "description": "Ahora vale {{checksum}}, así que la suma da {{result}}, que no es el checksum de esta cabecera. El emisor calcula con el campo en cero (RFC 791, §3.1)."
+        },
+        "alreadyCalculated": {
+          "title": "Parece que el checksum de esta cabecera ya fue calculado",
+          "description": "Con el campo Checksum en {{checksum}} la suma da 0x0000, que es lo que da una cabecera correcta al verificarla. Para calcularlo de nuevo, el campo debe valer 0000."
+        },
+        "accepted": {
+          "title": "La cabecera está correcta",
+          "description": "Con el checksum recibido la suma plegada da 0xffff y su complemento 0x0000: el receptor acepta la cabecera."
+        },
+        "rejected": {
+          "title": "Parece que la cabecera se corrompió en el camino (rechazada)",
+          "description": "La verificación da {{result}} en lugar de 0x0000: algún bit cambió en el camino. El receptor descarta el datagrama."
+        }
+      },
+      "actions": {
+        "example": "Cargar ejemplo",
+        "generateExercises": "Generar ejercicios",
+        "clear": "Limpiar",
+        "useChecksum": "Usar este checksum",
+        "setZero": "Poner en 0000"
+      },
+      "errors": {
+        "tosOutOfRange": "ToS debe estar entre {{min}} y {{max}}: es un campo de 8 bits (RFC 791, §3.1).",
+        "ttlOutOfRange": "TTL debe estar entre {{min}} y {{max}}: es un campo de 8 bits (RFC 791, §3.1).",
+        "protocolOutOfRange": "Protocolo debe estar entre {{min}} y {{max}}: es un campo de 8 bits (RFC 791, §3.1).",
+        "totalLengthOutOfRange": "Total Length debe estar entre {{min}} y {{max}} bytes: incluye los 20 bytes de cabecera y es un campo de 16 bits (RFC 791, §3.1).",
+        "identificationOutOfRange": "La identificación debe estar entre {{min}} y {{max}}: es un campo de 16 bits (RFC 791, §3.1).",
+        "fragmentOffsetOutOfRange": "Fragment Offset debe estar entre {{min}} y {{max}}: es un campo de 13 bits (RFC 791, §3.1).",
+        "checksumNotHex": "Checksum debe tener exactamente 4 dígitos hexadecimales: es un campo de 16 bits (RFC 791, §3.1).",
+        "invalidIp": "{{field}} debe tener cuatro octetos entre 0 y 255: una dirección IPv4 es de 32 bits (RFC 791, §3.1).",
+        "pasteNotHex": "La cabecera pegada tiene caracteres que no son hexadecimales (0–9, a–f): cada byte de la cabecera se escribe con dos dígitos hex (RFC 791, §3.1).",
+        "pasteLength": "Se leyeron {{digits}} dígitos hexadecimales; una cabecera sin opciones mide 20 bytes, es decir 40 dígitos (RFC 791, §3.1).",
+        "pasteVersion": "La cabecera pegada tiene Version {{value}}; solo se calculan cabeceras IPv4, de Version 4 (RFC 791, §3.1).",
+        "pasteIhl": "La cabecera pegada tiene IHL {{value}} ({{bytes}} bytes); solo se admiten cabeceras sin opciones, IHL 5 = 20 bytes (RFC 791, §3.1).",
+        "pasteReserved": "La cabecera pegada tiene encendido el bit reservado de Flags, que debe valer 0 (RFC 791, §3.1)."
+      },
+      "exercises": {
+        "fold": "La suma de las palabras de 16 bits de una cabecera IPv4 es {{sum}}. Pliega el acarreo en complemento a uno y complementa el resultado: ¿cuál es el checksum?",
+        "foldAnswer": "Plegado: {{folds}} → {{folded}}; checksum: ~{{folded}} = {{checksum}}",
+        "calculate": "Calcula el checksum de esta cabecera IPv4, cuyo campo Checksum vale 0000: {{header}}",
+        "calculateAnswer": "Checksum: {{checksum}}",
+        "verify": "Un router recibe esta cabecera IPv4: {{header}}. Verifica su checksum: ¿la acepta o la rechaza?",
+        "verifyAccepted": "Se acepta: la verificación da {{result}}.",
+        "verifyRejected": "Se rechaza: la verificación da {{result}} en lugar de 0x0000."
+      }
+    },
     "protocolBuilder": {
       "title": "Crea tu Protocolo",
       "subtitle": "Diagrama de encabezado de protocolo genérico · esquema editable",
@@ -550,7 +676,8 @@
     },
     "calculators": {
       "ipv4": "Calculadora IPv4",
-      "fragmentation": "Fragmentación IPv4"
+      "fragmentation": "Fragmentación IPv4",
+      "checksum": "Checksum IPv4"
     },
     "presentations": {
       "mine": "Mis Presentaciones",

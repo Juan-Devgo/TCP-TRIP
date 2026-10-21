@@ -5,6 +5,7 @@ import { TabScopeProvider, useTabs } from "@/context/TabsProvider";
 import { AsciiConverter } from "@/features/ascii-converter";
 import { AssignExercise, MyCourses } from "@/features/classroom";
 import { IPv4Calculator } from "@/features/ipv4-calculator";
+import { IPv4Checksum } from "@/features/ipv4-checksum";
 import { IPv4Fragmentation } from "@/features/ipv4-fragmentation";
 import { NumberBaseConverter } from "@/features/number-base-converter";
 import { MyPresentations, PresentationEditor } from "@/features/presentation-editor";
@@ -31,6 +32,7 @@ const PAGE_COMPONENTS: Partial<Record<PagePath, ComponentType>> = {
   "/tools/converters/ascii": AsciiConverter,
   "/tools/calculators/ipv4": IPv4Calculator,
   "/tools/calculators/fragmentation": IPv4Fragmentation,
+  "/tools/calculators/checksum": IPv4Checksum,
   "/generic-protocol/new": ProtocolBuilder,
   "/theory/presentations": TheoryPresentationPage,
   "/teacher/presentations/new": PresentationEditor,
