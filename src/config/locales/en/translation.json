@@ -4,7 +4,8 @@
     "copied": "Copied",
     "increment": "Increase",
     "decrement": "Decrease",
-    "loading": "Loading…"
+    "loading": "Loading…",
+    "backToTop": "Back to top"
   },
   "tools": {
     "numberBaseConverter": {

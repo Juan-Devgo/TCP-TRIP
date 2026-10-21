@@ -46,6 +46,10 @@
   --color-secondary-ink: var(--secondary-ink);
   --color-tertiary-ink: var(--tertiary-ink);
   --color-quaternary-ink: var(--quaternary-ink);
+  /* Status inks: a verdict's colour, readable as text and as a 10% tint.
+     Yellow warns, green confirms; red stays `destructive`. */
+  --color-warning-ink: var(--warning-ink);
+  --color-success-ink: var(--success-ink);
   /* Neutral keypad key: a gray that stays visible against the `sidebar`
      surface the calculator sits on (which `muted`/`accent` do not, in light
      mode). Light theme = light gray, dark theme = dark gray. */
@@ -135,6 +139,9 @@
   --secondary-ink: #7F00FF;
   --tertiary-ink: #00803A;
   --quaternary-ink: #604080;
+  /* Dark yellow 5.6:1 · green 5.1:1 on white. */
+  --warning-ink: #7A5F00;
+  --success-ink: #00803A;
 }
 
 .dark {
@@ -180,6 +187,8 @@
   --secondary-ink: #B388FF;
   --tertiary-ink: #00FF54;
   --quaternary-ink: #B39DDB;
+  --warning-ink: #FACC15;
+  --success-ink: #00FF54;
 }
 
 @layer base {
