@@ -102,89 +102,6 @@ El rol vive en `publicMetadata.role` de Clerk y viaja dentro del token de sesió
 
 ---
 
-## Puesta en marcha
-
-### Requisitos
-
-- [Bun](https://bun.sh) (no se usa npm, yarn, pnpm ni Node).
-- Una aplicación de [Clerk](https://clerk.com).
-- Opcional: un proyecto de Google Cloud con Classroom API y Drive API para el panel de cursos.
-
-### Instalación
-
-```sh
-bun install
-```
-
-Crear un `.env` en la raíz (Bun lo carga solo):
-
-```sh
-PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...   # se incrusta en el cliente
-CLERK_SECRET_KEY=sk_test_...               # solo servidor, nunca con prefijo PUBLIC_
-# Opcionales
-DATABASE_PATH=data/tcp-trip.sqlite         # valor por defecto
-APP_ORIGIN=https://mi-dominio              # enlaces adjuntos a Classroom detrás de un proxy
-PORT=3000
-```
-
-En el dashboard de Clerk (*Sessions → Customize session token*) agregar `{ "metadata": "{{user.public_metadata}}" }` para que el rol viaje en el token. Para Google Classroom, seguir la sección *Configuración requerida* de [`docs/exercises/ClassroomIntegration.md`](docs/exercises/ClassroomIntegration.md).
-
-### Comandos
-
-```sh
-bun run dev          # servidor de desarrollo con HMR (puerto 3000)
-bun run start        # modo producción sin HMR
-bun run build        # empaqueta servidor + SPA en dist/ (ejecutar: cd dist && bun index.js)
-bun run typecheck    # tsc --noEmit
-bun test             # todas las pruebas
-bun test ruta/al/archivo.test.ts
-bun run ui <componente>   # agrega un componente de shadcn
-```
-
-### Teoría base del modelo TCP/IP
-
-Publica el modelo y sus cuatro capas por el flujo real (el profesor guarda y envía, el administrador aprueba en la sección *Modelo TCP/IP*). Es idempotente.
-
-```sh
-bun run seed:theory --teacher <id de Clerk> --admin <id de Clerk> --author "Nombre Apellido"
-```
-
-### HTTPS opcional
-
-El servidor sirve HTTPS directamente si `TLS_KEY_PATH` y `TLS_CERT_PATH` apuntan a archivos PEM legibles (opcionales: `TLS_CA_PATH`, `TLS_PASSPHRASE`, `TLS_SERVER_NAME`). Sin ellas, sirve HTTP.
-
----
-
-## Arquitectura
-
-Un solo proceso Bun sirve la API (`/api/*`) y la SPA de React; no hay servidor de frontend aparte.
-
-```
-src/
-├── api/          rutas del servidor, guardas de rol, contrato de respuestas, logs
-├── components/   common/ (compartidos), layouts/ (shell y pestañas), ui/ (shadcn)
-├── config/       árbol de navegación, i18n y traducciones, registro de herramientas con ejercicios
-├── context/      providers de React (pestañas, tema, acciones, modo presentación)
-├── db/           conexión SQLite, esquema, un dominio por carpeta (queries → DAO → repositorio), seeds
-├── features/     una carpeta por herramienta o módulo, importada solo por su barrel
-├── hooks/        hooks compartidos
-├── lib/          lógica pura transversal: pestañas, PDF, ejercicios, contratos cliente/servidor
-├── pages/        inicio, 404, protocolo compartido
-└── services/     clientes de la API
-```
-
-Decisiones destacadas:
-
-- **Una sola fuente de navegación** (`src/config/navigation.ts`): barra lateral, pestañas, migas de pan y el tipo `PagePath` se derivan de un mismo árbol; una ruta mal escrita es un error de compilación.
-- **Funcionalidades aisladas**: una *feature* nunca importa a otra; lo compartido sube a `lib/`, `components/common/` o `hooks/`.
-- **Sin librería de estado global**: estado local en cada herramienta (las pestañas inactivas siguen montadas), un reductor puro y probado para las pestañas, contextos acotados y la API para los datos del servidor.
-- **La propiedad vive en el `WHERE`**: cada consulta de un dueño filtra por el id de Clerk verificado en el servidor; nunca se toma de la petición.
-- **Contenido publicado congelado**: lo que lee el estudiante es una copia aprobada del documento, sin notas, independiente del borrador del profesor. Las imágenes de las diapositivas se guardan como BLOB en SQLite (el archivo de la base es todo el respaldo) y se rechaza SVG.
-
-Las guías de cada área están en [`CLAUDE.md`](CLAUDE.md) y en `docs/`.
-
----
-
 ## Documentación
 
 | Área | Documento |
@@ -201,12 +118,6 @@ Las guías de cada área están en [`CLAUDE.md`](CLAUDE.md) y en `docs/`.
 | Despliegue | [`docs/deploy/Railway.md`](docs/deploy/Railway.md) |
 
 Las historias de usuario (`US-###`) están en español y explicitan el valor para el estudiante y para el profesor.
-
----
-
-## Despliegue
-
-Imagen Docker de dos etapas: `bun run build` empaqueta servidor y SPA en `dist/`, y la imagen final ejecuta solo esa carpeta. Railway construye con el `Dockerfile`, comprueba `/api/health` y guarda SQLite en un volumen montado en `/app/data` (una sola réplica). Las variables `PUBLIC_*` se incrustan durante el build. Pasos completos en [`docs/deploy/Railway.md`](docs/deploy/Railway.md).
 
 ---
 
