@@ -38,7 +38,7 @@ const GATE_COPY = {
  * data anyway (`authorOnly` / `adminOnly` in `src/api/guards.ts`), so this is
  * a courtesy, not the lock.
  */
-export function RoleGate({ role: required, children }: { role: GatedRole; children: React.ReactNode }) {
+export function RoleGate({ role: required, children }: Readonly<{ role: GatedRole; children: React.ReactNode }>) {
   const { t } = useTranslation();
   const { isSignedIn } = useAuth();
   const { role, isLoaded } = useAppRole();
@@ -78,11 +78,11 @@ export function RoleGate({ role: required, children }: { role: GatedRole; childr
 }
 
 /** A teacher page: the editors, exercise sets and Classroom. */
-export function TeacherGate({ children }: { children: React.ReactNode }) {
+export function TeacherGate({ children }: Readonly<{ children: React.ReactNode }>) {
   return <RoleGate role="teacher">{children}</RoleGate>;
 }
 
 /** An administrator page: the review queue and the Theory menu builder. */
-export function AdminGate({ children }: { children: React.ReactNode }) {
+export function AdminGate({ children }: Readonly<{ children: React.ReactNode }>) {
   return <RoleGate role="admin">{children}</RoleGate>;
 }
