@@ -602,7 +602,16 @@
   "home": {
     "title": "TCP-TRIP",
     "subtitle": "Open a tool to start. Each one keeps its own tab, so you can carry a result from one to the next.",
-    "hint": "Closing a tab discards what you typed in it."
+    "hint": "Closing a tab discards what you typed in it.",
+    "featured": {
+      "title": "Suggested tools",
+      "numberBases": "Convert values between binary, octal, decimal and hexadecimal.",
+      "ascii": "Turn text into ASCII or UTF-8 codes and back.",
+      "ipv4": "Find an address's network, broadcast and hosts, and split it into subnets.",
+      "fragmentation": "Split a datagram by MTU and inspect each fragment.",
+      "checksum": "Compute and verify an IPv4 header checksum step by step.",
+      "protocolBuilder": "Design your own protocol header, field by field."
+    }
   },
   "page": {
     "pending": "This page is not built yet.",
@@ -1490,6 +1499,13 @@
         "missing": "That no longer exists. The menu was reloaded.",
         "conflict": "Not possible: the presentation is not published, it is already in the menu, or the section is full."
       }
+    }
+  },
+  "admin": {
+    "gate": {
+      "title": "Administrators only",
+      "notAdmin": "This section is for administrators. If you need access, ask an administrator.",
+      "signedOut": "Sign in with an administrator account to use this section."
     }
   }
 }

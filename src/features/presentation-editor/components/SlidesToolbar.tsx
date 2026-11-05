@@ -240,7 +240,7 @@ export function SlidesToolbar({
         </Button>
       </Tip>
 
-      <div className="ml-auto flex items-center gap-1">
+      <div className="ml-auto flex flex-wrap items-center gap-1">
         <Menubar className="border-none">
           <MenubarMenu>
             <MenubarTrigger>{t("presentations.editor.menus.file")}</MenubarTrigger>

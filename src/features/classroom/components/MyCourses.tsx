@@ -12,7 +12,7 @@ import {
   Users,
 } from "lucide-react";
 
-import { TeacherGate } from "@/components/common/TeacherGate";
+import { TeacherGate } from "@/components/common/RoleGate";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";

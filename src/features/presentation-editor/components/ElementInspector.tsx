@@ -82,8 +82,8 @@ export function ElementInspector({
     // Beside the canvas the panel is exactly as tall as the board and scrolls
     // inside it: the inner column is taken out of flow, so a long form never
     // stretches the row. Wrapped under the canvas, a max height does the same.
-    <aside className="relative w-72 shrink-0 xl:self-stretch">
-      <div className="flex max-h-96 flex-col gap-6 overflow-y-auto pr-2 xl:absolute xl:inset-0 xl:max-h-none">
+    <aside className="relative w-72 shrink-0 @3xl:self-stretch">
+      <div className="flex max-h-96 flex-col gap-6 overflow-y-auto pr-2 @3xl:absolute @3xl:inset-0 @3xl:max-h-none">
         <section>
           <h3 className="mt-0 mb-2 text-sm font-semibold">
             {t("presentations.editor.elementSection")}

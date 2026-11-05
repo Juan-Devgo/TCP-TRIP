@@ -13,6 +13,7 @@ import {
   Trash2,
 } from "lucide-react";
 
+import { TeacherGate } from "@/components/common/RoleGate";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/toast";
@@ -36,6 +37,13 @@ import { cn } from "@/lib/utils";
 const BASE_PATH = "/teacher/presentations/mine";
 const NEW_PATH = "/teacher/presentations/new";
 
+/**
+ * The listing's column. The tab panel is full width because the editor this
+ * tab also hosts needs every pixel; the listing is not the editor, so it sits
+ * in the same centred column as `Crear ejercicios`.
+ */
+const LIST_COLUMN = "mx-auto w-full max-w-[42em] px-2";
+
 /** How the listing is laid out: one grid by last edit, or one per topic. */
 type ListView = "recent" | "topic";
 
@@ -52,6 +60,14 @@ type State =
   | { status: "ready"; presentations: SavedPresentation[] }
   | { status: "error" };
 
+export function MyPresentations() {
+  return (
+    <TeacherGate>
+      <PresentationLibrary />
+    </TeacherGate>
+  );
+}
+
 /**
  * `Mis Presentaciones`: everything this teacher has written, and the editor for
  * whichever one is open.
@@ -61,7 +77,7 @@ type State =
  * history). That gives the URL, the breadcrumb and the per-tab back button for
  * free, and keeps one editor open at a time instead of one per draft.
  */
-export function MyPresentations() {
+function PresentationLibrary() {
   const { t } = useTranslation();
   const pathname = useTabPath();
   const navigate = useNavigate();
@@ -146,7 +162,7 @@ export function MyPresentations() {
 
     if (!draft) {
       return (
-        <div className="flex flex-col gap-3">
+        <div className={cn(LIST_COLUMN, "flex flex-col gap-3 py-6")}>
           <p className="m-0">{t("presentations.mine.notFound")}</p>
           <Button variant="outline" className="self-start" onClick={() => navigate(BASE_PATH)}>
             <ArrowLeft />
@@ -188,16 +204,17 @@ export function MyPresentations() {
     navigate(`${BASE_PATH}/${presentation.id}`);
 
   return (
-    <section className="flex flex-col gap-5">
-      <div className="flex items-center justify-between gap-2">
-        <h2 className="m-0">{t("presentations.mine.title")}</h2>
-        <Button variant="outline" onClick={newPresentation}>
+    <section className={cn(LIST_COLUMN, "flex flex-col gap-6 py-6")}>
+      <header className="flex flex-wrap items-start justify-between gap-x-4 gap-y-3">
+        <div className="flex min-w-0 flex-1 basis-64 flex-col gap-1">
+          <h1 className="m-0">{t("presentations.mine.title")}</h1>
+          <p className="text-muted-foreground m-0">{t("presentations.mine.intro")}</p>
+        </div>
+        <Button className="shrink-0" onClick={newPresentation}>
           <Plus />
           {t("presentations.mine.new")}
         </Button>
-      </div>
-
-      <p className="text-muted-foreground m-0 text-sm">{t("presentations.mine.intro")}</p>
+      </header>
 
       {state.status === "loading" && (
         <p className="text-muted-foreground m-0">{t("common.loading")}</p>
@@ -266,7 +283,7 @@ function CardGrid({
   onDelete: (presentation: SavedPresentation) => void;
 }) {
   return (
-    <ul className="m-0 flex list-none flex-wrap gap-3 p-0">
+    <ul className="m-0 grid list-none grid-cols-[repeat(auto-fill,minmax(12rem,1fr))] gap-3 p-0">
       {presentations.map((presentation) => (
         <PresentationCard
           key={presentation.id}
@@ -304,7 +321,7 @@ function PresentationCard({
   const edited = new Date(presentation.updatedAt);
 
   return (
-    <li className="bg-card text-card-foreground border-border hover:border-primary has-[button:focus-visible]:ring-ring/50 relative m-0 flex aspect-square w-56 flex-col gap-2 rounded-xl border p-3 transition-colors has-[button:focus-visible]:ring-[3px]">
+    <li className="bg-card text-card-foreground border-border hover:border-primary has-[button:focus-visible]:ring-ring/50 relative m-0 flex aspect-square min-w-0 flex-col gap-2 rounded-xl border p-3 transition-colors has-[button:focus-visible]:ring-[3px]">
       <div className="flex items-start justify-between gap-2">
         <span className="bg-muted text-muted-foreground flex size-8 shrink-0 items-center justify-center rounded-lg">
           <ModeIcon className="size-4" />
@@ -382,7 +399,7 @@ function EmptyPresentations({ onNew }: { onNew: () => void }) {
   const { t } = useTranslation();
 
   return (
-    <section className="flex min-h-[60vh] flex-col items-center justify-center gap-3 text-center">
+    <section className="mx-auto flex min-h-[60vh] max-w-[42em] flex-col items-center justify-center gap-3 text-center">
       <span className="bg-muted text-muted-foreground flex size-14 items-center justify-center rounded-2xl">
         <Presentation className="size-7" />
       </span>

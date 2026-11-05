@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router";
 
 import { useIsTabActive, useTabPath } from "@/context/TabsProvider";
@@ -28,5 +28,7 @@ export function usePageIntent(param: string): { value: string | null; consume: (
     navigate(`${location.pathname}${search ? `?${search}` : ""}`, { replace: true });
   }, [location.pathname, location.search, navigate, param]);
 
-  return { value, consume };
+  // Callers list the whole object in effect deps: a fresh one each render
+  // would re-run their effect on every render until the navigation lands.
+  return useMemo(() => ({ value, consume }), [value, consume]);
 }

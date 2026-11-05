@@ -1,9 +1,6 @@
 import { AppSidebar } from "@/components/common/AppSidebar";
 import { AppHeader } from "@/components/layouts/AppHeader";
 import { ContentToolbar } from "@/components/layouts/ContentToolbar";
-import { findPage } from "@/config/navigation";
-import { useTabs } from "@/context/TabsProvider";
-import { cn } from "@/lib/utils";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -13,11 +10,6 @@ interface MainLayoutProps {
 }
 
 export function MainLayout({ className, children }: MainLayoutProps) {
-  const { activeTab } = useTabs();
-  // A canvas page (the protocol diagram) drops the reading-width column; only
-  // the tab on screen can decide it, since the hidden ones stay mounted here.
-  const wide = activeTab ? Boolean(findPage(activeTab.rootPath)?.wide) : false;
-
   return (
     <div className={className}>
       <SidebarProvider>
@@ -28,13 +20,10 @@ export function MainLayout({ className, children }: MainLayoutProps) {
               top-right corner, outside the reading-width constraint below. */}
           <ContentToolbar />
           {/* typeset is scoped to the content only: its `ul`/`li` rules would
-              otherwise put list markers on the sidebar menus. */}
-          <main
-            className={cn(
-              "typeset typeset-docs m-auto w-full",
-              wide ? "max-w-none px-4" : "max-w-[42em]",
-            )}
-          >
+              otherwise put list markers on the sidebar menus. Width and
+              padding are per page (`src/config/pageLayout.ts`), set by
+              `TabHost` on each tab panel. */}
+          <main className="typeset typeset-docs m-auto w-full">
             <TooltipProvider>
               {children}
             </TooltipProvider>

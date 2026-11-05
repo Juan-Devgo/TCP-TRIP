@@ -8,7 +8,7 @@ import {
   UserButton,
   useUser,
 } from "@clerk/clerk-react"
-import { ChevronDown, Network } from "lucide-react"
+import { ChevronDown } from "lucide-react"
 
 import {
   Sidebar,
@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/collapsible"
 import { Button } from "@/components/ui/button"
 
+import logoMark from "@/assets/logo-mark.svg"
 import { TheoryIcon } from "@/components/common/TheoryIcon"
 import { NAV_TREE, isVisibleTo, type NavItem } from "@/config/navigation"
 import { useAppRole } from "@/hooks/useAppRole"
@@ -80,9 +81,7 @@ export function AppSidebar() {
               className="gap-3"
               render={<Link to="/" className="no-underline" />}
             >
-              <span className="flex aspect-square size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <Network className="size-5" />
-              </span>
+              <img src={logoMark} alt="" className="size-9 shrink-0" />
               <span className="grid flex-1 leading-tight">
                 <span className="font-mono text-base font-semibold tracking-tight">
                   TCP<span className="text-primary-ink">-TRIP</span>

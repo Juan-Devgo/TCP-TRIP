@@ -37,10 +37,10 @@ export type NavNode = {
   /** Sidebar icon. Groups (depth 0) don't take one. */
   readonly icon?: LucideIcon;
   /**
-   * Present = this node opens as a tab. `{ wide: true }` opts the page out of
-   * the reading-width column (a canvas page, e.g. the protocol diagram).
+   * Present = this node opens as a tab. Its width and padding are not set
+   * here: they live in `PAGE_LAYOUT` (`src/config/pageLayout.ts`).
    */
-  readonly page?: true | { readonly wide: true };
+  readonly page?: true;
   /**
    * Present = a branch: a sidebar group (depth 0) or a collapsible section
    * (depth 1). An empty array is a section that has no pages yet — it renders
@@ -93,15 +93,12 @@ export const NAVIGATION = [
           {
             segment: "fragmentation",
             titleKey: "sidebar.calculators.fragmentation",
-            // The 32-bit header grid needs more than the reading column to
-            // keep its one-bit flags legible.
-            page: { wide: true },
+            page: true,
           },
           {
             segment: "checksum",
             titleKey: "sidebar.calculators.checksum",
-            // Same 32-bit grid, here with an input in every field.
-            page: { wide: true },
+            page: true,
           },
         ],
       },
@@ -152,15 +149,12 @@ export const NAVIGATION = [
           {
             segment: "new",
             titleKey: "sidebar.presentations.new",
-            // A slide canvas needs the whole content column, like the protocol
-            // diagram does.
-            page: { wide: true },
+            page: true,
           },
           {
             segment: "mine",
             titleKey: "sidebar.presentations.mine",
-            // The card grid, and the same editor as "new" once a draft is open.
-            page: { wide: true },
+            page: true,
           },
         ],
       },
@@ -179,9 +173,7 @@ export const NAVIGATION = [
         icon: GraduationCap,
         children: [
           { segment: "mine", titleKey: "sidebar.courses.mine", page: true },
-          // Title, instructions, attachments on the left and the course
-          // settings on the right: wider than a reading column.
-          { segment: "assign", titleKey: "sidebar.courses.assign", page: { wide: true } },
+          { segment: "assign", titleKey: "sidebar.courses.assign", page: true },
         ],
       },
     ],
@@ -229,7 +221,7 @@ export const NAVIGATION = [
         segment: "new",
         titleKey: "sidebar.protocol.builder",
         icon: Hammer,
-        page: { wide: true },
+        page: true,
       },
       {
         segment: "mine",
@@ -289,8 +281,6 @@ export type NavItem = {
 export type PageDefinition = {
   path: string;
   titleKey: string;
-  /** Opts the page out of the reading-width column. `MainLayout` reads it. */
-  wide?: true;
   /** Roles the sidebar offers the page to. Absent = everyone. See `NavNode`. */
   roles?: readonly AppRole[];
 };
@@ -306,7 +296,6 @@ function build(nodes: readonly NavNode[], prefix: string): NavItem[] {
         ? {
             path,
             titleKey: node.titleKey,
-            ...(node.page !== true && node.page.wide ? { wide: true as const } : {}),
             ...(node.roles ? { roles: node.roles } : {}),
           }
         : null,

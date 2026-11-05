@@ -110,7 +110,7 @@ export function CanvasContextMenu({
 
   return (
     <ContextMenu>
-      <ContextMenuTrigger className="w-full">{children}</ContextMenuTrigger>
+      <ContextMenuTrigger className="size-full">{children}</ContextMenuTrigger>
       <ContextMenuContent className="min-w-56">
         {target.kind === "board" && (
           <>

@@ -602,7 +602,16 @@
   "home": {
     "title": "TCP-TRIP",
     "subtitle": "Abre una herramienta para empezar. Cada una vive en su propia pestaña, así puedes llevar un resultado de una a otra.",
-    "hint": "Cerrar una pestaña descarta lo que hayas escrito en ella."
+    "hint": "Cerrar una pestaña descarta lo que hayas escrito en ella.",
+    "featured": {
+      "title": "Herramientas sugeridas",
+      "numberBases": "Convierte valores entre binario, octal, decimal y hexadecimal.",
+      "ascii": "Pasa texto a códigos ASCII o UTF-8 y de vuelta.",
+      "ipv4": "Halla la red, el broadcast y los hosts de una dirección, y divide en subredes.",
+      "fragmentation": "Parte un datagrama según el MTU y revisa cada fragmento.",
+      "checksum": "Calcula y verifica el checksum de una cabecera IPv4 paso a paso.",
+      "protocolBuilder": "Diseña el encabezado de tu propio protocolo campo a campo."
+    }
   },
   "page": {
     "pending": "Esta página aún no está construida.",
@@ -1490,6 +1499,13 @@
         "missing": "Eso ya no existe. Se recargó el menú.",
         "conflict": "No se puede: la presentación no está publicada, ya está en el menú, o la sección está llena."
       }
+    }
+  },
+  "admin": {
+    "gate": {
+      "title": "Solo para administradores",
+      "notAdmin": "Esta sección es para administradores. Si necesitas acceso, pídelo a un administrador.",
+      "signedOut": "Inicia sesión con una cuenta de administrador para usar esta sección."
     }
   }
 }

@@ -1,0 +1,20 @@
+# Installed inside the image from the lockfile.
+node_modules
+
+# Secrets never enter the image: Railway injects them as service variables.
+.env
+.env.*
+
+# Local SQLite file — production data lives on the Railway volume.
+data
+
+# Not used at runtime.
+dist
+coverage
+docs
+.git
+.claude
+.agents
+.vscode
+**/*.test.ts
+*.md

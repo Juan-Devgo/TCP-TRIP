@@ -3,7 +3,7 @@ import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 import { CalendarClock, ExternalLink, Info, Loader2, Save, Send } from "lucide-react";
 
-import { TeacherGate } from "@/components/common/TeacherGate";
+import { TeacherGate } from "@/components/common/RoleGate";
 import { Alert, AlertAction, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {

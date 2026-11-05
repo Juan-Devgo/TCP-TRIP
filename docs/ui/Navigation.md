@@ -45,7 +45,7 @@ La solución elimina la posibilidad del error en vez de corregir las copias: **u
 | `segment` | Un segmento de ruta. La ruta absoluta es la unión de los segmentos de sus ancestros — aquí, `/tools/calculators/ipv4`. |
 | `titleKey` | Clave i18n. **La misma clave** etiqueta el ítem del sidebar, el título de la pestaña y la miga del breadcrumb: no pueden divergir. |
 | `icon` | Ícono de `lucide-react` para el sidebar. Los grupos de nivel 0 no llevan. |
-| `page` | Si está presente, el nodo abre como pestaña. `true` para una página normal; `{ wide: true }` para una página tipo lienzo que renuncia a la columna de ancho de lectura (por ejemplo, el diagrama del protocolo). |
+| `page` | Si está presente (`true`), el nodo abre como pestaña. El ancho y el padding de la página no se declaran aquí: viven en `PAGE_LAYOUT` (`src/config/pageLayout.ts`), una entrada por `PagePath`. |
 | `children` | Si está presente, el nodo es una rama. Un arreglo vacío es una sección todavía sin páginas: renderiza el aviso "sin ítems". Si está ausente, el nodo es un enlace hoja. |
 
 El archivo es **solo metadatos**: no importa JSX ni componentes de features, de modo que la capa pura de pestañas (`src/lib/tabs.ts`, con sus tests sin React) puede importarlo.
@@ -61,7 +61,7 @@ Todo lo demás es una proyección de `NAVIGATION`, calculada una vez al cargar e
 | `NAV_TREE: NavItem[]` | `AppSidebar` | El mismo árbol con rutas absolutas ya resueltas. |
 | `findNavItem(path)` | `AppBreadcrumb` | Etiqueta de cualquier nodo, sea página o agrupador. Reemplazó a `SEGMENT_LABEL_KEYS`. |
 | `PAGES: PageDefinition[]` | `HomePage` | Las páginas que abren pestaña, en orden de sidebar. |
-| `findPage(path)` | `TabBar`, `TabHost`, `MainLayout` | Título de la pestaña, fallback al placeholder, bandera `wide`. |
+| `findPage(path)` | `TabBar`, `TabHost` | Título de la pestaña, fallback al placeholder. |
 | `isPagePath(path)` | `src/lib/tabs.ts` | Decide si un pathname abre pestaña o es navegación *dentro* de la pestaña activa. |
 | `PagePath` | `TabHost` | Unión de literales con todas las rutas de página (ver más abajo). |
 | `HOME_PATH` | `NotFoundPage` | El inicio es el estado vacío, no una pestaña: no está en el árbol. |

@@ -13,7 +13,7 @@ import {
   Trash2,
 } from "lucide-react";
 
-import { TeacherGate } from "@/components/common/TeacherGate";
+import { TeacherGate } from "@/components/common/RoleGate";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -104,6 +104,9 @@ function ExerciseComposer() {
   const [pdfFailed, setPdfFailed] = useState(false);
 
   const save = useSaveExerciseSet();
+  // `reset` is stable; the `save` object is not, and `reset()` itself
+  // re-renders — depending on `save` would loop.
+  const resetSave = save.reset;
 
   // `?edit=<id>` from `Mis ejercicios`: load that set into the form.
   const intent = usePageIntent("edit");
@@ -114,9 +117,9 @@ function ExerciseComposer() {
     setEditingId(editing.data.id);
     setSavedId(null);
     setTouched(false);
-    save.reset();
+    resetSave();
     intent.consume();
-  }, [intent, editing.data, save]);
+  }, [intent, editing.data, resetSave]);
 
   const problems = validateDraft(draft);
   const valid = isDraftValid(problems);
