@@ -7,11 +7,14 @@
  * `fail` — one place instead of one wrapper per handler, and nothing between
  * the router and the function it dispatches to.
  *
- * The trade-off is that `error` receives the error alone, not the request, so
- * the log line no longer names the method and URL. The stack does.
+ * `error` receives the error alone, not the request; the access log
+ * (`src/api/accessLog.ts`) is what names the method and path of a failed API
+ * call.
  */
 
 import type { ErrorLike } from "bun";
+
+import { errorFields, log } from "@/api/log";
 
 export function ok<T>(data: T, init?: ResponseInit): Response {
   return Response.json(data, init);
@@ -35,7 +38,7 @@ export function fail(
  * the client gets the status and nothing else, while the full error is logged.
  */
 export function onError(error: ErrorLike): Response {
-  console.error("[server]", error);
+  log.error("uncaught error", errorFields(error));
 
   if (process.env.NODE_ENV === "production") {
     return fail(500, "Internal Server Error");

@@ -1,5 +1,6 @@
 import { getClerk } from "@/api/auth";
 import { fail } from "@/api/http";
+import { errorFields, log } from "@/api/log";
 import type { ClassroomErrorCode } from "@/lib/classroom";
 
 /**
@@ -35,7 +36,7 @@ export async function googleToken(userId: string): Promise<string> {
   } catch (error) {
     if (error instanceof GoogleError) throw error;
     // Clerk fails the read when the refresh token is gone (revoked or expired).
-    console.warn("[google] token read failed", error);
+    log.warn("google token read failed", errorFields(error));
     throw new GoogleError("google_reauth", "The Google authorization must be renewed");
   }
   if (!token) throw new GoogleError("google_reauth", "The Google authorization must be renewed");
@@ -76,7 +77,7 @@ export async function googleFetch<T>(
   ) {
     throw new GoogleError("google_scopes", "A Google permission is missing");
   }
-  console.warn(`[google] ${init.method ?? "GET"} ${url} → ${res.status}`, message);
+  log.warn("google api error", { method: init.method ?? "GET", url, status: res.status, error: message });
   throw new GoogleError("google_error", message, res.status >= 500 ? 502 : res.status);
 }
 

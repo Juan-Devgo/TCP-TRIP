@@ -1,6 +1,7 @@
 import { classroomRoutes } from "@/api/classroom";
 import { exerciseRoutes } from "@/api/exercises";
 import { fail, ok } from "@/api/http";
+import { memoryFields } from "@/api/log";
 import { presentationRoutes } from "@/api/presentations";
 import { protocolRoutes } from "@/api/protocols";
 import { theoryRoutes } from "@/api/theory";
@@ -19,7 +20,9 @@ export const apiRoutes = {
   "/api/health": {
     // `uptime` changes per request, so this one is a handler and not a static
     // `Response` — those are frozen at boot.
-    GET: () => ok({ status: "ok", uptime: process.uptime() }),
+    // Memory rides along: an OOM kill leaves no log line, so a rising `rssMb`
+    // here is the only warning before the container restarts.
+    GET: () => ok({ status: "ok", uptime: process.uptime(), ...memoryFields() }),
   },
 
   ...protocolRoutes,
