@@ -121,12 +121,12 @@ THEN cada entrada muestra su porcentaje (`Completada` a partir del 95 %), todo e
 **CA-18 — Abrir una entrada no abre una pestaña nueva**
 GIVEN el estudiante está leyendo una presentación
 WHEN abre otra desde el menú
-THEN sigue en la misma pestaña `Presentaciones de Teoría`, la URL cambia a `/theory/presentations/<slug>` y el botón atrás de la pestaña vuelve a la anterior.
+THEN sigue en la misma pestaña (la del lector de Teoría, que no se lista en la barra lateral), la URL cambia a `/theory/presentations/<slug>` y el botón atrás de la pestaña vuelve a la anterior.
 
 **CA-19 — Fallo del menú no rompe la aplicación**
 GIVEN el servidor no responde el menú
 WHEN la barra lateral se dibuja
-THEN el grupo `Teoría` muestra solo sus entradas estáticas, el error queda en consola y el resto de la aplicación funciona; las presentaciones siguen siendo accesibles por URL.
+THEN el grupo `Teoría` no se muestra (no tiene entradas estáticas), el error queda en consola y el resto de la aplicación funciona; las presentaciones siguen siendo accesibles por URL.
 
 ### Transversales
 

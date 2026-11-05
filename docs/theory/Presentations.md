@@ -162,7 +162,7 @@ THEN la operación se rechaza con 409 explicando que hay que retirar la presenta
 **CA-24 — El menú de Teoría es la lista**
 GIVEN un administrador armó el menú de Teoría (ver `docs/theory/TheoryMenu.md`)
 WHEN un usuario abre la aplicación
-THEN encuentra las presentaciones aprobadas en la barra lateral, dentro de las secciones que el administrador creó, y **no** en un índice generado: la navegación sigue el orden del curso, no la fecha de publicación; y GIVEN el menú todavía está vacío, WHEN abre `Presentaciones de Teoría`, THEN la página explica que debe elegir una presentación en el menú.
+THEN encuentra las presentaciones aprobadas en la barra lateral, dentro de las secciones que el administrador creó, y **no** en un índice generado: la navegación sigue el orden del curso, no la fecha de publicación; la página que aloja el lector (`/theory/presentations`) **no** aparece en la barra lateral: su raíz no ofrece nada, y GIVEN alguien la abre escribiendo la URL, THEN la página explica que debe elegir una presentación en el menú.
 
 **CA-25 — Abrir una presentación es navegación dentro de la pestaña**
 GIVEN una entrada del menú de Teoría

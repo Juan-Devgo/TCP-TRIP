@@ -5,7 +5,6 @@ import {
   FolderOpen,
   GraduationCap,
   Hammer,
-  Layers,
   ListTree,
   MessagesSquare,
   MonitorPlay,
@@ -56,6 +55,12 @@ export type NavNode = {
    * typed by hand renders and then gets a 403 from every call it makes.
    */
   readonly roles?: readonly AppRole[];
+  /**
+   * Present = registered (it opens as a tab, labels its crumb) but **not
+   * listed** in the sidebar: a page reached only through links that point
+   * inside it, like the Theory reader.
+   */
+  readonly hidden?: true;
 };
 
 export const NAVIGATION = [
@@ -107,27 +112,24 @@ export const NAVIGATION = [
   {
     segment: "theory",
     titleKey: "sidebar.groups.theory",
+    // No static entry is listed: the whole group is built by an administrator
+    // (`theory_sections`) and appended at runtime by `AppSidebar`. The node
+    // below only hosts the reader every entry opens.
     children: [
-      {
-        segment: "tcp-ip-model",
-        titleKey: "sidebar.theory.tcpIpModel",
-        icon: Layers,
-        children: [],
-      },
       {
         // The reader of what teachers publish. One page for everyone: a
         // published presentation is educational content, so there is no role
         // on it — and reading one is navigation *inside* this tab, at
         // `/theory/presentations/<slug>`.
         //
-        // It is **not** a listing: the entries of this group are built by an
-        // administrator (`theory_sections`) and appended to it at runtime by
-        // `AppSidebar`, so a published presentation reaches a student through
-        // the syllabus rather than through a generated index.
+        // `hidden`: its root is an empty state with nothing to offer, so the
+        // sidebar does not list it. It still has to be a page — the tab the
+        // menu entries open — so it stays registered.
         segment: "presentations",
         titleKey: "sidebar.theory.presentations",
         icon: Presentation,
         page: true,
+        hidden: true,
       },
     ],
   },
@@ -274,6 +276,8 @@ export type NavItem = {
   branch: boolean;
   /** Roles the sidebar shows this to. Absent = everyone. See `NavNode`. */
   roles?: readonly AppRole[];
+  /** Registered but not listed in the sidebar. See `NavNode`. */
+  hidden: boolean;
   children: NavItem[];
 };
 
@@ -301,6 +305,7 @@ function build(nodes: readonly NavNode[], prefix: string): NavItem[] {
         : null,
       branch: node.children !== undefined,
       ...(node.roles ? { roles: node.roles } : {}),
+      hidden: node.hidden === true,
       children: build(node.children ?? [], path),
     };
   });

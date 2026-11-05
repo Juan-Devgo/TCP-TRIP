@@ -49,10 +49,10 @@ import { cn } from "@/lib/utils"
 /**
  * The group whose contents an administrator builds at runtime.
  *
- * Its static nodes (the TCP/IP model, and the reader every entry opens) stay in
- * `src/config/navigation.ts`; the sections below them are rows in
- * `theory_sections`, so publishing a presentation and putting it in the
- * syllabus no longer means editing the navigation tree.
+ * Its one static node (the reader every entry opens, unlisted) stays in
+ * `src/config/navigation.ts`; the sections are rows in `theory_sections`, so
+ * publishing a presentation and putting it in the syllabus never means editing
+ * the navigation tree.
  */
 const THEORY_GROUP_PATH = "/theory"
 
@@ -65,10 +65,13 @@ export function AppSidebar() {
   // Hiding only: a student who types a teacher's path still gets a 403 from
   // the server, which is where the role actually decides anything.
   const { role } = useAppRole()
+  const { sections } = useTheoryMenu()
 
   const groups = NAV_TREE.filter((group) => isVisibleTo(group, role)).filter(
     // A group whose every entry is hidden is an empty heading, not a group.
-    (group) => group.children.some((item) => isVisibleTo(item, role)),
+    (group) =>
+      group.children.some((item) => isListed(item, role)) ||
+      (group.path === THEORY_GROUP_PATH && sections.length > 0),
   )
 
   return (
@@ -108,6 +111,11 @@ export function AppSidebar() {
   )
 }
 
+/** Whether the sidebar shows a node to this role: visible to it and not unlisted. */
+function isListed(item: NavItem, role: AppRole): boolean {
+  return !item.hidden && isVisibleTo(item, role)
+}
+
 function NavGroup({
   group,
   pathname,
@@ -127,7 +135,7 @@ function NavGroup({
       </SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu className="gap-0.5">
-          {group.children.filter((item) => isVisibleTo(item, role)).map((item) =>
+          {group.children.filter((item) => isListed(item, role)).map((item) =>
             item.branch ? (
               <NavSection
                 key={item.path}
@@ -241,7 +249,7 @@ function NavSection({
 }) {
   const { t } = useTranslation()
   const Icon = section.icon
-  const links = section.children.filter((link) => isVisibleTo(link, role))
+  const links = section.children.filter((link) => isListed(link, role))
 
   return (
     <Collapsible className="group/collapsible" render={<SidebarMenuItem />}>
