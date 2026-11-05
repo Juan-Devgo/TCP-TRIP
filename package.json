@@ -9,6 +9,7 @@
     "build": "bun run build.ts",
     "test": "bun test",
     "typecheck": "tsc --noEmit",
+    "seed:theory": "bun run scripts/seed-tcp-ip-theory.ts",
     "ui": "bunx shadcn@latest add"
   },
   "dependencies": {

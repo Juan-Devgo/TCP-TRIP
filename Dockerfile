@@ -25,6 +25,7 @@ RUN bun install --frozen-lockfile
 # tsconfig.json carries the `@/*` path alias.
 COPY bunfig.toml tsconfig.json build.ts ./
 COPY src ./src
+COPY scripts ./scripts
 
 ARG PUBLIC_CLERK_PUBLISHABLE_KEY
 RUN bun run build

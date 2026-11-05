@@ -32,6 +32,12 @@ Por eso las variables `PUBLIC_*` se inlinean **durante el build**: Railway pasa 
 5. **Generar el dominio público**: *Settings → Networking → Generate Domain*, con **puerto destino `8080`** (el mismo `PORT` del contenedor). Copiarlo en `APP_ORIGIN`. Si el dominio apunta a otro puerto (p. ej. `3000`), el despliegue sale en verde —el health check usa `PORT`— pero todo el tráfico público responde **502**.
 6. **Clerk**: con las claves de desarrollo (`pk_test_…`) la app funciona en el dominio `*.up.railway.app` sin más configuración. Una instancia de producción de Clerk exige un dominio propio con registros DNS, así que para una demostración corta conviene usar la de desarrollo.
 7. **Primer administrador**: se asigna a mano en el dashboard de Clerk, como se explica en `docs/users/roles.md`. Los roles viven en Clerk, no en la base de datos, así que no se pierden al cambiar de volumen.
+8. **Teoría base (una sola vez)**: el contenido del modelo TCP/IP vive en el código (`src/db/seeds/tcp-ip-theory/`), pero hay que publicarlo en la base del volumen. La imagen trae el script ya compilado; desde la carpeta del proyecto:
+   ```sh
+   railway ssh
+   bun seed-tcp-ip-theory.js --teacher user_… --admin user_… --author "Nombre Apellido"
+   ```
+   Los dos ids son de Clerk (*Users* en el dashboard): el profesor queda como dueño de las presentaciones y el administrador como quien las aprobó. Volver a correrlo no duplica nada: salta las presentaciones que el profesor ya tiene.
 
 ---
 

@@ -48,9 +48,24 @@ if (!result.success) {
   process.exit(1);
 }
 
-for (const output of result.outputs) {
+// The base-theory seed travels in the image too, so it can be run once against
+// the production volume: `bun seed-tcp-ip-theory.js --teacher … --admin … --author …`
+// from /app. It is a separate entry point — never imported by the server.
+const seed = await Bun.build({
+  entrypoints: ["scripts/seed-tcp-ip-theory.ts"],
+  outdir: "dist",
+  target: "bun",
+  minify: true,
+});
+
+if (!seed.success) {
+  for (const log of seed.logs) console.error(log);
+  process.exit(1);
+}
+
+for (const output of [...result.outputs, ...seed.outputs]) {
   if (output.kind === "sourcemap") continue;
   const kb = (output.size / 1024).toFixed(0).padStart(6);
   console.log(`[build] ${kb} KB  ${output.kind.padEnd(11)} ${output.path.slice(output.path.lastIndexOf("/") + 1)}`);
 }
-console.log(`[build] ${result.outputs.length} files written to dist/ — run with: cd dist && bun index.js`);
+console.log(`[build] ${result.outputs.length + seed.outputs.length} files written to dist/ — run with: cd dist && bun index.js`);
