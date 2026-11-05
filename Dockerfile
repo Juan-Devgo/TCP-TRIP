@@ -27,15 +27,18 @@ COPY src ./src
 
 ENV NODE_ENV=production
 
-# Run as the image's unprivileged `bun` user. It owns /app/data so the SQLite
-# file can be created when no volume is mounted (see docs/deploy/Railway.md for
-# the volume's permissions).
+# The server runs as the image's unprivileged `bun` user, but the container
+# starts as root: Railway mounts the volume over /app/data owned by root, so
+# the entrypoint hands that folder to `bun` and then drops privileges with
+# setpriv before exec'ing the server. A plain `USER bun` cannot do that and
+# leaves SQLite with SQLITE_CANTOPEN.
 RUN mkdir -p /app/data && chown bun:bun /app /app/data
-USER bun
+COPY --chmod=755 docker-entrypoint.sh /usr/local/bin/tcp-trip-entrypoint.sh
 
 # Bun reads $PORT (Railway injects it); 3000 is the fallback.
 EXPOSE 3000
 
 # The SQLite file lives in /app/data by default (DATABASE_PATH). Mount a volume
 # there, or every redeploy starts with an empty database.
+ENTRYPOINT ["/usr/local/bin/tcp-trip-entrypoint.sh"]
 CMD ["bun", "src/index.ts"]

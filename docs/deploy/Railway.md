@@ -16,7 +16,7 @@ No hay paso de build del frontend: Bun empaqueta `src/index.html` (TSX + Tailwin
 
 1. **Verificar la cuenta con GitHub** en `railway.com/verify`. Sin verificar, el *Limited Trial* restringe el tráfico saliente, y el servidor necesita salir hacia Clerk y Google.
 2. **Crear el servicio**: *New Project → Deploy from GitHub repo* y elegir este repositorio. Railway detecta `railway.json` y construye con el `Dockerfile`.
-3. **Añadir un volumen** al servicio (clic derecho → *Attach volume*), montado en **`/app/data`**. Los volúmenes no se pueden declarar en `railway.json`. Sin volumen, cada redeploy empieza con la base de datos vacía. La imagen corre como el usuario `bun` (no root) y Railway monta el volumen con dueño `root`: si el servidor no puede crear `data/tcp-trip.sqlite`, añadir la variable `RAILWAY_RUN_UID=0` al servicio.
+3. **Añadir un volumen** al servicio (clic derecho → *Attach volume*), montado en **`/app/data`**. Los volúmenes no se pueden declarar en `railway.json`. Sin volumen, cada redeploy empieza con la base de datos vacía. Railway monta el volumen con dueño `root`; el contenedor arranca como root solo para que `docker-entrypoint.sh` le pase `/app/data` al usuario `bun`, y el servidor corre ya sin privilegios (`setpriv`). No hace falta `RAILWAY_RUN_UID`.
 4. **Variables del servicio** (*Variables*):
 
    | Variable | Valor |
