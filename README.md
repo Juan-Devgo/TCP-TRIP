@@ -123,4 +123,4 @@ Las historias de usuario (`US-###`) están en español y explicitan el valor par
 
 ## Licencia
 
-[MIT](LICENSE) © 2026 Juan Diego García Nieto — Trabajo de grado, Universidad del Quindío.
+[MIT](LICENSE) © 2026 Juan Diego García Nieto • Carlos Eduardo Gómez Montoya Ph.D. — Trabajo de grado, Universidad del Quindío.
