@@ -16,9 +16,14 @@ WORKDIR /app
 
 # Dependencies first, so a source-only change reuses this layer.
 COPY package.json bun.lockb ./
-# Lifecycle scripts stay off: Bun already skips untrusted ones, and the only
-# one blocked here is Clerk's telemetry postinstall.
-RUN bun install --frozen-lockfile --ignore-scripts
+# Lifecycle scripts stay off. That blocks Clerk's telemetry postinstall and
+# also the `bun` npm package's (a peer of bun-plugin-tailwind), which is what
+# swaps its bin/bun.exe placeholder for a real binary. The placeholder is
+# linked as node_modules/.bin/bun, and `bun run` puts that folder first in
+# PATH, so `bun run start` would exec it and exit with "Bun's postinstall
+# script was not run". Removing the links leaves the image's own pinned bun.
+RUN bun install --frozen-lockfile --ignore-scripts \
+  && rm -f node_modules/.bin/bun node_modules/.bin/bunx
 
 # bunfig.toml carries the Tailwind plugin and the PUBLIC_* inlining rule;
 # tsconfig.json carries the `@/*` path alias Bun resolves at runtime.
