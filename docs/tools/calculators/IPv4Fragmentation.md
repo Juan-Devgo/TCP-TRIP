@@ -45,12 +45,12 @@ THEN aparece la tarjeta de la cabecera original y, debajo, una flecha que apunta
 **CA-4 — Cabecera como rejilla RFC 791**
 GIVEN hay resultados visibles
 WHEN el estudiante observa cualquier tarjeta
-THEN ve la cabecera dibujada como la rejilla de 32 bits del RFC 791, con cada campo de un ancho proporcional a sus bits y su valor en decimal: Versión 4, IHL 5, ToS 0, Longitud total, Identificación, flags (reservado 0, DF, MF), Desplazamiento del fragmento, TTL (64 por defecto), Protocolo (17 por defecto), Suma de verificación 0, IP origen e IP destino.
+THEN ve la cabecera dibujada como la rejilla de 32 bits del RFC 791, con cada campo de un ancho proporcional a sus bits y su valor en decimal: Versión 4, IHL 5, DiffServ 0, Longitud total, Identificación, flags (reservado 0, DF, MF), Desplazamiento del fragmento, TTL (64 por defecto), Protocolo (17 por defecto), Suma de verificación 0, IP origen e IP destino.
 
 **CA-5 — Coherencia entre fragmentos**
 GIVEN hay dos o más fragmentos
 WHEN el estudiante compara las tarjetas
-THEN todas comparten Identificación, IP origen, IP destino, Versión, IHL, ToS, TTL, Protocolo, Suma de verificación y DF, y solo difieren en longitud total, MF y desplazamiento del fragmento.
+THEN todas comparten Identificación, IP origen, IP destino, Versión, IHL, DiffServ, TTL, Protocolo, Suma de verificación y DF, y solo difieren en longitud total, MF y desplazamiento del fragmento.
 
 **CA-6 — Offset legible**
 GIVEN un fragmento tiene offset distinto de 0

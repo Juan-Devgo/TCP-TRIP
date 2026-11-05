@@ -35,7 +35,7 @@ describe("parseHeaderHex", () => {
     expect(example()).toEqual({
       version: 4,
       ihl: 5,
-      tos: 0,
+      diffServ: 0,
       totalLength: 60,
       identification: 0x1c46,
       reserved: 0,

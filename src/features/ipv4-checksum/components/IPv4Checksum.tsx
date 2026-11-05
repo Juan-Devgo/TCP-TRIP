@@ -53,7 +53,7 @@ import {
   checkIdentification,
   checkIp,
   checkProtocol,
-  checkTos,
+  checkDiffServ,
   checkTotalLength,
   checkTtl,
   CHECKSUM_WORD,
@@ -78,7 +78,7 @@ import { cn } from "@/lib/utils";
 
 /** What the student types: strings, so a field can be emptied mid-edit. */
 type FormState = {
-  tos: string;
+  diffServ: string;
   totalLength: string;
   identification: string;
   df: boolean;
@@ -94,11 +94,12 @@ type FormState = {
 type TextField = Exclude<keyof FormState, "df" | "mf">;
 
 /**
- * The usual values of a header leaving a host: no ToS, DF set, TTL 64, TCP
- * and Checksum still 0000. What identifies the datagram stays empty.
+ * The usual values of a header leaving a host: DiffServ 0 (best effort), DF
+ * set, TTL 64, TCP and Checksum still 0000. What identifies the datagram
+ * stays empty.
  */
 const DEFAULT_FORM: FormState = {
-  tos: "0",
+  diffServ: "0",
   totalLength: "",
   identification: "",
   df: true,
@@ -119,7 +120,7 @@ function isDefaultForm(form: FormState): boolean {
 
 function formFromHeader(header: Ipv4Header): FormState {
   return {
-    tos: String(header.tos),
+    diffServ: String(header.diffServ),
     totalLength: String(header.totalLength),
     identification: String(header.identification),
     df: header.df === 1,
@@ -173,7 +174,7 @@ const HEADER_LAYOUT: Cell[][] = [
   [
     { field: "version", bits: 4 },
     { field: "ihl", bits: 4 },
-    { field: "tos", bits: 8 },
+    { field: "diffServ", bits: 8 },
     { field: "totalLength", bits: 16 },
   ],
   [
@@ -229,7 +230,7 @@ function numberError(
 
 function validate(form: FormState): FieldErrors {
   return {
-    tos: numberError(form.tos, checkTos),
+    diffServ: numberError(form.diffServ, checkDiffServ),
     totalLength: numberError(form.totalLength, checkTotalLength),
     identification: numberError(form.identification, checkIdentification),
     fragmentOffset: numberError(form.fragmentOffset, checkFragmentOffset),
@@ -244,7 +245,7 @@ function validate(form: FormState): FieldErrors {
 /** The header the form describes, or null while a field is empty or wrong. */
 function toHeader(form: FormState, errors: FieldErrors): Ipv4Header | null {
   const texts: string[] = [
-    form.tos,
+    form.diffServ,
     form.totalLength,
     form.identification,
     form.fragmentOffset,
@@ -259,7 +260,7 @@ function toHeader(form: FormState, errors: FieldErrors): Ipv4Header | null {
   return {
     version: IPV4_VERSION,
     ihl: IPV4_IHL,
-    tos: Number(form.tos),
+    diffServ: Number(form.diffServ),
     totalLength: Number(form.totalLength),
     identification: Number(form.identification),
     reserved: 0,
@@ -276,7 +277,7 @@ function toHeader(form: FormState, errors: FieldErrors): Ipv4Header | null {
 
 /** Interpolation values each error message needs. */
 const ERROR_LIMITS: Partial<Record<ChecksumErrorCode, Record<string, number>>> = {
-  tosOutOfRange: { min: 0, max: MAX_BYTE },
+  diffServOutOfRange: { min: 0, max: MAX_BYTE },
   ttlOutOfRange: { min: 0, max: MAX_BYTE },
   protocolOutOfRange: { min: 0, max: MAX_BYTE },
   totalLengthOutOfRange: { min: MIN_TOTAL_LENGTH, max: MAX_WORD },
@@ -728,7 +729,7 @@ function HeaderForm({
         {BIT_RULER}
         {fixedCell("version", 4, String(IPV4_VERSION))}
         {fixedCell("ihl", 4, String(IPV4_IHL))}
-        {numberCell("tos", 8, 0, MAX_BYTE)}
+        {numberCell("diffServ", 8, 0, MAX_BYTE)}
         {numberCell("totalLength", 16, MIN_TOTAL_LENGTH, MAX_WORD)}
         {numberCell("identification", 16, 0, MAX_WORD)}
         {fixedCell("reserved", 1, "0")}

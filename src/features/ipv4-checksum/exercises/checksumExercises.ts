@@ -55,7 +55,7 @@ const LEVELS: Record<Difficulty, Level> = {
   hard: { questions: ["verify", "fold"], folds: 2, damage: ["bit"] },
 };
 
-const TOS_VALUES = [0x00, 0x00, 0x10, 0x08, 0xb8];
+const DIFFSERV_VALUES = [0x00, 0x00, 0x10, 0x08, 0xb8];
 const TTL_VALUES = [32, 63, 64, 128, 255];
 /** ICMP, TCP and UDP: what students meet in captures. */
 const PROTOCOLS = [1, 6, 17];
@@ -70,7 +70,7 @@ function randomHeader(): Ipv4Header {
   const header: Ipv4Header = {
     version: 4,
     ihl: 5,
-    tos: randomItem(TOS_VALUES),
+    diffServ: randomItem(DIFFSERV_VALUES),
     totalLength: randomInt(IPV4_HEADER_BYTES + 8, 1500),
     identification: randomInt(0, 0xffff),
     reserved: 0,

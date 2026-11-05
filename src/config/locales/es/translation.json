@@ -182,7 +182,7 @@
       "fields": {
         "version": "Versión",
         "ihl": "IHL",
-        "tos": "ToS",
+        "diffServ": "DiffServ",
         "totalLength": "Longitud total",
         "identification": "Identificación",
         "reserved": "R",
@@ -245,7 +245,7 @@
       "fields": {
         "version": "Version",
         "ihl": "IHL",
-        "tos": "ToS",
+        "diffServ": "DiffServ",
         "totalLength": "Total Length",
         "identification": "Identificación",
         "reserved": "R",
@@ -320,7 +320,7 @@
         "setZero": "Poner en 0000"
       },
       "errors": {
-        "tosOutOfRange": "ToS debe estar entre {{min}} y {{max}}: es un campo de 8 bits (RFC 791, §3.1).",
+        "diffServOutOfRange": "DiffServ debe estar entre {{min}} y {{max}}: es el octeto de 8 bits que el RFC 791 llamaba Type of Service, hoy 6 bits de DSCP (RFC 2474, §3) y 2 de ECN (RFC 3168, §5).",
         "ttlOutOfRange": "TTL debe estar entre {{min}} y {{max}}: es un campo de 8 bits (RFC 791, §3.1).",
         "protocolOutOfRange": "Protocolo debe estar entre {{min}} y {{max}}: es un campo de 8 bits (RFC 791, §3.1).",
         "totalLengthOutOfRange": "Total Length debe estar entre {{min}} y {{max}} bytes: incluye los 20 bytes de cabecera y es un campo de 16 bits (RFC 791, §3.1).",
@@ -550,8 +550,8 @@
           "fields": {
             "version": "Versión del protocolo IP; vale 4 en IPv4.",
             "ihl": "Longitud del encabezado en palabras de 32 bits.",
-            "dscp": "Clase de servicio solicitada para el paquete.",
-            "ecn": "Notificación explícita de congestión.",
+            "dscp": "Punto de código DiffServ: clase de servicio solicitada para el paquete (RFC 2474).",
+            "ecn": "Notificación explícita de congestión (RFC 3168).",
             "totalLength": "Longitud total del paquete en bytes, encabezado incluido.",
             "identification": "Identificador que agrupa los fragmentos de un mismo paquete.",
             "reservedFlag": "Bit reservado; siempre vale 0.",

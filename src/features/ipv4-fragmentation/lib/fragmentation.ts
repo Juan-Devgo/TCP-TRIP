@@ -29,7 +29,7 @@ export const MAX_PROTOCOL = 255;
 export const HEADER_DEFAULTS = {
   version: 4,
   ihl: 5,
-  tos: 0,
+  diffServ: 0,
   ttl: 64,
   /** UDP. */
   protocol: 17,
@@ -68,7 +68,7 @@ export class FragmentationError extends Error {
 export type Ipv4Header = {
   version: number;
   ihl: number;
-  tos: number;
+  diffServ: number;
   totalLength: number;
   identification: number;
   /** The reserved flag bit; always 0. */
@@ -249,7 +249,7 @@ export function fragment(
       header: {
         version: original.version,
         ihl: original.ihl,
-        tos: original.tos,
+        diffServ: original.diffServ,
         totalLength: size + IPV4_HEADER_BYTES,
         identification,
         reserved: 0,

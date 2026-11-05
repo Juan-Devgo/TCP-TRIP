@@ -182,7 +182,7 @@
       "fields": {
         "version": "Version",
         "ihl": "IHL",
-        "tos": "ToS",
+        "diffServ": "DiffServ",
         "totalLength": "Total Length",
         "identification": "Identification",
         "reserved": "R",
@@ -245,7 +245,7 @@
       "fields": {
         "version": "Version",
         "ihl": "IHL",
-        "tos": "ToS",
+        "diffServ": "DiffServ",
         "totalLength": "Total Length",
         "identification": "Identification",
         "reserved": "R",
@@ -320,7 +320,7 @@
         "setZero": "Set to 0000"
       },
       "errors": {
-        "tosOutOfRange": "ToS must be between {{min}} and {{max}}: it is an 8-bit field (RFC 791, §3.1).",
+        "diffServOutOfRange": "DiffServ must be between {{min}} and {{max}}: it is the 8-bit octet that RFC 791 called Type of Service, now 6 bits of DSCP (RFC 2474, §3) and 2 of ECN (RFC 3168, §5).",
         "ttlOutOfRange": "TTL must be between {{min}} and {{max}}: it is an 8-bit field (RFC 791, §3.1).",
         "protocolOutOfRange": "Protocol must be between {{min}} and {{max}}: it is an 8-bit field (RFC 791, §3.1).",
         "totalLengthOutOfRange": "Total Length must be between {{min}} and {{max}} bytes: it includes the 20 header bytes and is a 16-bit field (RFC 791, §3.1).",
@@ -550,8 +550,8 @@
           "fields": {
             "version": "IP protocol version; 4 in IPv4.",
             "ihl": "Header length, in 32-bit words.",
-            "dscp": "Class of service requested for the packet.",
-            "ecn": "Explicit congestion notification.",
+            "dscp": "DiffServ code point: class of service requested for the packet (RFC 2474).",
+            "ecn": "Explicit congestion notification (RFC 3168).",
             "totalLength": "Total packet length in bytes, header included.",
             "identification": "Identifier grouping the fragments of one packet.",
             "reservedFlag": "Reserved bit; always 0.",

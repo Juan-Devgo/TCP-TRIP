@@ -35,7 +35,7 @@ THEN ve un selector con los modos «Calcular» y «Verificar», con «Calcular»
 **CA-2 — Cabecera como formulario con valores por defecto**
 GIVEN la herramienta está abierta
 WHEN termina de cargar
-THEN ve la cabecera dibujada como la rejilla de 32 bits del RFC 791, con un campo por cada campo de la cabecera en decimal (las IPs en notación punteada). Versión (4) e IHL (5) aparecen fijos; ToS 0, Flags DF, Fragment Offset 0, TTL 64, Protocolo 6 (TCP) y Checksum 0000 vienen precargados y son editables; Total Length, Identificación, IP origen e IP destino los escribe el estudiante.
+THEN ve la cabecera dibujada como la rejilla de 32 bits del RFC 791, con un campo por cada campo de la cabecera en decimal (las IPs en notación punteada). Versión (4) e IHL (5) aparecen fijos; DiffServ 0, Flags DF, Fragment Offset 0, TTL 64, Protocolo 6 (TCP) y Checksum 0000 vienen precargados y son editables; Total Length, Identificación, IP origen e IP destino los escribe el estudiante.
 
 **CA-3 — Equivalente hexadecimal por campo**
 GIVEN el estudiante escribe un valor válido en un campo
@@ -53,7 +53,7 @@ WHEN termina de pegar
 THEN ve un error que explica el motivo y cita el RFC 791, el formulario no cambia y el resultado queda atenuado como desactualizado hasta que la secuencia vuelva a decodificar.
 
 **CA-6 — Campo fuera de rango**
-GIVEN el estudiante escribe un valor que no cabe en el ancho del campo (ToS, TTL o Protocolo fuera de 0–255; Identificación fuera de 0–65535; Fragment Offset fuera de 0–8191; Total Length menor que 20 o mayor que 65535; Checksum que no sea de 4 dígitos hex; un prefijo `0x` pegado, como el del resultado copiado, se descarta) o una IP mal formada
+GIVEN el estudiante escribe un valor que no cabe en el ancho del campo (DiffServ, TTL o Protocolo fuera de 0–255; Identificación fuera de 0–65535; Fragment Offset fuera de 0–8191; Total Length menor que 20 o mayor que 65535; Checksum que no sea de 4 dígitos hex; un prefijo `0x` pegado, como el del resultado copiado, se descarta) o una IP mal formada
 WHEN termina de escribir
 THEN el campo muestra un error que cita el RFC 791 y no se calcula un resultado nuevo (ver CA-16).
 

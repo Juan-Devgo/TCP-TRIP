@@ -19,7 +19,10 @@ export const IPV4_VERSION = 4;
 /** In 32-bit words: 5 × 4 = 20 bytes. */
 export const IPV4_IHL = 5;
 
-/** ToS, TTL and Protocol are 8-bit fields (RFC 791 §3.1). */
+/**
+ * DiffServ (RFC 2474 §3, with ECN per RFC 3168 §5), TTL and Protocol are
+ * 8-bit fields (RFC 791 §3.1).
+ */
 export const MAX_BYTE = 255;
 /** Total Length and Identification are 16-bit fields (RFC 791 §3.1). */
 export const MAX_WORD = 0xffff;
@@ -40,7 +43,7 @@ export type ChecksumErrorCode =
   | "pasteVersion"
   | "pasteIhl"
   | "pasteReserved"
-  | "tosOutOfRange"
+  | "diffServOutOfRange"
   | "totalLengthOutOfRange"
   | "identificationOutOfRange"
   | "fragmentOffsetOutOfRange"
@@ -65,7 +68,7 @@ export class ChecksumError extends Error {
 export type Ipv4Header = {
   version: number;
   ihl: number;
-  tos: number;
+  diffServ: number;
   totalLength: number;
   identification: number;
   /** The reserved flag bit; must be 0. */
@@ -95,7 +98,7 @@ export type HeaderWord = {
 
 /** Which fields each of the ten words carries, in order. */
 export const WORD_FIELDS: readonly HeaderField[][] = [
-  ["version", "ihl", "tos"],
+  ["version", "ihl", "diffServ"],
   ["totalLength"],
   ["identification"],
   ["reserved", "df", "mf", "fragmentOffset"],
@@ -197,8 +200,8 @@ function inRange(value: number, min: number, max: number): boolean {
   return Number.isInteger(value) && value >= min && value <= max;
 }
 
-export function checkTos(value: number): ChecksumErrorCode | null {
-  return inRange(value, 0, MAX_BYTE) ? null : "tosOutOfRange";
+export function checkDiffServ(value: number): ChecksumErrorCode | null {
+  return inRange(value, 0, MAX_BYTE) ? null : "diffServOutOfRange";
 }
 
 export function checkTotalLength(value: number): ChecksumErrorCode | null {
@@ -237,7 +240,7 @@ export function checkIp(ip: string): ChecksumErrorCode | null {
 /** Throws the first rule a field breaks, so no result is built from it. */
 export function validateHeader(header: Ipv4Header): void {
   const code =
-    checkTos(header.tos) ??
+    checkDiffServ(header.diffServ) ??
     checkTotalLength(header.totalLength) ??
     checkIdentification(header.identification) ??
     checkFragmentOffset(header.fragmentOffset) ??
@@ -255,7 +258,7 @@ export function headerToBytes(header: Ipv4Header): number[] {
   const flagsAndOffset = (flags << 13) | header.fragmentOffset;
   return [
     (header.version << 4) | header.ihl,
-    header.tos,
+    header.diffServ,
     header.totalLength >> 8,
     header.totalLength & 0xff,
     header.identification >> 8,
@@ -310,7 +313,7 @@ export function bytesToHeader(bytes: readonly number[]): Ipv4Header {
   return {
     version,
     ihl,
-    tos: at(1),
+    diffServ: at(1),
     totalLength: (at(2) << 8) | at(3),
     identification: (at(4) << 8) | at(5),
     reserved: 0,

@@ -122,7 +122,7 @@ const HEADER_LAYOUT: Cell[][] = [
   [
     { field: "version", bits: 4 },
     { field: "ihl", bits: 4 },
-    { field: "tos", bits: 8 },
+    { field: "diffServ", bits: 8 },
     { field: "totalLength", bits: 16 },
   ],
   [
