@@ -77,7 +77,7 @@ THEN la lee en modo normal; y WHEN pulsa el botón de la cabecera, THEN se abre 
 **CA-9 — Controles mínimos**
 GIVEN el modo presentación está abierto
 WHEN el usuario mira los controles
-THEN solo ve los chevrones abajo, un botón de cierre y el menú de acciones; ya no aparecen el título, el botón de notas ni la línea de ayuda; y THEN los tooltips de los chevrones dicen `Anterior (←)` y `Siguiente (→)`; y THEN el chevron correspondiente se desactiva en la primera y en la última diapositiva; y WHEN pulsa `Esc`, THEN el reproductor se cierra.
+THEN solo ve los chevrones abajo, un botón de cierre y el menú de acciones; ya no aparecen el título, el botón de notas ni la línea de ayuda; y THEN los tooltips de los chevrones dicen `Anterior (←)` y `Siguiente (→)`; y THEN el chevron correspondiente se desactiva en la primera y en la última diapositiva; y WHEN pulsa `Esc` una sola vez, THEN el navegador sale de pantalla completa y el reproductor se cierra (si el navegador negó la pantalla completa, `Esc` lo cierra igual).
 
 **CA-10 — Barra de progreso del estudiante**
 GIVEN el usuario es estudiante o visitante sin sesión

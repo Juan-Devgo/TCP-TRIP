@@ -905,7 +905,6 @@ function Editor({
         {presenting && (
           <PresentationPlayer
             document={state.document}
-            fullscreen
             // The editor is the author's own draft: their notes are theirs.
             speakerNotes
             onClose={() => setPresenting(false)}

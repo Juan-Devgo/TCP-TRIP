@@ -56,10 +56,12 @@ const PRESENTABLE_ACTIONS = [
  * everyone else sees a plain `n / total`. Speaker notes exist only when the
  * caller says the viewer may read them — the author, projecting their own deck.
  *
- * `fullscreen` asks the browser for the real thing. It is requested on the
- * *document*, not on this node: the tooltips and the actions menu are portalled
- * to `<body>`, and only the fullscreen element's subtree is painted. Refused is
- * fine — the player is already a full-window overlay.
+ * Opening it always asks the browser for real fullscreen. It is requested on
+ * the *document*, not on this node: the tooltips and the actions menu are
+ * portalled to `<body>`, and only the fullscreen element's subtree is painted.
+ * Refused is fine — the player is already a full-window overlay. Leaving
+ * fullscreen closes the player: the browser swallows the `Esc` that exits it,
+ * so a single `Esc` would otherwise leave the player open in a window.
  *
  * Key handling is bound to this component's own node, not to `document`:
  * inactive tabs stay mounted in this app, so a global listener here would eat
@@ -69,7 +71,6 @@ const PRESENTABLE_ACTIONS = [
 export function PresentationPlayer({
   document,
   initialSlide = 0,
-  fullscreen = false,
   speakerNotes = false,
   onSlideChange,
   onClose,
@@ -77,8 +78,6 @@ export function PresentationPlayer({
   document: PresentationDocument;
   /** Where to resume — a reader coming back to a deck they had started. */
   initialSlide?: number;
-  /** Take over the screen, not just the window. */
-  fullscreen?: boolean;
   /** The viewer may read the slides' notes (`N`): the deck's author only. */
   speakerNotes?: boolean;
   /** Called with every slide reached; the reader turns it into a percentage. */
@@ -97,18 +96,36 @@ export function PresentationPlayer({
     frame.current?.focus();
   }, []);
 
+  // Read through a ref so a caller's inline `onClose` does not re-run the
+  // fullscreen effect (and re-request fullscreen) on every render.
+  const close = useRef(onClose);
   useEffect(() => {
-    if (!fullscreen) return;
+    close.current = onClose;
+  });
 
+  useEffect(() => {
+    const page = window.document;
+    // Only a fullscreen this player entered may close it on the way out.
+    let entered = false;
+
+    function onFullscreenChange() {
+      if (page.fullscreenElement) entered = true;
+      else if (entered) close.current();
+    }
+
+    // A document listener is safe despite tabs staying mounted: the player is
+    // a modal overlay, open only in the tab on screen, and removed on close.
+    page.addEventListener("fullscreenchange", onFullscreenChange);
     // Refused is not an error here: the overlay already fills the window.
-    void window.document.documentElement.requestFullscreen?.().catch(() => undefined);
+    void page.documentElement.requestFullscreen?.().catch(() => undefined);
 
     return () => {
-      if (window.document.fullscreenElement) {
-        void window.document.exitFullscreen?.().catch(() => undefined);
+      page.removeEventListener("fullscreenchange", onFullscreenChange);
+      if (page.fullscreenElement) {
+        void page.exitFullscreen?.().catch(() => undefined);
       }
     };
-  }, [fullscreen]);
+  }, []);
 
   useEffect(() => {
     onSlideChange?.(index, total);
