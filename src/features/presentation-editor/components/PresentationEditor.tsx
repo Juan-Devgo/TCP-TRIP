@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
+import type { CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 
 import { PresentationPlayer } from "@/components/common/PresentationPlayer";
+import { TeacherGate } from "@/components/common/RoleGate";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -23,7 +25,10 @@ import { MarkdownWriter } from "@/features/presentation-editor/components/Markdo
 import { NotesPanel } from "@/features/presentation-editor/components/NotesPanel";
 import { PresentationEditorActions } from "@/features/presentation-editor/components/PresentationEditorActions";
 import { PresentationStatusBadge } from "@/features/presentation-editor/components/PresentationStatusBadge";
-import { SlideCanvas } from "@/features/presentation-editor/components/SlideCanvas";
+import {
+  boardHeightAtFullWidth,
+  SlideCanvas,
+} from "@/features/presentation-editor/components/SlideCanvas";
 import { SlidesToolbar } from "@/features/presentation-editor/components/SlidesToolbar";
 import {
   canRedo,
@@ -86,6 +91,15 @@ const TABLE_COLUMNS = 2;
 const AUTOSAVE_DELAY = 2000;
 
 const NEW_PRESENTATION_PATH = "/teacher/presentations/new";
+
+/** The New presentation tab. `Mis Presentaciones` embeds the editor behind its own gate. */
+export function NewPresentation() {
+  return (
+    <TeacherGate>
+      <PresentationEditor />
+    </TeacherGate>
+  );
+}
 
 /**
  * The teacher's presentation editor, as a page.
@@ -616,7 +630,13 @@ function Editor({
 
   return (
     <TooltipProvider delay={300}>
-      <div className="flex flex-col gap-3" onKeyDown={onKeyDown}>
+      {/* At least the viewport under the shell (AppHeader h-16.25 +
+          ContentToolbar h-14 = 7.5625rem): the board takes whatever height the
+          bars above it leave, so the page fills the window without spilling. */}
+      <div
+        className="flex min-h-[calc(100svh-7.5625rem)] flex-col gap-3 py-4"
+        onKeyDown={onKeyDown}
+      >
         <PresentationEditorActions
           status={saved?.status ?? null}
           dirty={state.dirty}
@@ -629,6 +649,7 @@ function Editor({
         />
 
         <Tabs
+          className="flex-1"
           value={state.document.mode}
           onValueChange={(next) =>
             dispatch({ type: "mode", value: String(next) as PresentationMode })
@@ -650,7 +671,7 @@ function Editor({
             }
           />
 
-          <TabsContent value="slides" className="flex flex-col gap-3">
+          <TabsContent value="slides" className="@container flex flex-col gap-3">
             <SlidesToolbar
               slides={state.document.slides}
               selectedSlideId={state.selectedSlideId}
@@ -721,49 +742,66 @@ function Editor({
               onBackground={(value) => dispatch({ type: "slideBackground", value })}
             />
 
-            <div className="flex flex-wrap items-start gap-4 xl:flex-nowrap">
+            {/* Wide enough (the container is this tab panel, so the sidebar
+                counts): the board fills the space left of the inspector, as
+                large as fits both ways. Narrower: board on top at full width,
+                inspector under it. */}
+            <div className="flex flex-1 flex-col gap-4 @3xl:min-h-72 @3xl:flex-row">
               {slide && (
-                <div className="min-w-0 flex-1">
-                  <CanvasContextMenu
-                    target={contextTarget}
-                    canPaste={clipboard.length > 0}
-                    canUndo={canUndo(state)}
-                    canRedo={canRedo(state)}
-                    slideEmpty={slide.elements.length === 0}
-                    onCopy={copy}
-                    onPaste={paste}
-                    onUndo={() => dispatch({ type: "undo" })}
-                    onRedo={() => dispatch({ type: "redo" })}
-                    onClearSlide={() => dispatch({ type: "clearSlide" })}
-                    onDuplicate={duplicate}
-                    onRestack={restack}
-                    onToggleLock={() => {
-                      if (element) dispatch({ type: "toggleLock", id: element.id });
-                    }}
-                    onDelete={() => {
-                      if (element) dispatch({ type: "deleteElement", id: element.id });
-                    }}
-                    onExportPng={() => setExportRequest({ kind: "png" })}
-                  >
-                    <SlideCanvas
-                      slide={slide}
-                      canvas={state.document.canvas}
-                      selectedElementId={state.selectedElementId}
-                      group={group}
-                      onSelect={select}
-                      onGroup={selectGroup}
-                      onMoveGroup={(moves) => dispatch({ type: "moveElements", moves })}
-                      onTransform={(id, next) =>
-                        dispatch({ type: "transformElement", id, ...next })
-                      }
-                      onCommit={() => dispatch({ type: "commit" })}
-                      onText={(id, text) => dispatch({ type: "textProps", id, props: { text } })}
-                      onCell={(id, row, column, value) =>
-                        dispatch({ type: "tableCell", id, row, column, value })
-                      }
-                      onDelete={(id) => dispatch({ type: "deleteElement", id })}
-                    />
-                  </CanvasContextMenu>
+                <div
+                  className="relative h-(--board-height) min-w-0 @3xl:h-auto @3xl:flex-1"
+                  style={
+                    {
+                      // Never taller than the window under the shell either,
+                      // so the whole board can be on screen at once.
+                      "--board-height": `min(${boardHeightAtFullWidth(state.document.canvas)}, 100svh - 9.5625rem)`,
+                    } as CSSProperties
+                  }
+                >
+                  {/* Out of flow: the column's size comes from the row, never
+                      from the board it is measuring for. */}
+                  <div className="absolute inset-0">
+                    <CanvasContextMenu
+                      target={contextTarget}
+                      canPaste={clipboard.length > 0}
+                      canUndo={canUndo(state)}
+                      canRedo={canRedo(state)}
+                      slideEmpty={slide.elements.length === 0}
+                      onCopy={copy}
+                      onPaste={paste}
+                      onUndo={() => dispatch({ type: "undo" })}
+                      onRedo={() => dispatch({ type: "redo" })}
+                      onClearSlide={() => dispatch({ type: "clearSlide" })}
+                      onDuplicate={duplicate}
+                      onRestack={restack}
+                      onToggleLock={() => {
+                        if (element) dispatch({ type: "toggleLock", id: element.id });
+                      }}
+                      onDelete={() => {
+                        if (element) dispatch({ type: "deleteElement", id: element.id });
+                      }}
+                      onExportPng={() => setExportRequest({ kind: "png" })}
+                    >
+                      <SlideCanvas
+                        slide={slide}
+                        canvas={state.document.canvas}
+                        selectedElementId={state.selectedElementId}
+                        group={group}
+                        onSelect={select}
+                        onGroup={selectGroup}
+                        onMoveGroup={(moves) => dispatch({ type: "moveElements", moves })}
+                        onTransform={(id, next) =>
+                          dispatch({ type: "transformElement", id, ...next })
+                        }
+                        onCommit={() => dispatch({ type: "commit" })}
+                        onText={(id, text) => dispatch({ type: "textProps", id, props: { text } })}
+                        onCell={(id, row, column, value) =>
+                          dispatch({ type: "tableCell", id, row, column, value })
+                        }
+                        onDelete={(id) => dispatch({ type: "deleteElement", id })}
+                      />
+                    </CanvasContextMenu>
+                  </div>
                 </div>
               )}
 

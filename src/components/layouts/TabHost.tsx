@@ -8,13 +8,14 @@ import { IPv4Calculator } from "@/features/ipv4-calculator";
 import { IPv4Checksum } from "@/features/ipv4-checksum";
 import { IPv4Fragmentation } from "@/features/ipv4-fragmentation";
 import { NumberBaseConverter } from "@/features/number-base-converter";
-import { MyPresentations, PresentationEditor } from "@/features/presentation-editor";
+import { MyPresentations, NewPresentation } from "@/features/presentation-editor";
 import { PresentationReview } from "@/features/presentation-review";
 import { ProtocolBuilder } from "@/features/protocol-builder";
 import { CreateExercises, MyExercises } from "@/features/teacher-exercises";
 import { TheoryMenuManager } from "@/features/admin-theory";
 import { TheoryPresentationPage } from "@/features/theory-presentations";
 import { findPage, type PagePath } from "@/config/navigation";
+import { HOME_PAGE_LAYOUT, pageLayout } from "@/config/pageLayout";
 import { cn } from "@/lib/utils";
 import { HomePage } from "@/pages/HomePage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
@@ -35,7 +36,7 @@ const PAGE_COMPONENTS: Partial<Record<PagePath, ComponentType>> = {
   "/tools/calculators/checksum": IPv4Checksum,
   "/generic-protocol/new": ProtocolBuilder,
   "/theory/presentations": TheoryPresentationPage,
-  "/teacher/presentations/new": PresentationEditor,
+  "/teacher/presentations/new": NewPresentation,
   "/teacher/presentations/mine": MyPresentations,
   "/admin/presentations": PresentationReview,
   "/admin/theory": TheoryMenuManager,
@@ -61,12 +62,18 @@ export function TabHost() {
             path={tab.history.current}
           >
             {/* Inactive tabs stay mounted — that is what preserves their state.
-                Anything global inside them must gate on `useIsTabActive()`. */}
+                Anything global inside them must gate on `useIsTabActive()`.
+                `flow-root` keeps a page's own top margin inside its panel:
+                without it the margin collapses out and is lost. */}
             <div
               id={tabPanelId(tab.id)}
               role="tabpanel"
               aria-labelledby={tabButtonId(tab.id)}
-              className={cn("w-full", !isActive && "hidden")}
+              className={cn(
+                "mx-auto flow-root w-full",
+                pageLayout(tab.rootPath),
+                !isActive && "hidden",
+              )}
             >
               <TabContent path={tab.rootPath} />
             </div>
@@ -74,7 +81,11 @@ export function TabHost() {
         );
       })}
 
-      {activeTabId === null && <HomePage />}
+      {activeTabId === null && (
+        <div className={cn("mx-auto flow-root w-full", HOME_PAGE_LAYOUT)}>
+          <HomePage />
+        </div>
+      )}
     </>
   );
 }

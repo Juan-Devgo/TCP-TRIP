@@ -68,6 +68,19 @@ type Editing = {
   color: string;
 };
 
+/** `p-1` on the frame, each side. */
+const FRAME_PADDING = 4;
+
+/**
+ * How tall the frame must be for the board to span `100cqw` (the width of the
+ * nearest `@container`) — for a layout that stacks the board at full width
+ * instead of handing it a box. The rulers and the padding do not scale.
+ */
+export function boardHeightAtFullWidth(canvas: PresentationCanvas): string {
+  const chrome = RULER_SIZE + FRAME_PADDING * 2;
+  return `calc((100cqw - ${chrome}px) * ${canvas.height / canvas.width} + ${chrome}px)`;
+}
+
 /**
  * The editable slide: a real `<canvas>` (Konva) at the document's own
  * coordinates, with a transformer for scaling and rotating and rulers around
@@ -75,8 +88,9 @@ type Editing = {
  *
  * Two things make this work at any window size:
  *
- * - **The stage is scaled, not reflowed.** Konva's stage gets `scale = screen
- *   width / canvas width`, so every coordinate inside it — and therefore every
+ * - **The stage is scaled, not reflowed.** Konva's stage gets `scale = frame
+ *   size / canvas size` (the tighter of width and height), so every coordinate
+ *   inside it — and therefore every
  *   coordinate that reaches the reducer — is a canvas unit. A slide laid out on
  *   a laptop is the same document as one laid out on a projector.
  * - **Colours are resolved, not inherited.** A canvas cannot paint
@@ -130,7 +144,7 @@ export function SlideCanvas({
   const frame = useRef<HTMLDivElement>(null);
   const transformer = useRef<Konva.Transformer>(null);
   const nodes = useRef(new Map<string, Konva.Group>());
-  const [available, setAvailable] = useState(0);
+  const [available, setAvailable] = useState({ width: 0, height: 0 });
   const [editing, setEditing] = useState<Editing | null>(null);
   const [area, setArea] = useState<Area | null>(null);
   /** Read inside Konva handlers, which may run before React re-renders. */
@@ -147,12 +161,18 @@ export function SlideCanvas({
     if (!element) return;
 
     const style = getComputedStyle(element);
-    setAvailable(
-      element.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight),
-    );
+    setAvailable({
+      width:
+        element.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight),
+      height:
+        element.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom),
+    });
 
     const observer = new ResizeObserver(([entry]) => {
-      setAvailable(entry?.contentRect.width ?? 0);
+      setAvailable({
+        width: entry?.contentRect.width ?? 0,
+        height: entry?.contentRect.height ?? 0,
+      });
     });
     // Observing fires once straight away, with the content box — the frame's
     // padding already taken out, which `clientWidth` would include.
@@ -161,9 +181,19 @@ export function SlideCanvas({
     return () => observer.disconnect();
   }, []);
 
-  // Never over 1:1 — the canvas is a fixed stage, and a blown-up slide would
-  // invite laying it out for a screen this size.
-  const scale = Math.min(1, Math.max(0, (available - RULER_SIZE) / canvas.width));
+  // As large as the frame allows both ways — the rulers take one band of each
+  // — but never over 1:1: the canvas is a fixed stage, and a blown-up slide
+  // would invite laying it out for a screen this size.
+  const scale = Math.min(
+    1,
+    Math.max(
+      0,
+      Math.min(
+        (available.width - RULER_SIZE) / canvas.width,
+        (available.height - RULER_SIZE) / canvas.height,
+      ),
+    ),
+  );
 
   const selected = slide.elements.find((element) => element.id === selectedElementId);
   // What the rulers band: the box the element really covers once it is turned.
@@ -349,7 +379,9 @@ export function SlideCanvas({
       // No focus ring: the transformer already shows what the keys act on, and
       // a ring would light up the whole board the moment Shift is pressed to
       // scale.
-      className="w-full p-1 outline-none"
+      // It fills the box its parent gives it and is measured, never sized by
+      // the board: the board is centered in whatever room is left over.
+      className="flex size-full flex-col items-center p-1 outline-none"
       // Focusable so the nudge and delete keys have somewhere to land. Bound
       // here and not to `document`: inactive tabs stay mounted in this app.
       tabIndex={0}
@@ -361,8 +393,7 @@ export function SlideCanvas({
       {scale === 0 && (
         <div
           role="status"
-          className="bg-muted/40 text-muted-foreground flex w-full items-center justify-center rounded-md border"
-          style={{ aspectRatio: `${canvas.width} / ${canvas.height}` }}
+          className="bg-muted/40 text-muted-foreground flex size-full items-center justify-center rounded-md border"
         >
           <Loader2 className="size-8 animate-spin" aria-hidden />
           <span className="sr-only">{t("common.loading")}</span>
