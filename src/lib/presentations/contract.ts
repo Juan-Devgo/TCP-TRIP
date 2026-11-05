@@ -265,7 +265,10 @@ type ElementBox = {
   y: number;
   width: number;
   height: number;
-  /** Degrees, clockwise, around the box centre. */
+  /**
+   * Degrees, clockwise, around the box's top-left corner `(x, y)` — where the
+   * editor's Konva node turns. Every renderer must use the same pivot.
+   */
   rotation: number;
   /** The editor refuses to drag it. Never a security boundary. */
   locked?: boolean;

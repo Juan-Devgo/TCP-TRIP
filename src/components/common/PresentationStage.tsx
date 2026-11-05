@@ -111,6 +111,10 @@ function StageElement({ element }: { element: PresentationElement }) {
         width: element.width,
         height: element.height,
         transform: element.rotation === 0 ? undefined : `rotate(${element.rotation}deg)`,
+        // The editor's Konva node turns around its own origin, the box's
+        // top-left corner; CSS turns around the centre unless told otherwise,
+        // which is what swung a rotated element off its place when projected.
+        transformOrigin: "top left",
       }}
     >
       {element.type === "table" ? (
