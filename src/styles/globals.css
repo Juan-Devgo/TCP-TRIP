@@ -17,7 +17,13 @@
   --typeset-flow: 1.25em;
 }
 
-@theme inline {
+/* `static`: emit every variable below, used or not. Tailwind otherwise drops a
+   `--color-*` no scanned file names literally, and slides name theirs at
+   runtime (`var(--color-${token})`, and the editor's canvas reads them off
+   `:root`). Locally the Markdown docs happened to name them; the Docker build
+   does not copy those, so production lost `--color-background` and the canvas
+   fell back to the foreground colour — the opposite theme. */
+@theme inline static {
   --font-sans: var(--font-montserrat);
   --font-mono: var(--font-jetbrains-mono);
   --color-background: var(--background);
