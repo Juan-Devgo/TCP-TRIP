@@ -163,9 +163,13 @@ export function SlideCanvas({
     const style = getComputedStyle(element);
     setAvailable({
       width:
-        element.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight),
+        element.clientWidth -
+        Number.parseFloat(style.paddingLeft) -
+        Number.parseFloat(style.paddingRight),
       height:
-        element.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom),
+        element.clientHeight -
+        Number.parseFloat(style.paddingTop) -
+        Number.parseFloat(style.paddingBottom),
     });
 
     const observer = new ResizeObserver(([entry]) => {
