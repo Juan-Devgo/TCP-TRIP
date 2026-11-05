@@ -1491,5 +1491,12 @@
         "conflict": "No se puede: la presentación no está publicada, ya está en el menú, o la sección está llena."
       }
     }
+  },
+  "admin": {
+    "gate": {
+      "title": "Solo para administradores",
+      "notAdmin": "Esta sección es para administradores. Si necesitas acceso, pídelo a un administrador.",
+      "signedOut": "Inicia sesión con una cuenta de administrador para usar esta sección."
+    }
   }
 }

@@ -1491,5 +1491,12 @@
         "conflict": "Not possible: the presentation is not published, it is already in the menu, or the section is full."
       }
     }
+  },
+  "admin": {
+    "gate": {
+      "title": "Administrators only",
+      "notAdmin": "This section is for administrators. If you need access, ask an administrator.",
+      "signedOut": "Sign in with an administrator account to use this section."
+    }
   }
 }

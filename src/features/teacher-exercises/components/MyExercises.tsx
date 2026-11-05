@@ -14,7 +14,7 @@ import {
   Trash2,
 } from "lucide-react";
 
-import { TeacherGate } from "@/components/common/TeacherGate";
+import { TeacherGate } from "@/components/common/RoleGate";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

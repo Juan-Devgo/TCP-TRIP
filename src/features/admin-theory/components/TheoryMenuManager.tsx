@@ -9,6 +9,7 @@ import {
   X,
 } from "lucide-react";
 
+import { AdminGate } from "@/components/common/RoleGate";
 import { TheoryIcon } from "@/components/common/TheoryIcon";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
@@ -56,6 +57,14 @@ type State =
   | { status: "forbidden" }
   | { status: "error" };
 
+export function TheoryMenuManager() {
+  return (
+    <AdminGate>
+      <TheoryMenuBuilder />
+    </AdminGate>
+  );
+}
+
 /**
  * The administrator's builder for the Theory section of the sidebar.
  *
@@ -72,7 +81,7 @@ type State =
  * Every successful write refreshes the shared menu cache, so the sidebar on
  * the left updates without a reload.
  */
-export function TheoryMenuManager() {
+function TheoryMenuBuilder() {
   const { t } = useTranslation();
   const [state, setState] = useState<State>({ status: "loading" });
   const [busy, setBusy] = useState(false);

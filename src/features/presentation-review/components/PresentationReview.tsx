@@ -5,6 +5,7 @@ import { Check, MonitorPlay, X } from "lucide-react";
 import { Markdown } from "@/components/common/Markdown";
 import { PresentationPlayer } from "@/components/common/PresentationPlayer";
 import { PresentationStage } from "@/components/common/PresentationStage";
+import { AdminGate } from "@/components/common/RoleGate";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
@@ -37,6 +38,14 @@ type State =
   | { status: "forbidden" }
   | { status: "error" };
 
+export function PresentationReview() {
+  return (
+    <AdminGate>
+      <ReviewQueue />
+    </AdminGate>
+  );
+}
+
 /**
  * The administrator's review panel: what teachers have submitted, and the
  * decision on each one.
@@ -53,7 +62,7 @@ type State =
  * menu (`ApproveDialog`); an edit of something already published comes back
  * through the same queue with an `Edit` badge and keeps its place.
  */
-export function PresentationReview() {
+function ReviewQueue() {
   const { t } = useTranslation();
   const [filter, setFilter] = useState<PresentationStatus>("pending");
   const [state, setState] = useState<State>({ status: "loading" });
